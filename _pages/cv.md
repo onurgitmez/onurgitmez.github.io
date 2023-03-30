@@ -11,43 +11,51 @@ redirect_from:
 
 Education
 ======
-* B.S. in GitHub, GitHub University, 2012
-* M.S. in Jekyll, GitHub University, 2014
-* Ph.D in Version Control Theory, GitHub University, 2018 (expected)
+* B.A. in Political Science and Public Administration, Bilkent University, 2016
+* M.A. in Political Economy, University of Essex, 2017
+* M.Sc. in Political Science and Public Administration, Middle East Technincal University, 2020
+* Ph.D in Political Science, Sabanci University, 2026 (expected)
 
 Work experience
 ======
-* Summer 2015: Research Assistant
-  * Github University
-  * Duties included: Tagging issues
-  * Supervisor: Professor Git
+* July 2022: Project Assistant at Tubitak-VRL Lab
+  * Currently working as a Project Assistant analyzing Twitter data. This includes politicians, journalists and otheraccounts affiliated with politics or political news.
+  * My duties include checking accounts for their party affiliations and determining whether they are correct and upto date or not.
+  * My other responsibility is using the Twitter Moderation Research Consortium dataset to check on the closed accounts around the world to see common patterns in their activity.
+  * I also assist on the keywords that will be used to collect Twitter data and look over their appropriateness in collecting necessary data for the project.
 
-* Fall 2015: Research Assistant
-  * Github University
-  * Duties included: Merging pull requests
-  * Supervisor: Professor Hub
+* October 2021-July 2022: Research Assistant at Communicare Engineering and Consultancy
+  * Conducted market research for potential clients
+  * Made the first contact with the potential clients for our services and listed them for future visit
+  
+* September 2019-August 2021: Marketing Data Analyst at The Shibumi
+  *Assisted with the analysis of customer profiles
+  *Analyzed potential market for the products and assisted the development of marketing strategy
+
+
+* September 2017-July 2019: Marketing Analyst at Global Technology Specialists
+    * Assisted the development of customer portfolio for military-grade speakers, headphones and microphones
+  * Analyzed the global market for potential buyers
+  
+* July-August 2015: Sales Intern at DemirDokum
+  * Analyzed the market for potential customers by checking ongoing construction projects in the Ankara region and presented my report on them to the Regional Director in charge of Sales
+
+
+* July 2015: Parliamentary Intern at Turkish Grand National Assembly
+  * Helped with daily workings of the parliament and organized documents from the preceding parliamentary term
+  * Presented a report on the parliamentary immunity rules across the world
   
 Skills
 ======
-* Skill 1
-* Skill 2
-  * Sub-skill 2.1
-  * Sub-skill 2.2
-  * Sub-skill 2.3
-* Skill 3
+* Stata
+* R
+* Python
+* Latex
+* Tableau
+* Microsoft Office
+  * Excel
 
-Publications
-======
-  <ul>{% for post in site.publications %}
-    {% include archive-single-cv.html %}
-  {% endfor %}</ul>
-  
-Talks
-======
-  <ul>{% for post in site.talks %}
-    {% include archive-single-talk-cv.html %}
-  {% endfor %}</ul>
-  
+
 Teaching
 ======
   <ul>{% for post in site.teaching %}
@@ -56,4 +64,10 @@ Teaching
   
 Service and leadership
 ======
-* Currently signed in to 43 different slack teams
+* Founding treasurer of Hisar Leo Club
+
+Awards 
+======
+* First place award for teaching assistants-2022
+* Second place award for senior year project-2015
+
