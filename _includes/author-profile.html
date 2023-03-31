@@ -103,6 +103,9 @@
       {% if author.vine %}
         <li><a href="https://vine.co/u/{{ author.vine }}"><i class="fab fa-fw fa-vine" aria-hidden="true"></i> Vine</a></li>
       {% endif %}
+      {% if author.medium %}
+        <li><a href="{{ author.medium }}"><i class="fab fa-fw fa-medium" aria-hidden="true"></i> Medium</a></li>
+      {% endif %}
       {% if author.googlescholar %}
         <li><a href="{{ author.googlescholar }}"><i class="ai ai-google-scholar-square ai-fw"></i> Google Scholar</a></li>
       {% endif %}
