@@ -9,6 +9,9 @@ redirect_from:
 
 Here, I will share blog posts on current events and some tutorials on software
 
+
+First table [here](/Users/alionurgitmez/Desktop/WebsiteFiles/onurgitmez.github.io/files/model1.html)
+
 {% include base_path %}
 {% capture written_year %}'None'{% endcapture %}
 {% for post in site.posts %}
