@@ -10,7 +10,7 @@ redirect_from:
 Here, I will share blog posts on current events and some tutorials on software
 
 Table 1 is 
-[here](/Users/alionurgitmez/Desktop/WebsiteFiles/onurgitmez.github.io/files/model1.png)
+![here](/Users/alionurgitmez/Desktop/WebsiteFiles/onurgitmez.github.io/files/model1.png)
 
 {% include base_path %}
 {% capture written_year %}'None'{% endcapture %}
