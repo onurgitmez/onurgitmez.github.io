@@ -1,0 +1,19 @@
+<article class="{% if include.type == "grid" %}grid__item{% endif %} {% if post.link %}post--link{% endif %}">
+  {% if post.link %}
+    <a href="{{ post.link }}" target="_blank" rel="noopener noreferrer">
+      <h2 class="archive__item-title">{{ post.title }}</h2>
+    </a>
+  {% else %}
+    <h2 class="archive__item-title">
+      <a href="{{ post.url | prepend: site.baseurl }}">{{ post.title }}</a>
+    </h2>
+  {% endif %}
+  <div class="archive__item-excerpt">
+    {{ post.excerpt }}
+  </div>
+  {% if post.image.path %}
+    <div class="archive__item-teaser">
+      <img src="{{ post.image.path }}">
+    </div>
+  {% endif %}
+</article>

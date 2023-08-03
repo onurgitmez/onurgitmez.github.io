@@ -5,6 +5,8 @@ permalink: /software/
 author_profile: true
 ---
 
+{% include base_path %}
+
 {% for post in site.software %}
-  {% include archive-single.html %}
+  {% include archive-single-software.html %}
 {% endfor %}
