@@ -1,5 +1,5 @@
 ---
-title: 'D'Hondt Election Simulator Package in R'
+title: D'Hondt Election Simulator Package in R
 date: 2023-08-03
 permalink: /posts/2023/08/dhondt-simulator/
 excerpt_separator: <!--more-->
