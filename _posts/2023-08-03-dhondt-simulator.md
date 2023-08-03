@@ -1,5 +1,5 @@
 ---
-title: D'Hondt Election Simulator: A Powerful Tool for Electoral Analysis in R
+title: "D'Hondt Election Simulator: A Powerful Tool for Electoral Analysis in R"
 date: 2023-08-03
 permalink: /posts/2023/08/dhondt-simulator/
 excerpt_separator: <!--more-->
