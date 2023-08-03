@@ -1,36 +1,86 @@
 ---
-title: D'Hondt Election Simulator Package in R
+title: D'Hondt Election Simulator: A Powerful Tool for Electoral Analysis in R
 date: 2023-08-03
 permalink: /posts/2023/08/dhondt-simulator/
 excerpt_separator: <!--more-->
 toc: true
 tags:
-  - references
-  - bash
+  - R
+  - election-simulator
+  - data-analysis
 ---
 
-In this blogpost I will talk about a software that I created using R Shiny. This software allows you to enter vote shares for parties that compete in 2023 Turkish General Elections for each electoral district. It then calculates the seat distribution using the D'Hondt method and creates a table for the seat distribution.
+Today, I'm excited to introduce you to my first R package: the D'Hondt simulator.  It is a a powerful new tool for political scientists, statisticians, and anyone interested in electoral systems. This user friendly package allows users to simulate elections using the D'Hondt method, a highest averages method for allocating seats in party-list proportional representation.
+
 
 <!--more-->
 
-2023 General Elections in Turkey sparked a debate on the best way to enter the election for parties. First, the threshold was decreased to 7% but alliance voting system which allowed parties to benefit from the distribution of alliance votes was removed. Following these changes, the discussion revolved around how smaller parties should enter the election and whether larger parties of the alliance can benefit from entering the election under a single ticket ——that is entering under the most powerful party in that district—— so that they will receive the most seats. 
+Visit the GitHub page for more information:
 
-In People’s Alliance, HUDA-PAR and DSP entered the election under the incumbent AKP, and MHP entered the election as a party. In Nation Alliance, Gelecek, Deva, DP, and SP entered the election from CHP lists and IYIP entered on itsown. The same issue was also discussed in Labour and Freedom Alliance where YSP and TIP entered under a general ticket in some districts but on their own in others. Turkey has 87 electoral districts with d’Hondt being used to allocate seats to parties in all of them. 
+[D'Hondt Election Simulator R Package](https://github.com/onurgitmez/dhondt)
+
+This package provides an easy-to-use and powerful simulation tool to conduct election simulations using the D'Hondt method in R.
 
 
-Following this discussion, I developed a parliamentary election simulator for the 2023 Turkish National Elections. This application allows you to select a specific district and input the vote shares for different political parties. Using the D'Hondt method, the application calculates the allocation of seats for each party within that district. To access the simulator, please follow the link provided below:
+The dhondt package is available directly from GitHub and can be installed using the devtools package in R:
 
-[2023 Turkish Parliamentary Election Simulator](https://onurgitmez.shinyapps.io/2023TurkishElectionSimulator/)
+```r
 
-In this app which I created using R Shiny, you can choose the electoral district that you would like simulate on. Changing the district will also change the total number of seats to be allocated as shown in the table on the right. Let's choose Ankara-1 district. This is one of the three districts in Ankara. We can enter the approximate election results from the 2018 General Elections. 
+devtools::install_github("onurgitmez/dhondt")
 
-One positive aspect of this simulator is that you are able to enter either the vote share or the number of votes received, depending on your preference and precision you would like. For the sake of simplicity, in this example we are going to use the vote shares. 
+```
 
-According to news sites in 2018 elections CHP won 35.78%, IYI won 12.5%, AKP won 29,57%, MHP won 10.58%, and HDP won 8.56% of the vote. We can enter these numbers to our simulator. When entering the vote shares you can notice two features of this simulator. The first one is you can see the total number of votes entered at the bottom of the right table. This is added to ensure when you make your own simulation you do not have to worry about going above 100% or not entering the desired share of votes. The second feature is that when you enter a party's vote it will be placed above others in the table. For example, if you entered CHP's vote last; it will be placed at top of the table since they earned the most seats from the district. This feature is added to make it easier to read the table and see the classification of parties quicker based on the number of seats they won.
+## Usage
 
-Below is a screenshot of the application.
+Start by loading the dhondt package:
 
-![Turkish Election Simulator-Seat Distribution](/images/software/turkeyelectionsimulator.png)
+```r
+
+library(dhondt)
+
+```
+
+## Simulating an election
+
+To simulate an election, you need a dataframe ('data') that includes the electoral district name ('district'), the number of seats available in that district ('seats'), and the number of votes each party received ('party1', 'party2', etc.).
+
+Assuming the dataset is complete, you can simulate en election like this:
+
+
+```r
+
+election_results <- simulate_election(data, "district", "seats", c("party1", "party2"), threshold = 0.1, assign_to_env = TRUE, env_var_name = "election_results")
+
+```
+
+The 'threshold' argument specifies the national threshold required for a party to be eligible for seats. If desired, the resulting dataframe can be assigned to a global environment variable, 'election_results' for convenient access.
+
+## Function
+
+When you run the simulation of any election using the simulate_election() function in the dhondt package, the calculations are performed in the background using the D'Hondt method.
+
+The function takes several arguments:
+
+- df: Your dataframe with election data.
+- district_col: The name of the column with district names.
+- seats_col: The name of the column with the number of seats in each district.
+- parties: A vector of party names, each matching a column in your dataframe. Each column holds the votes that party got in each district.
+- threshold: (Optional) A vote share threshold that parties must exceed to be eligible for seats. Default is 0.
+- assign_to_env: (Optional) If TRUE, the function's result is assigned to a variable in the global environment. Default is FALSE.
+- env_var_name: (Optional) The name of the global environment variable to which the result is assigned, if assign_to_env is TRUE.
+
+The simulate_election() function returns a list with two components:
+
+Named Vector of Total Seats for Each Party: The first item is a named vector that displays the total seats won by each party. For instance, if three parties A, B, and C won 15, 10, and 5 seats respectively, the vector would show: partyA = 15, partyB = 10, partyC = 5.
+Dataframe of Seats Won by Each Party in Each District: The second item is a dataframe that gives a district-wise breakdown of the results. It shows the seats each party won in each district, with a column for each party, a row for each district, and an additional row with the total seats won by each party across all districts.
+This output provides both a bird's eye view and a detailed analysis of the election results, offering a comprehensive understanding of the electoral landscape.
+
+More information on the package and an election  dataset shipped with the package for analysis can be found on the Github page.
+
+For any questions or further details, please feel free to reach out to me.
+
+
+
 
 
 

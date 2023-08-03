@@ -33,7 +33,7 @@ To access the package on Github, please follow the link provided below:
 
 You can read more about the application in my blog post:
 
-[2023 Turkish Parliamentary Election Simulator Blogpost](https://www.gitmez.com/posts/2023/05/election-simulator/)
+[2023 Turkish Parliamentary Election Simulator Blogpost](https://www.gitmez.com/posts/2023/08/dhondt-simulator/)
 
 
 

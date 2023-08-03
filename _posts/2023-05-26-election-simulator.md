@@ -5,8 +5,9 @@ permalink: /posts/2023/05/election-simulator/
 excerpt_separator: <!--more-->
 toc: true
 tags:
-  - references
-  - bash
+  - R
+  - election-simulator
+  - data-analysis
 ---
 
 In this blogpost I will talk about a software that I created using R Shiny. This software allows you to enter vote shares for parties that compete in 2023 Turkish General Elections for each electoral district. It then calculates the seat distribution using the D'Hondt method and creates a table for the seat distribution.
