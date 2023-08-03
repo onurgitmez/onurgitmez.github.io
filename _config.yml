@@ -189,9 +189,6 @@ collections:
   talks:
     output: true
     permalink: /:collection/:path/
-  software:
-    output: true
-    permalink: /:collection/:path/
 
 
 # Defaults
