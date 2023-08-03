@@ -28,6 +28,10 @@ One positive aspect of this simulator is that you are able to enter either the v
 
 According to news sites in 2018 elections CHP won 35.78%, IYI won 12.5%, AKP won 29,57%, MHP won 10.58%, and HDP won 8.56% of the vote. We can enter these numbers to our simulator. When entering the vote shares you can notice two features of this simulator. The first one is you can see the total number of votes entered at the bottom of the right table. This is added to ensure when you make your own simulation you do not have to worry about going above 100% or not entering the desired share of votes. The second feature is that when you enter a party's vote it will be placed above others in the table. For example, if you entered CHP's vote last; it will be placed at top of the table since they earned the most seats from the district. This feature is added to make it easier to read the table and see the classification of parties quicker based on the number of seats they won.
 
+Below is a screenshot of the application.
+
+![Turkish Election Simulator-Seat Distribution](/Users/alionurgitmez/Desktop/WebsiteFiles/onurgitmez.github.io/images/software/turkeyelectionsimulator.png)
+
 
 
 
