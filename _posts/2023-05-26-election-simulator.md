@@ -1,5 +1,5 @@
 ---
-title: 'Combining PDF Documents'
+title: '2023 Turkish Election Simulator'
 date: 2023-05-26
 permalink: /posts/2023/05/election-simulator/
 excerpt_separator: <!--more-->
