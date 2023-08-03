@@ -9,7 +9,9 @@ tags:
   - bash
 ---
 
-In this blogpost I will talk about a software that I created using R Shiny.
+In this blogpost I will talk about a software that I created using R Shiny. This software allows you to enter vote shares for parties that compete in 2023 Turkish General Elections for each electoral district. It then calculates the seat distribution using the D'Hondt method and creates a table for the seat distribution.
+
+<!--more-->
 
 2023 General Elections in Turkey sparked a debate on the best way to enter the election for parties. First, the threshold was decreased to 7% but alliance voting system which allowed parties to benefit from the distribution of alliance votes was removed. Following these changes, the discussion revolved around how smaller parties should enter the election and whether larger parties of the alliance can benefit from entering the election under a single ticket ——that is entering under the most powerful party in that district—— so that they will receive the most seats. 
 
