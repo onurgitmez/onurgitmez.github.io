@@ -13,7 +13,7 @@ I developed a parliamentary election simulator for the 2023 Turkish National Ele
 
 This is an example screenshot of the application.
 
-<img src="/images/software/turkeyelectionsimulator.png" alt="Turkish Election Simulator-Seat Distribution" style="width:200px;height:150px;"/>
+<img src="/images/software/turkeyelectionsimulator.png" alt="Turkish Election Simulator-Seat Distribution" style="width:400px;height:300px;"/>
 
 
 You can read more about the application in my blog post:
