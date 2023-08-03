@@ -7,8 +7,6 @@ redirect_from:
   - /wordpress/blog-posts/
 ---
 
-Here, I will share blog posts on current events and some tutorials on software
-
 
 
 {% include base_path %}
