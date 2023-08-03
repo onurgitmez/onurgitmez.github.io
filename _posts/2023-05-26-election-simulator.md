@@ -30,7 +30,7 @@ According to news sites in 2018 elections CHP won 35.78%, IYI won 12.5%, AKP won
 
 Below is a screenshot of the application.
 
-![Turkish Election Simulator-Seat Distribution](/Users/alionurgitmez/Desktop/WebsiteFiles/onurgitmez.github.io/images/software/turkeyelectionsimulator.png)
+![Turkish Election Simulator-Seat Distribution](/images/software/turkeyelectionsimulator.png)
 
 
 
