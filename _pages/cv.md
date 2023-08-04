@@ -19,10 +19,9 @@ Education
 
 Work experience
 ======
-* July 2022: Project Assistant at Tubitak-VRL Lab
-  * Currently working as a Project Assistant analyzing Twitter data. This includes politicians, journalists and otheraccounts affiliated with politics or political news.
-  * My duties include checking accounts for their party affiliations and determining whether they are correct and upto date or not.
-  * My other responsibility is using the Twitter Moderation Research Consortium dataset to check on the closed accounts around the world to see common patterns in their activity.
+* July 2022-July 2023: Project Assistant at Tubitak-VRL Lab
+  * Worked as a Project Assistant analyzing Twitter data. This includes politicians, journalists and otheraccounts affiliated with politics or political news.
+  * My main responsibility was using the Twitter Moderation Research Consortium dataset to check on the closed accounts around the world to see common patterns in their activity.
   * I also assist on the keywords that will be used to collect Twitter data and look over their appropriateness in collecting necessary data for the project.
 
 * October 2021-July 2022: Research Assistant at Communicare Engineering and Consultancy
