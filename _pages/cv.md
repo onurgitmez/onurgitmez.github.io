@@ -12,7 +12,6 @@ redirect_from:
 Education
 ======
 
-* Ph.D in Political Science, Sabanci University, 2026 (expected)
 * M.Sc. in Political Science and Public Administration, Middle East Technincal University, 2020
 * M.A. in Political Economy, University of Essex, 2017
 * B.A. in Political Science and Public Administration, Bilkent University, 2016
