@@ -28,11 +28,6 @@ Work experience
   * Conducted market research for potential clients
   * Made the first contact with the potential clients for our services and listed them for future visit
   
-* September 2019-August 2021: Marketing Data Analyst at The Shibumi
-  *Assisted with the analysis of customer profiles
-  *Analyzed potential market for the products and assisted the development of marketing strategy
-
-
 * September 2017-July 2019: Marketing Analyst at Global Technology Specialists
     * Assisted the development of customer portfolio for military-grade speakers, headphones and microphones
   * Analyzed the global market for potential buyers
