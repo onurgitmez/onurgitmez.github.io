@@ -1,0 +1,137 @@
+/* General body and font styles */
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f4f4f4;
+    margin: 0;
+    padding: 0;
+}
+
+/* Header */
+h1 {
+    background-color: #2c3e50;  /* Dark blue */
+    color: #ecf0f1;  /* Light gray */
+    padding: 10px;
+    text-align: center;
+    font-size: 24px;
+}
+
+h1 img.logo {
+    vertical-align: middle;
+    margin-right: 10px;
+    width: 30px;
+    height: 30px;
+}
+
+h2 {
+    color: #2c3e50;
+}
+
+/* Navigation tabs */
+.tab {
+    display: flex;
+    justify-content: center;
+    background-color: #34495e;  /* Slightly darker blue */
+    padding: 5px 0;
+    flex-wrap: wrap;
+}
+
+.tab a {
+    padding: 10px 14px;
+    margin: 5px;
+    background-color: #2c3e50;  /* Dark blue */
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+    font-size: 14px;
+    transition: background-color 0.3s ease;
+}
+
+.tab a:hover {
+    background-color: #1abc9c;  /* Teal */
+}
+
+.tab a.active {
+    background-color: #1abc9c;  /* Teal */
+}
+
+/* Content section */
+.content {
+    max-width: 1200px;
+    margin: 20px auto;
+    background-color: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Topic outline styling */
+.topic-outline {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+.topic-card {
+    background-color: #e0f7fa;  /* Light blue */
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.topic-card h3 {
+    color: #2c3e50;  /* Dark blue */
+}
+
+.topic-card ul {
+    list-style: none;
+    padding: 0;
+}
+
+.topic-card ul li {
+    padding: 10px 0;
+    border-bottom: 1px solid #bdc3c7;
+}
+
+.topic-card ul li:last-child {
+    border-bottom: none;
+}
+
+.topic-card ul li::before {
+    content: "•";
+    color: #1abc9c;  /* Teal */
+    font-size: 20px;
+    padding-right: 10px;
+}
+
+/* Footer */
+footer {
+    background-color: #2c3e50;  /* Dark blue */
+    color: white;
+    text-align: center;
+    padding: 20px 0;
+    position: fixed;
+    width: 100%;
+    bottom: 0;
+}
+
+/* Media Queries for responsiveness */
+@media (max-width: 768px) {
+    .tab {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .tab a {
+        margin: 5px 0;
+        font-size: 12px;
+    }
+
+    h1 {
+        font-size: 20px;
+    }
+
+    h1 img.logo {
+        width: 24px;
+        height: 24px;
+    }
+}
