@@ -177,7 +177,7 @@
 <script>
     function openTab(evt, lessonName) {
         var i, tabcontent, tablinks;
-        
+
         // Hide all tab content
         tabcontent = document.getElementsByClassName("tabcontent");
         for (i = 0; i < tabcontent.length; i++) {
@@ -209,6 +209,11 @@
             .then(response => response.text())
             .then(html => {
                 tabElement.innerHTML = html;
+
+                // After content is loaded, reinitialize the ToC if needed
+                if (typeof initializeTOC === 'function') {
+                    initializeTOC(); // Call this if you have a function to generate ToC dynamically
+                }
             })
             .catch(error => {
                 tabElement.innerHTML = `Error loading lesson content: ${error}`;
@@ -219,6 +224,12 @@
     document.addEventListener('DOMContentLoaded', (event) => {
         document.querySelector('.tablinks').click();
     });
+
+    // Example function for initializing ToC (if applicable)
+    function initializeTOC() {
+        // Custom logic to build or reinitialize the table of contents
+        console.log("ToC initialized or refreshed.");
+    }
 </script>
 
 </body>
