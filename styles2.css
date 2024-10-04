@@ -26,3 +26,26 @@ h1 img.logo {
     transition: background-color 0.3s ease;
 }
 
+/* Styles for the Back to Top button */
+#backToTopBtn {
+    display: none; /* Hidden by default */
+    position: fixed; /* Fixed position */
+    bottom: 20px; /* Place the button at the bottom of the page */
+    right: 30px; /* Place the button 30px from the right */
+    z-index: 99; /* Make sure it does not overlap */
+    border: none; /* Remove borders */
+    outline: none; /* Remove outline */
+    background-color: #2c3e50; /* Dark background color */
+    color: white; /* White text color */
+    cursor: pointer; /* Add a mouse pointer on hover */
+    padding: 15px; /* Some padding */
+    border-radius: 50%; /* Rounded corners */
+    font-size: 18px; /* Increase font size */
+    width: 50px; /* Set a specific width */
+    height: 50px; /* Set a specific height */
+    transition: background-color 0.3s ease; /* Smooth transition for hover effect */
+}
+
+#backToTopBtn:hover {
+    background-color: #34495e; /* Darker background on hover */
+}
