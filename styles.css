@@ -1,6 +1,9 @@
+/* Import Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;700&display=swap');
+
 /* General body and font styles */
 body {
-    font-family: 'Arial', sans-serif;
+    font-family: 'Noto Sans', Arial, sans-serif;
     background-color: #f4f4f4;
     margin: 0;
     padding: 0;
@@ -120,16 +123,13 @@ footer {
         flex-direction: column;
         align-items: center;
     }
-
     .tab a {
         margin: 5px 0;
         font-size: 12px;
     }
-
     h1 {
         font-size: 20px;
     }
-
     h1 img.logo {
         width: 24px;
         height: 24px;
