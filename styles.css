@@ -16,6 +16,8 @@ h1 {
     padding: 10px;
     text-align: center;
     font-size: 24px;
+    position: relative;
+    padding-left: 50px;  /* Make space for the home button */
 }
 
 h1 img.logo {
@@ -27,6 +29,22 @@ h1 img.logo {
 
 h2 {
     color: #2c3e50;
+}
+
+/* Home button styles */
+.home-button {
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #ecf0f1;  /* Light gray */
+    font-size: 24px;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.home-button:hover {
+    color: #1abc9c;  /* Teal */
 }
 
 /* Navigation tabs */
@@ -123,15 +141,23 @@ footer {
         flex-direction: column;
         align-items: center;
     }
+    
     .tab a {
         margin: 5px 0;
         font-size: 12px;
     }
+    
     h1 {
         font-size: 20px;
+        padding-left: 40px;
     }
+    
     h1 img.logo {
         width: 24px;
         height: 24px;
+    }
+    
+    .home-button {
+        font-size: 20px;
     }
 }
