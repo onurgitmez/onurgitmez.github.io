@@ -5,7 +5,11 @@ document.addEventListener('DOMContentLoaded', function () {
     button.className = 'copy-code-button';
     button.textContent = 'Copy';
 
-    codeBlock.parentNode.insertBefore(button, codeBlock);
+    var pre = codeBlock.parentNode; // Get the parent <pre> element
+    pre.style.position = 'relative'; // Make sure the parent is positioned for the button placement
+
+    // Insert the button in a way that it's positioned over the code block
+    pre.insertBefore(button, codeBlock);
 
     button.addEventListener('click', function () {
       var text = codeBlock.innerText;
@@ -14,6 +18,8 @@ document.addEventListener('DOMContentLoaded', function () {
         setTimeout(function () {
           button.textContent = 'Copy';
         }, 2000);
+      }).catch(function () {
+        console.error('Failed to copy text.');
       });
     });
   });
