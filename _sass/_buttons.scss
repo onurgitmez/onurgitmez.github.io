@@ -151,3 +151,18 @@
     font-size: $type-size-7;
   }
 }
+
+.copy-code-button {
+  @extend .btn; // Extends the existing default button styles
+  position: absolute;
+  right: 10px;
+  top: 10px;
+  z-index: 1000; // Ensures it appears on top of the code block
+  font-size: $type-size-6;
+  padding: 0.5em 1em;
+  background-color: $success-color; // You can adjust the color as needed
+
+  &:hover {
+    background-color: mix(white, $success-color, 20%);
+  }
+}
