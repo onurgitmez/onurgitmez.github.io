@@ -1,86 +1,199 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-   <url>
-      <loc>https://gitmez.com/posts/2023/05/election-simulator/</loc>
-      <lastmod>2023-05-26T00:00:00-07:00</lastmod>
-   </url>
-   <url>
-      <loc>https://gitmez.com/posts/2023/08/dhondt-simulator/</loc>
-      <lastmod>2023-08-03T00:00:00-07:00</lastmod>
-   </url>
-   <url>
-      <loc>https://gitmez.com/teaching/2021-fall-teaching-1</loc>
-      <lastmod>2021-09-27T00:00:00-07:00</lastmod>
-   </url>
-   <url>
-      <loc>https://gitmez.com/teaching/2022-spring-teaching-1</loc>
-      <lastmod>2022-02-28T00:00:00-08:00</lastmod>
-   </url>
-   <url>
-      <loc>https://gitmez.com/teaching/2022-spring-teaching-3/</loc>
-      <lastmod>2022-10-03T00:00:00-07:00</lastmod>
-   </url>
-   <url>
-      <loc>https://gitmez.com/teaching/2023-spring-teaching-4/</loc>
-      <lastmod>2023-02-27T00:00:00-08:00</lastmod>
-   </url>
-   <url>
-      <loc>https://gitmez.com/</loc>
-   </url>
-   <url>
-      <loc>https://gitmez.com/archive-layout-with-content/</loc>
-   </url>
-   <url>
-      <loc>https://gitmez.com/categories/</loc>
-   </url>
-   <url>
-      <loc>https://gitmez.com/collection-archive/</loc>
-   </url>
-   <url>
-      <loc>https://gitmez.com/cv/</loc>
-   </url>
-   <url>
-      <loc>https://gitmez.com/non-menu-page/</loc>
-   </url>
-   <url>
-      <loc>https://gitmez.com/page-archive/</loc>
-   </url>
-   <url>
-      <loc>https://gitmez.com/publications/</loc>
-   </url>
-   <url>
-      <loc>https://gitmez.com/sitemap/</loc>
-   </url>
-   <url>
-      <loc>https://gitmez.com/software/</loc>
-   </url>
-   <url>
-      <loc>https://gitmez.com/tags/</loc>
-   </url>
-   <url>
-      <loc>https://gitmez.com/talkmap.html</loc>
-   </url>
-   <url>
-      <loc>https://gitmez.com/talks/</loc>
-   </url>
-   <url>
-      <loc>https://gitmez.com/teaching/</loc>
-   </url>
-   <url>
-      <loc>https://gitmez.com/terms/</loc>
-   </url>
-   <url>
-      <loc>https://gitmez.com/year-archive/</loc>
-   </url>
-   <url>
-      <loc>https://gitmez.com/markdown_generator/</loc>
-   </url>
-   <url>
-      <loc>https://gitmez.com/faq.html</loc>
-      <lastmod>2024-09-27T07:49:26-07:00</lastmod>
-   </url>
-   <url>
-      <loc>https://gitmez.com/talkmap/map.html</loc>
-      <lastmod>2024-09-27T07:49:26-07:00</lastmod>
-   </url>
+﻿<?xml version="1.0" encoding="UTF-8"?>
+		<!--	created with www.mysitemapgenerator.com	-->
+		<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<url>
+	<loc>https://gitmez.com/</loc>
+	<lastmod>2024-10-07T10:58:55+01:00</lastmod>
+	<priority>1.0</priority>
+</url>
+<url>
+	<loc>https://gitmez.com/cv/</loc>
+	<lastmod>2024-10-07T10:58:55+01:00</lastmod>
+	<priority>0.8</priority>
+</url>
+<url>
+	<loc>https://gitmez.com/teaching/</loc>
+	<lastmod>2024-10-07T10:58:55+01:00</lastmod>
+	<priority>0.8</priority>
+</url>
+<url>
+	<loc>https://gitmez.com/software/</loc>
+	<lastmod>2024-10-07T10:58:55+01:00</lastmod>
+	<priority>0.8</priority>
+</url>
+<url>
+	<loc>https://gitmez.com/year-archive/</loc>
+	<lastmod>2024-10-07T10:58:55+01:00</lastmod>
+	<priority>0.8</priority>
+</url>
+<url>
+	<loc>https://gitmez.com/rdersi.html</loc>
+	<lastmod>2024-10-07T10:58:55+01:00</lastmod>
+	<priority>1.0</priority>
+</url>
+<url>
+	<loc>https://gitmez.com/sitemap/</loc>
+	<lastmod>2024-10-07T10:58:55+01:00</lastmod>
+	<priority>0.8</priority>
+</url>
+<url>
+	<loc>https://gitmez.com/teaching/2021-fall-teaching-1</loc>
+	<lastmod>2024-10-07T10:58:55+01:00</lastmod>
+	<priority>0.8</priority>
+</url>
+<url>
+	<loc>https://gitmez.com/teaching/2022-spring-teaching-1</loc>
+	<lastmod>2024-10-07T10:58:55+01:00</lastmod>
+	<priority>0.8</priority>
+</url>
+<url>
+	<loc>https://gitmez.com/teaching/2022-spring-teaching-3/</loc>
+	<lastmod>2024-10-07T10:58:55+01:00</lastmod>
+	<priority>0.6</priority>
+</url>
+<url>
+	<loc>https://gitmez.com/teaching/2023-spring-teaching-4/</loc>
+	<lastmod>2024-10-07T10:58:55+01:00</lastmod>
+	<priority>0.6</priority>
+</url>
+<url>
+	<loc>https://gitmez.com/posts/2023/05/election-simulator/</loc>
+	<lastmod>2024-10-07T10:58:57+01:00</lastmod>
+	<priority>0.2</priority>
+</url>
+<url>
+	<loc>https://gitmez.com/posts/2023/08/dhondt-simulator/</loc>
+	<lastmod>2024-10-07T10:58:57+01:00</lastmod>
+	<priority>0.2</priority>
+</url>
+<url>
+	<loc>https://gitmez.com/r-ders-1.html</loc>
+	<lastmod>2024-10-07T10:58:58+01:00</lastmod>
+	<priority>1.0</priority>
+</url>
+<url>
+	<loc>https://gitmez.com/r-ders-2.html</loc>
+	<lastmod>2024-10-07T10:58:58+01:00</lastmod>
+	<priority>1.0</priority>
+</url>
+<url>
+	<loc>https://gitmez.com/r-ders-3.html</loc>
+	<lastmod>2024-10-07T10:58:58+01:00</lastmod>
+	<priority>1.0</priority>
+</url>
+<url>
+	<loc>https://gitmez.com/r-ders-4.html</loc>
+	<lastmod>2024-10-07T10:58:58+01:00</lastmod>
+	<priority>1.0</priority>
+</url>
+<url>
+	<loc>https://gitmez.com/r-ders-5.html</loc>
+	<lastmod>2024-10-07T10:58:58+01:00</lastmod>
+	<priority>1.0</priority>
+</url>
+<url>
+	<loc>https://gitmez.com/r-ders-6.html</loc>
+	<lastmod>2024-10-07T10:58:58+01:00</lastmod>
+	<priority>1.0</priority>
+</url>
+<url>
+	<loc>https://gitmez.com/r-ders-7.html</loc>
+	<lastmod>2024-10-07T10:58:58+01:00</lastmod>
+	<priority>1.0</priority>
+</url>
+<url>
+	<loc>https://gitmez.com/r-ders-8.html</loc>
+	<lastmod>2024-10-07T10:58:58+01:00</lastmod>
+	<priority>1.0</priority>
+</url>
+<url>
+	<loc>https://gitmez.com/r-ders-9.html</loc>
+	<lastmod>2024-10-07T10:58:58+01:00</lastmod>
+	<priority>1.0</priority>
+</url>
+<url>
+	<loc>https://gitmez.com/r-ders-10.html</loc>
+	<lastmod>2024-10-07T10:58:58+01:00</lastmod>
+	<priority>1.0</priority>
+</url>
+<url>
+	<loc>https://gitmez.com/r-ders-11.html</loc>
+	<lastmod>2024-10-07T10:58:58+01:00</lastmod>
+	<priority>1.0</priority>
+</url>
+<url>
+	<loc>https://gitmez.com/r-ders-12.html</loc>
+	<lastmod>2024-10-07T10:58:58+01:00</lastmod>
+	<priority>1.0</priority>
+</url>
+<url>
+	<loc>https://gitmez.com/r-ders-13.html</loc>
+	<lastmod>2024-10-07T10:58:58+01:00</lastmod>
+	<priority>1.0</priority>
+</url>
+<url>
+	<loc>https://gitmez.com/r-ders-14.html</loc>
+	<lastmod>2024-10-07T10:58:58+01:00</lastmod>
+	<priority>1.0</priority>
+</url>
+<url>
+	<loc>https://gitmez.com/r-ders-15.html</loc>
+	<lastmod>2024-10-07T10:58:58+01:00</lastmod>
+	<priority>1.0</priority>
+</url>
+<url>
+	<loc>https://gitmez.com/404.html</loc>
+	<lastmod>2024-10-07T10:58:58+01:00</lastmod>
+	<priority>1.0</priority>
+</url>
+<url>
+	<loc>https://gitmez.com/archive-layout-with-content/</loc>
+	<lastmod>2024-10-07T10:58:58+01:00</lastmod>
+	<priority>0.8</priority>
+</url>
+<url>
+	<loc>https://gitmez.com/categories/</loc>
+	<lastmod>2024-10-07T10:58:58+01:00</lastmod>
+	<priority>0.8</priority>
+</url>
+<url>
+	<loc>https://gitmez.com/collection-archive/</loc>
+	<lastmod>2024-10-07T10:58:58+01:00</lastmod>
+	<priority>0.8</priority>
+</url>
+<url>
+	<loc>https://gitmez.com/non-menu-page/</loc>
+	<lastmod>2024-10-07T10:58:58+01:00</lastmod>
+	<priority>0.8</priority>
+</url>
+<url>
+	<loc>https://gitmez.com/page-archive/</loc>
+	<lastmod>2024-10-07T10:58:58+01:00</lastmod>
+	<priority>0.8</priority>
+</url>
+<url>
+	<loc>https://gitmez.com/tags/</loc>
+	<lastmod>2024-10-07T10:58:58+01:00</lastmod>
+	<priority>0.8</priority>
+</url>
+<url>
+	<loc>https://gitmez.com/talkmap.html</loc>
+	<lastmod>2024-10-07T10:58:58+01:00</lastmod>
+	<priority>1.0</priority>
+</url>
+<url>
+	<loc>https://gitmez.com/terms/</loc>
+	<lastmod>2024-10-07T10:58:58+01:00</lastmod>
+	<priority>0.8</priority>
+</url>
+<url>
+	<loc>https://gitmez.com/markdown_generator/</loc>
+	<lastmod>2024-10-07T10:58:58+01:00</lastmod>
+	<priority>0.8</priority>
+</url>
+<url>
+	<loc>https://gitmez.com/robots.txt</loc>
+	<lastmod>2024-10-07T10:58:58+01:00</lastmod>
+	<priority>1.0</priority>
+</url>
 </urlset>
