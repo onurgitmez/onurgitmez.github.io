@@ -181,4 +181,9 @@ $button-text-color: white;
   z-index: 1;
 }
 
+div.language-highlighter-rouge::before {
+  display: none !important;
+}
+
+
 
