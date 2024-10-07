@@ -49,7 +49,7 @@ Assuming the dataset is complete, you can simulate en election like this:
 
 ```r
 
-election_results <- simulate_election(data, "district", "seats", c("party1", "party2"), threshold = 0.1, assign_to_env = TRUE, env_var_name = "election_results")
+election_results <- simulate_election(data, "district", "seats", c("party1", "party2"), threshold = 0.1")
 
 ```
 
@@ -66,13 +66,14 @@ The function takes several arguments:
 - seats_col: The name of the column with the number of seats in each district.
 - parties: A vector of party names, each matching a column in your dataframe. Each column holds the votes that party got in each district.
 - threshold: (Optional) A vote share threshold that parties must exceed to be eligible for seats. Default is 0.
-- assign_to_env: (Optional) If TRUE, the function's result is assigned to a variable in the global environment. Default is FALSE.
-- env_var_name: (Optional) The name of the global environment variable to which the result is assigned, if assign_to_env is TRUE.
+
 
 The simulate_election() function returns a list with two components:
 
 Named Vector of Total Seats for Each Party: The first item is a named vector that displays the total seats won by each party. For instance, if three parties A, B, and C won 15, 10, and 5 seats respectively, the vector would show: partyA = 15, partyB = 10, partyC = 5.
+
 Dataframe of Seats Won by Each Party in Each District: The second item is a dataframe that gives a district-wise breakdown of the results. It shows the seats each party won in each district, with a column for each party, a row for each district, and an additional row with the total seats won by each party across all districts.
+
 This output provides both a bird's eye view and a detailed analysis of the election results, offering a comprehensive understanding of the electoral landscape.
 
 More information on the package and an election  dataset shipped with the package for analysis can be found on the Github page.
