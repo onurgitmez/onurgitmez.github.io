@@ -152,17 +152,25 @@
   }
 }
 
-.copy-code-button {
-  @extend .btn; // Extends the existing default button styles
+$button-bg: #4caf50;
+$button-bg-hover: #45a049;
+$button-text-color: white;
+
+.copy-button {
   position: absolute;
-  right: 10px;
   top: 10px;
-  z-index: 1000; // Ensures it appears on top of the code block
-  font-size: $type-size-6;
-  padding: 0.5em 1em;
-  background-color: $success-color; // You can adjust the color as needed
+  right: 10px;
+  background-color: $button-bg;
+  color: $button-text-color;
+  border: none;
+  padding: 5px 10px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  border-radius: 3px;
+  transition: background-color 0.3s;
 
   &:hover {
-    background-color: mix(white, $success-color, 20%);
+    background-color: $button-bg-hover;
   }
 }
+
