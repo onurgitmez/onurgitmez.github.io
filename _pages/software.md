@@ -37,6 +37,17 @@ You can read more about the application in my blog post:
 
 
 
+# D'Hondt Simulator Python Package
+
+I created an Python package that can simulate nation level election results using the D'Hondt allocation method. In this package, the command requires you to define the columns in your dataframe corresponding to elements such as district name, district size, party vote shares, define a nation level threshold, and whether you would like to save you simulation results as a new object in the environment. It then runs the simulation across all districts and gives you the seat distribution.
+
+
+To access the package on Github, please follow the link provided below:
+
+[D'Hondt Simulator in R](https://github.com/onurgitmez/dhondt-python)
+
+
+
 
 
 {% include base_path %}
