@@ -18,12 +18,18 @@ Education
 
 Work experience
 ======
-* July 2022-July 2023: Project Assistant at Tubitak-VRL Lab
-  * Worked as a Project Assistant analyzing Twitter data. This includes politicians, journalists and otheraccounts affiliated with politics or political news.
-  * My main responsibility was using the Twitter Moderation Research Consortium dataset to check on the closed accounts around the world to see common patterns in their activity.
-  * I also assist on the keywords that will be used to collect Twitter data and look over their appropriateness in collecting necessary data for the project.
+* July 2024-Present: Sales Development Manager at ikas
+  * Worked as Sales Development Manager for the outbound sales team at ikas.
+  * Generated quality leads and assigned them to the members of the outbound sales team
+  * Assisted outbound team with HubSpot
 
-* October 2021-July 2022: Research Assistant at Communicare Engineering and Consultancy
+* July 2022-July 2023: Project Assistant at Tubitak-VRL Lab
+  * Worked as a Project Assistant analyzing Twitter data. This includes politicians, journalists and other
+accounts affiliated with politics or political news.
+  * My main responsibility was using the Twitter Moderation Research Consortium dataset to check on the closed accounts around the world to see common patterns in their activity.
+  * I also assisted on the keywords that will be used to collect Twitter data and look over their appropriateness in collecting necessary data for the project.
+
+* October 2021-July 2022: Market Research Analyst at Communicare Engineering and Consultancy
   * Conducted market research for potential clients
   * Made the first contact with the potential clients for our services and listed them for future visit
   
@@ -48,6 +54,7 @@ Skills
 * Tableau
 * Microsoft Office
   * Excel
+* HubSpot 
 
 
 Teaching
