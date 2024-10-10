@@ -33,7 +33,7 @@ To access the package on Github, please follow the link provided below:
 
 You can read more about the application in my blog post:
 
-[D'Hondt Election Simulator Blogpost](https://www.gitmez.com/posts/2023/08/dhondt-simulator/)
+[D'Hondt Election Simulator Blogpost](https://gitmez.com/posts/2023/08/dhondt-simulator/)
 
 
 
@@ -46,6 +46,9 @@ To access the package on Github, please follow the link provided below:
 
 [D'Hondt Simulator in R](https://github.com/onurgitmez/dhondt-python)
 
+You can read more about the application in my blog post:
+
+[D'Hondt Election Simulator Blogpost](https://gitmez.com/posts/2024/10/dhondt-simulator/)
 
 
 
