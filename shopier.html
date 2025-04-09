@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Shopier Link Shortener</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            margin-top: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            border: none;
+            border-radius: 5px;
+            background-color: #007bff;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        #result {
+            margin-top: 15px;
+            font-weight: bold;
+            font-size: 18px;
+            word-break: break-all;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Shopier Link Shortener</h2>
+    <input type="text" id="urlInput" placeholder="Enter Shopier URL">
+    <br>
+    <button onclick="shortenLink()">Shorten Link</button>
+    <button onclick="copyLink()">Copy Link</button>
+    <div id="result"></div>
+</div>
+
+<script>
+function shortenLink() {
+    const url = document.getElementById('urlInput').value.trim();
+    const resultDiv = document.getElementById('result');
+    
+    if (!url) {
+        resultDiv.textContent = "Please enter a URL";
+        return;
+    }
+
+    let shopPattern = /shop=([^&\/]*)/;
+    let homePattern = /\/s\/home\/(\w+)/;
+    let storePattern = /\/s\/store\/(\w+)/;
+
+    let match = url.match(shopPattern) || url.match(homePattern) || url.match(storePattern);
+
+    if (match) {
+        let shopName = match[1].replace(/\/$/, ''); // Remove trailing slash if any
+        let shortUrl = "shopier.com/" + shopName;
+        resultDiv.textContent = shortUrl;
+    } else {
+        resultDiv.textContent = "Invalid URL";
+    }
+}
+
+function copyLink() {
+    const resultDiv = document.getElementById('result');
+    const text = resultDiv.textContent;
+
+    if (text && text !== "Invalid URL" && text !== "Please enter a URL") {
+        navigator.clipboard.writeText(text).then(function() {
+            alert("Link copied to clipboard!");
+        }, function(err) {
+            alert("Could not copy to clipboard");
+        });
+    }
+}
+</script>
+
+</body>
+</html>
