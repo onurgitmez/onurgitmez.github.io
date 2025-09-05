@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <title>Ödeme Hesaplama · Contract Remainder Calculator</title>
+    <title>Geri Ödeme Hesaplayıcı</title>
     <meta name="color-scheme" content="dark">
 
     <!-- Tailwind (runtime) -->
@@ -13,7 +13,7 @@
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
 
-    <!-- Babel for in-page JSX (keeps this single-file) -->
+    <!-- Babel for in-page JSX -->
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
   </head>
   <body class="min-h-screen">
@@ -29,7 +29,6 @@
         const [years, setYears]   = useState(1);
         const [saleDate, setSaleDate] = useState(todayISO);
         const [asOfDate, setAsOfDate] = useState(todayISO);
-        const [currency, setCurrency] = useState("TRY");
 
         function parseISO(d) {
           const [y,m,day] = d.split("-").map(Number);
@@ -44,7 +43,7 @@
           const MS = 24*60*60*1000;
           const a = Date.UTC(start.getUTCFullYear(), start.getUTCMonth(), start.getUTCDate());
           const b = Date.UTC(end.getUTCFullYear(),   end.getUTCMonth(),   end.getUTCDate());
-          return Math.floor((b - a) / MS); // non-inclusive of end day
+          return Math.floor((b - a) / MS);
         }
 
         const result = useMemo(() => {
@@ -67,11 +66,11 @@
           return { totalDays, elapsed, remainingDays, dailyRate, recognized, remaining, endDate: end, sale, asof, amountNum };
         }, [amount, years, saleDate, asOfDate]);
 
-        const fmt = new Intl.NumberFormat(currency === "TRY" ? "tr-TR" : undefined, {
-          style: "currency", currency, maximumFractionDigits: 0
+        const fmt = new Intl.NumberFormat("tr-TR", {
+          style: "currency", currency: "TRY", maximumFractionDigits: 0
         });
 
-        const fmtNum = new Intl.NumberFormat(currency === "TRY" ? "tr-TR" : undefined, {
+        const fmtNum = new Intl.NumberFormat("tr-TR", {
           maximumFractionDigits: 0
         });
 
@@ -80,8 +79,7 @@
         return (
           <div className="min-h-screen w-full bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800 text-slate-100">
             <header className="px-6 pt-8 pb-4">
-              <h1 className="text-3xl md:text-4xl font-semibold tracking-tight">Contract Remainder Calculator</h1>
-              <p className="text-slate-300 mt-2">Satış tarihi, sözleşme süresi (yıl) ve tutarı girin. Uygulama gün bazında (artı sıçrama yılları) doğrusal paylaştırma ile kalan/gelirleşen tutarı hesaplar.</p>
+              <h1 className="text-3xl md:text-4xl font-semibold tracking-tight">Geri Ödeme Hesaplayıcı</h1>
             </header>
 
             <main className="px-6 pb-12 grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
@@ -92,18 +90,9 @@
                   <div className="space-y-4">
                     <div>
                       <label className="block text-sm text-slate-300 mb-1" htmlFor="amount">Satış Tutarı</label>
-                      <div className="flex gap-2">
-                        <input id="amount" type="number" min="0" inputMode="decimal" placeholder="örn. 365000"
-                          value={amount} onChange={(e) => setAmount(e.target.value)}
-                          className="w-full rounded-xl bg-white/10 border border-white/10 px-3 py-2 outline-none focus:ring-2 focus:ring-cyan-400/50" />
-                        <select value={currency} onChange={(e) => setCurrency(e.target.value)}
-                          className="rounded-xl bg-white/10 border border-white/10 px-3 py-2 outline-none focus:ring-2 focus:ring-cyan-400/50">
-                          <option value="TRY">TRY ₺</option>
-                          <option value="USD">USD $</option>
-                          <option value="EUR">EUR €</option>
-                          <option value="GBP">GBP £</option>
-                        </select>
-                      </div>
+                      <input id="amount" type="number" min="0" inputMode="decimal" placeholder="örn. 365000"
+                        value={amount} onChange={(e) => setAmount(e.target.value)}
+                        className="w-full rounded-xl bg-white/10 border border-white/10 px-3 py-2 outline-none focus:ring-2 focus:ring-cyan-400/50" />
                     </div>
 
                     <div>
@@ -127,12 +116,6 @@
                       </div>
                     </div>
 
-                    <div className="text-xs text-slate-400 leading-relaxed">
-                      <ul className="list-disc pl-5 space-y-1">
-                        <li>Kalan = tutar − (günlük oran × geçen gün).</li>
-                        <li>Hesaplama tarihi satıştan önceyse geçen gün = 0; bitişten sonraysa kalan = 0.</li>
-                      </ul>
-                    </div>
                   </div>
                 </div>
               </section>
@@ -183,16 +166,6 @@
                         </table>
                       </div>
 
-                      <ExampleHelper onFill={(a, y, daysElapsed) => {
-                        const sale = new Date();
-                        sale.setUTCDate(sale.getUTCDate() - daysElapsed);
-                        const iso = sale.toISOString().slice(0,10);
-                        const today = new Date().toISOString().slice(0,10);
-                        setSaleDate(iso);
-                        setYears(y);
-                        setAmount(String(a));
-                        setAsOfDate(today);
-                      }} />
                     </div>
                   )}
                 </div>
@@ -221,29 +194,6 @@
             <td className="px-4 py-3 text-slate-300 w-1/3">{k}</td>
             <td className="px-4 py-3 text-slate-100">{v}</td>
           </tr>
-        );
-      }
-
-      function ExampleHelper({ onFill }) {
-        return (
-          <div className="mt-2 flex flex-wrap items-center gap-2 text-xs">
-            <span className="text-slate-400 mr-1">Hızlı örnekler:</span>
-            <button onClick={() => onFill(365000, 1, 150)}
-              className="rounded-lg px-3 py-1.5 bg-white/10 hover:bg-white/20 border border-white/10"
-              title="365.000 — 1 yıl — 150 gün (beklenen kalan 215.000)">
-              365k · 1y · 150g
-            </button>
-            <button onClick={() => onFill(1200000, 2, 365)}
-              className="rounded-lg px-3 py-1.5 bg-white/10 hover:bg-white/20 border border-white/10"
-              title="1.200.000 — 2 yıl — 365 gün">
-              1.2M · 2y · 365g
-            </button>
-            <button onClick={() => onFill(99999, 3, 800)}
-              className="rounded-lg px-3 py-1.5 bg-white/10 hover:bg-white/20 border border-white/10"
-              title="99.999 — 3 yıl — 800 gün">
-              99,999 · 3y · 800g
-            </button>
-          </div>
         );
       }
 
