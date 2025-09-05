@@ -55,7 +55,7 @@
       .dark .flatpickr-monthDropdown-months,
       .dark .numInputWrapper input { color: #e5e7eb; }
 
-      /* FIX: Calendar navigation arrows */
+      /* FIX 1: Calendar navigation (month) arrows */
       .dark .flatpickr-prev-month,
       .dark .flatpickr-next-month {
         fill: #e5e7eb !important;
@@ -64,6 +64,27 @@
       .dark .flatpickr-next-month svg {
         fill: #e5e7eb !important;
         stroke: none;
+      }
+
+      /* FIX 2: YEAR up/down arrows (the problem you described)
+         Flatpickr draws these as CSS triangles on :after of .arrowUp / .arrowDown.
+         We recolor the triangle borders for dark mode. */
+      .dark .flatpickr-current-month .numInputWrapper .arrowUp,
+      .dark .flatpickr-current-month .numInputWrapper .arrowDown {
+        opacity: 1; /* ensure not dimmed */
+      }
+      .dark .flatpickr-current-month .numInputWrapper .arrowUp:after {
+        border-bottom-color: #e5e7eb !important; /* up-triangle color */
+      }
+      .dark .flatpickr-current-month .numInputWrapper .arrowDown:after {
+        border-top-color: #e5e7eb !important; /* down-triangle color */
+      }
+
+      /* Optional: better hit targets on arrows in dark mode */
+      .dark .flatpickr-current-month .numInputWrapper .arrowUp,
+      .dark .flatpickr-current-month .numInputWrapper .arrowDown {
+        width: 18px;
+        height: 50%;
       }
     </style>
   </head>
@@ -275,7 +296,8 @@
                         <div className={"h-3 w-full rounded-full overflow-hidden " + (isDark ? "bg-white/10" : "bg-slate-300/60")}>
                           <div className="h-3" style={{ backgroundColor: "rgb(34 211 238 / 0.9)", width: pct(result.elapsed, result.totalDays) + "%" }} />
                         </div>
-                        <div className={"flex items-center justify-between text-xs mt-2 " + (isDark ? "text-slate-400" : "text-slate-600")}>\n                          <span>{formatDate(result.sale)}</span>
+                        <div className={"flex items-center justify-between text-xs mt-2 " + (isDark ? "text-slate-400" : "text-slate-600")}>
+                          <span>{formatDate(result.sale)}</span>
                           <span>Bitiş: {formatDate(result.endDate)}</span>
                         </div>
                       </div>
