@@ -27,14 +27,18 @@
     <style>
       /* --- Flatpickr theming (consistent across light/dark) --- */
 
-      /* Calendar surface */
+      /* Calendar surface (dark) */
       .dark .flatpickr-calendar {
         background: #0b1220;
         border: 1px solid rgba(255, 255, 255, 0.15);
-        color: #e5e7eb;
       }
       .dark .flatpickr-months,
       .dark .flatpickr-weekdays { background: transparent; }
+
+      /* Base header/text colors via currentColor */
+      .flatpickr-calendar { color: #0f172a; }           /* light header text => slate-900 */
+      .dark .flatpickr-calendar { color: #e5e7eb; }     /* dark header text  => slate-200 */
+
       .dark .flatpickr-current-month,
       .dark .flatpickr-weekday,
       .dark .flatpickr-day { color: #e5e7eb; }
@@ -55,42 +59,28 @@
         color: #0b1220;
       }
 
-      /* Inputs & month label colors */
+      /* Inputs & month label colors inherit */
       .flatpickr-current-month .cur-year,
       .flatpickr-current-month .cur-month,
       .flatpickr-current-month .numInputWrapper input {
-        color: inherit; /* pick up container text color */
+        color: inherit;
       }
-      /* Light mode base text color for calendar header */
-      .flatpickr-calendar { color: #0f172a; } /* slate-900 */
-      /* Dark mode header text color */
-      .dark .flatpickr-calendar { color: #e5e7eb; } /* slate-200 */
 
-      /* --- Month nav arrows use currentColor in both modes --- */
+      /* Month nav arrows use currentColor in both modes */
       .flatpickr-prev-month,
-      .flatpickr-next-month {
-        color: inherit; /* so svg fill matches text */
-      }
+      .flatpickr-next-month { color: inherit; }
       .flatpickr-prev-month svg,
-      .flatpickr-next-month svg {
-        fill: currentColor !important;
-        stroke: none !important;
-      }
+      .flatpickr-next-month svg { fill: currentColor !important; stroke: none !important; }
 
-      /* --- Year increment/decrement arrows (consistent both modes) --- */
-      /* Flatpickr draws them with border triangles on :after. Use currentColor so it matches text in both modes. */
+      /* Year increment/decrement arrows (consistent both modes) */
       .flatpickr-current-month .numInputWrapper .arrowUp,
       .flatpickr-current-month .numInputWrapper .arrowDown {
         opacity: 1;
         width: 18px;
         height: 50%;
       }
-      .flatpickr-current-month .numInputWrapper .arrowUp:after {
-        border-bottom-color: currentColor !important;
-      }
-      .flatpickr-current-month .numInputWrapper .arrowDown:after {
-        border-top-color: currentColor !important;
-      }
+      .flatpickr-current-month .numInputWrapper .arrowUp:after { border-bottom-color: currentColor !important; }
+      .flatpickr-current-month .numInputWrapper .arrowDown:after { border-top-color: currentColor !important; }
 
       /* Slightly clearer hover for days in light mode */
       .flatpickr-day:not(.selected):hover { background: rgba(14, 165, 233, 0.12); } /* cyan-500/12 */
@@ -231,7 +221,7 @@
               <div className="flex items-start justify-between gap-4">
                 <div>
                   <h1 className="text-3xl md:text-4xl font-semibold tracking-tight">Ödeme Hesaplama</h1>
-                  <!-- Subtitle: edit this line as you like -->
+                  {/* Subtitle: edit this line as you like */}
                   <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
                     Buraya kısa bir açıklama / alt başlık ekleyebilirsiniz.
                   </p>
