@@ -356,7 +356,7 @@
                       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
                         <KPI label="Sözleşme Tutarı" value={fmt.format(result.amountNum)} isDark={isDark} />
                         <KPI label="Kalan Tutar" value={fmt.format(Math.round(result.remaining))} highlight isDark={isDark} />
-                        <KPI label="Bugüne Kadar Gelirleşen" value={fmt.format(Math.round(result.recognized))} isDark={isDark} />
+                        <KPI label="Bugüne Kadar Geçen" value={fmt.format(Math.round(result.recognized))} isDark={isDark} />
                         <KPI label="Günlük Oran" value={fmt.format(Math.round(result.dailyRate))} isDark={isDark} />
                       </div>
 
@@ -385,7 +385,7 @@
                             <Row k="Toplam Gün"        v={fmtNum.format(result.totalDays)}      isDark={isDark} />
                             <Row k="Geçen Gün"         v={fmtNum.format(result.elapsed)}        isDark={isDark} />
                             <Row k="Kalan Gün"         v={fmtNum.format(result.remainingDays)}  isDark={isDark} />
-                            <Row k="Gelirleşen Tutar"  v={fmt.format(Math.round(result.recognized))} isDark={isDark} />
+                            <Row k="Geçen Tutar"  v={fmt.format(Math.round(result.recognized))} isDark={isDark} />
                             <Row k="Kalan Tutar"       v={fmt.format(Math.round(result.remaining))}  isDark={isDark} />
                           </tbody>
                         </table>
