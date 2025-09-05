@@ -3,54 +3,67 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <title> Geri Ödeme Hesaplama</title>
-    <meta name="color-scheme" content="light dark">
+    <title>Ödeme Hesaplama</title>
+    <meta name="color-scheme" content="dark light" />
 
-    <!-- Tailwind (runtime) -->
-    <script>
-      // Enable class-based dark mode switching
-      window.tailwind = { config: { darkMode: "class" } };
-    </script>
+    <!-- Tailwind -->
     <script src="https://cdn.tailwindcss.com"></script>
 
-    <!-- React 18 + ReactDOM (UMD) -->
+    <!-- React 18 -->
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
 
-    <!-- Babel for in-page JSX -->
+    <!-- Babel -->
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
-    <!-- Flatpickr (calendar) -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <!-- Flatpickr -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" />
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/tr.js"></script>
 
     <style>
-      /* Soften flatpickr a bit in light mode to match your palette */
-      .flatpickr-calendar {
-        border-radius: 12px;
-        border: 1px solid rgba(15, 23, 42, 0.2); /* slate-800/20 */
-        box-shadow: 0 10px 25px rgba(0,0,0,0.10);
-      }
+      /* --- Flatpickr dark-mode fixes --- */
       .dark .flatpickr-calendar {
-        border: 1px solid rgba(255,255,255,0.15);
-        background: #0b1220; /* near-slate-950 */
-        color: #e5e7eb; /* slate-200 */
-      }
-      .dark .flatpickr-months, .dark .flatpickr-weekdays,
-      .dark .flatpickr-days, .dark .flatpickr-day {
-        background: transparent;
+        background: #0b1220;
+        border: 1px solid rgba(255, 255, 255, 0.15);
         color: #e5e7eb;
       }
+      .dark .flatpickr-months,
+      .dark .flatpickr-weekdays {
+        background: transparent;
+      }
+      .dark .flatpickr-current-month,
+      .dark .flatpickr-weekday,
+      .dark .flatpickr-day {
+        color: #e5e7eb;
+      }
+      .dark .flatpickr-day.disabled,
+      .dark .flatpickr-day.prevMonthDay,
+      .dark .flatpickr-day.nextMonthDay {
+        color: #64748b;
+      }
       .dark .flatpickr-day:hover {
-        background: rgba(34,211,238,0.15);
+        background: rgba(34, 211, 238, 0.15);
+      }
+      .dark .flatpickr-day.inRange {
+        background: rgba(34, 211, 238, 0.08);
+        border-color: transparent;
+        color: #e5e7eb;
       }
       .dark .flatpickr-day.selected,
       .dark .flatpickr-day.startRange,
       .dark .flatpickr-day.endRange,
       .dark .flatpickr-day.selected:hover {
-        background: rgba(34,211,238,0.9);
+        background: rgba(34, 211, 238, 0.9);
         color: #0b1220;
+      }
+      .dark .flatpickr-monthDropdown-months,
+      .dark .numInputWrapper input {
+        color: #e5e7eb;
+      }
+      .dark .flatpickr-next-month svg,
+      .dark .flatpickr-prev-month svg {
+        fill: #e5e7eb;
       }
     </style>
   </head>
@@ -58,91 +71,60 @@
     <div id="root"></div>
 
     <script type="text/babel">
-      const { useMemo, useState, useEffect, useRef } = React;
+      const { useState, useMemo, useEffect, useRef } = React;
 
-      function useFlatpickr({ valueISO, onChangeISO, isDark }) {
+      // Custom hook to bind flatpickr to an input
+      function useFlatpickr(initialDate, onChange) {
         const inputRef = useRef(null);
-        const fpRef = useRef(null);
-
-        // init
         useEffect(() => {
-          if (!inputRef.current) return;
-          fpRef.current = flatpickr(inputRef.current, {
-            locale: flatpickr.l10ns.tr,
-            dateFormat: "Y-m-d",     // underlying value (ISO-like)
-            altInput: true,
-            altFormat: "d/m/Y",      // user-facing dd/mm/yyyy
-            allowInput: false,
-            defaultDate: valueISO,
-            clickOpens: true,
-            onChange: (selectedDates, dateStr /* Y-m-d */) => {
-              if (!dateStr) return;
-              onChangeISO(dateStr);
-            },
-          });
-          return () => { try { fpRef.current?.destroy(); } catch {} };
+          if (inputRef.current) {
+            const fp = flatpickr(inputRef.current, {
+              dateFormat: "d/m/Y",
+              defaultDate: initialDate,
+              locale: flatpickr.l10ns.tr,
+              onChange: (dates) => {
+                if (dates.length > 0) {
+                  const iso = dates[0].toISOString().slice(0, 10);
+                  onChange(iso);
+                }
+              },
+            });
+            return () => fp.destroy();
+          }
         }, []);
-
-        // keep picker in sync if state changes from outside
-        useEffect(() => {
-          if (fpRef.current) {
-            // only update if different, to avoid cursor jumps
-            const current = fpRef.current.input.value;
-            if (valueISO && fpRef.current.selectedDates?.[0]) {
-              const y = fpRef.current.selectedDates[0].getUTCFullYear().toString().padStart(4,"0");
-              const m = (fpRef.current.selectedDates[0].getUTCMonth()+1).toString().padStart(2,"0");
-              const d = fpRef.current.selectedDates[0].getUTCDate().toString().padStart(2,"0");
-              const iso = `${y}-${m}-${d}`;
-              if (iso !== valueISO) fpRef.current.setDate(valueISO, true);
-            } else if (valueISO) {
-              fpRef.current.setDate(valueISO, true);
-            }
-          }
-        }, [valueISO]);
-
-        // re-open to reflow theme if toggled while open (cosmetic)
-        useEffect(() => {
-          if (fpRef.current?.isOpen) {
-            fpRef.current.close();
-            setTimeout(() => fpRef.current.open(), 0);
-          }
-        }, [isDark]);
-
         return inputRef;
       }
 
       function App() {
-        // THEME: prefers-color-scheme with persistence
-        const prefersDark = typeof window !== "undefined"
-          && window.matchMedia
-          && window.matchMedia("(prefers-color-scheme: dark)").matches;
+        const todayISO = new Date().toISOString().slice(0, 10);
 
+        const [amount, setAmount] = useState("");
+        const [years, setYears] = useState("1");
+        const [saleDate, setSaleDate] = useState(todayISO);
+        const [asOfDate, setAsOfDate] = useState(todayISO);
         const [theme, setTheme] = useState(() => {
-          const saved = typeof window !== "undefined" ? localStorage.getItem("odeme-theme") : null;
-          return saved || (prefersDark ? "dark" : "light");
+          if (typeof window !== "undefined") {
+            return (
+              localStorage.getItem("theme") ||
+              (window.matchMedia("(prefers-color-scheme: dark)").matches
+                ? "dark"
+                : "light")
+            );
+          }
+          return "dark";
         });
 
         useEffect(() => {
-          try { localStorage.setItem("odeme-theme", theme); } catch {}
-          // Reflect theme as a class on <html> for Tailwind "dark"
-          const root = document.documentElement;
-          if (theme === "dark") root.classList.add("dark");
-          else root.classList.remove("dark");
+          localStorage.setItem("theme", theme);
+          document.documentElement.classList.toggle("dark", theme === "dark");
         }, [theme]);
 
-        const isDark = theme === "dark";
-        const t = (darkCls, lightCls) => (isDark ? darkCls : lightCls);
-
-        // DATA
-        const todayISO = new Date().toISOString().slice(0, 10);
-        const [amount, setAmount] = useState("");
-        const [years, setYears] = useState("1");  // store raw string for easier typing
-        const [saleDate, setSaleDate] = useState(todayISO);
-        const [asOfDate, setAsOfDate] = useState(() => new Date().toISOString().slice(0, 10));
+        const saleRef = useFlatpickr(saleDate, setSaleDate);
+        const asOfRef = useFlatpickr(asOfDate, setAsOfDate);
 
         function parseISO(d) {
-          const [y,m,day] = d.split("-").map(Number);
-          return new Date(Date.UTC(y, (m||1)-1, day||1));
+          const [y, m, day] = d.split("-").map(Number);
+          return new Date(Date.UTC(y, (m || 1) - 1, day || 1));
         }
         function addYears(date, y) {
           const d = new Date(date.getTime());
@@ -150,21 +132,29 @@
           return d;
         }
         function diffDays(start, end) {
-          const MS = 24*60*60*1000;
-          const a = Date.UTC(start.getUTCFullYear(), start.getUTCMonth(), start.getUTCDate());
-          const b = Date.UTC(end.getUTCFullYear(),   end.getUTCMonth(),   end.getUTCDate());
+          const MS = 24 * 60 * 60 * 1000;
+          const a = Date.UTC(
+            start.getUTCFullYear(),
+            start.getUTCMonth(),
+            start.getUTCDate()
+          );
+          const b = Date.UTC(
+            end.getUTCFullYear(),
+            end.getUTCMonth(),
+            end.getUTCDate()
+          );
           return Math.floor((b - a) / MS);
-        }
-        function formatDate(date) {
-          const d = date.getUTCDate().toString().padStart(2,"0");
-          const m = (date.getUTCMonth()+1).toString().padStart(2,"0");
-          const y = date.getUTCFullYear();
-          return `${d}/${m}/${y}`;
         }
 
         const result = useMemo(() => {
-          const amountNum = Number((amount || "").toString().replace(/[^0-9.,-]/g, "").replace(/,/g, "."));
-          if (!saleDate || !asOfDate || !amountNum || amountNum < 0) return null;
+          const amountNum = Number(
+            (amount || "")
+              .toString()
+              .replace(/[^0-9.,-]/g, "")
+              .replace(/,/g, ".")
+          );
+          if (!saleDate || !asOfDate || !amountNum || amountNum < 0)
+            return null;
 
           const sale = parseISO(saleDate);
           const asof = parseISO(asOfDate);
@@ -172,7 +162,7 @@
           let yearsNum = parseInt(years || "1", 10);
           if (isNaN(yearsNum) || yearsNum < 1) yearsNum = 1;
 
-          const end  = addYears(sale, yearsNum);
+          const end = addYears(sale, yearsNum);
           const totalDays = Math.max(0, diffDays(sale, end));
           const elapsedRaw = diffDays(sale, asof);
           const elapsed = Math.min(Math.max(0, elapsedRaw), totalDays);
@@ -182,60 +172,85 @@
           const recognized = dailyRate * elapsed;
           const remaining = Math.max(0, amountNum - recognized);
 
-          return { totalDays, elapsed, remainingDays, dailyRate, recognized, remaining, endDate: end, sale, asof, amountNum };
+          return {
+            totalDays,
+            elapsed,
+            remainingDays,
+            dailyRate,
+            recognized,
+            remaining,
+            endDate: end,
+            sale,
+            asof,
+            amountNum,
+          };
         }, [amount, years, saleDate, asOfDate]);
 
-        const fmt = new Intl.NumberFormat("tr-TR", { style: "currency", currency: "TRY", maximumFractionDigits: 0 });
-        const fmtNum = new Intl.NumberFormat("tr-TR", { maximumFractionDigits: 0 });
-        const pct = (n, d) => (d <= 0 ? 0 : Math.min(100, Math.max(0, (n / d) * 100)));
+        const fmt = new Intl.NumberFormat("tr-TR", {
+          style: "currency",
+          currency: "TRY",
+          maximumFractionDigits: 0,
+        });
 
-        // Hook up flatpickr to inputs (consistent calendar in both themes)
-        const saleInputRef  = useFlatpickr({ valueISO: saleDate, onChangeISO: setSaleDate, isDark });
-        const asOfInputRef  = useFlatpickr({ valueISO: asOfDate, onChangeISO: setAsOfDate, isDark });
+        const fmtNum = new Intl.NumberFormat("tr-TR", {
+          maximumFractionDigits: 0,
+        });
+
+        function pct(n, d) {
+          if (d <= 0) return 0;
+          return Math.min(100, Math.max(0, (n / d) * 100));
+        }
+
+        const isDark = theme === "dark";
 
         return (
-          <div className={
-            "min-h-screen w-full transition-colors " +
-            t(
-              "bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800 text-slate-100",
-              "bg-gradient-to-br from-slate-200 via-slate-100 to-slate-50 text-slate-900"
-            )
-          }>
-            <header className="px-6 pt-8 pb-4 flex items-start justify-between gap-4">
+          <div
+            className={
+              "min-h-screen w-full transition-colors " +
+              (isDark
+                ? "bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800 text-slate-100"
+                : "bg-gradient-to-br from-slate-200 via-slate-100 to-slate-50 text-slate-900")
+            }
+          >
+            <header className="px-6 pt-8 pb-4 flex items-center justify-between">
               <div>
-                <h1 className="text-3xl md:text-4xl font-semibold tracking-tight"> Geri Ödeme Hesaplama</h1>
-                <p className={ "mt-2 text-sm " + t("text-slate-400","text-slate-600") }>
-                  Ay hediyeleri veya ekstra satılan entegrasyonları hesaplamaya dahil etmeyin.
+                <h1 className="text-3xl md:text-4xl font-semibold tracking-tight">
+                  Ödeme Hesaplama
+                </h1>
+                <p className="text-slate-400 mt-2 text-sm">
+                  Satış tarihi, sözleşme süresi (yıl) ve tutarı girin; uygulama
+                  gün bazlı (artık yıllar dâhil) doğrusal paylaştırma ile kalan
+                  ve gelirleşen tutarları hesaplar.
                 </p>
               </div>
-
-              {/* Theme toggle */}
               <button
                 onClick={() => setTheme(isDark ? "light" : "dark")}
-                className={
-                  "select-none rounded-xl px-3 py-2 text-sm font-medium border transition " +
-                  t("bg-white/10 border-white/10 hover:bg-white/20 text-slate-100",
-                    "bg-slate-50/90 border-slate-300 hover:bg-slate-100 text-slate-900 shadow-sm")
-                }
-                title={isDark ? "Açık tema" : "Koyu tema"}
+                className="rounded-lg border px-3 py-1 text-sm"
               >
                 {isDark ? "☀️ Açık" : "🌙 Koyu"}
               </button>
             </header>
 
             <main className="px-6 pb-12 grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
-              {/* Inputs */}
               <section className="lg:col-span-1">
-                <div className={
-                  "rounded-2xl p-5 border shadow-2xl transition " +
-                  t("backdrop-blur-xl bg-white/5 border-white/10 shadow-black/30",
-                    "bg-slate-50/90 border-slate-300 shadow-sm")
-                }>
+                <div
+                  className={
+                    (isDark
+                      ? "backdrop-blur-xl bg-white/5 border border-white/10"
+                      : "backdrop-blur-xl bg-slate-50/90 border border-slate-300") +
+                    " rounded-2xl p-5 shadow-xl"
+                  }
+                >
                   <h2 className="text-lg font-medium mb-4">Girdiler</h2>
 
                   <div className="space-y-4">
                     <div>
-                      <label className={"block text-sm mb-1 " + t("text-slate-300","text-slate-700")} htmlFor="amount">Satış Tutarı</label>
+                      <label
+                        className="block text-sm mb-1"
+                        htmlFor="amount"
+                      >
+                        Satış Tutarı
+                      </label>
                       <input
                         id="amount"
                         type="number"
@@ -245,15 +260,21 @@
                         value={amount}
                         onChange={(e) => setAmount(e.target.value)}
                         className={
-                          "w-full rounded-xl px-3 py-2 outline-none focus:ring-2 transition " +
-                          t("bg-white/10 border border-white/10 focus:ring-cyan-400/50",
-                            "bg-slate-50 border border-slate-300 focus:ring-cyan-300")
+                          (isDark
+                            ? "bg-white/10 border-white/10"
+                            : "bg-slate-50 border-slate-300") +
+                          " w-full rounded-xl px-3 py-2 outline-none focus:ring-2 focus:ring-cyan-400/50"
                         }
                       />
                     </div>
 
                     <div>
-                      <label className={"block text-sm mb-1 " + t("text-slate-300","text-slate-700")} htmlFor="years">Sözleşme Süresi (yıl)</label>
+                      <label
+                        className="block text-sm mb-1"
+                        htmlFor="years"
+                      >
+                        Sözleşme Süresi (yıl)
+                      </label>
                       <input
                         id="years"
                         type="number"
@@ -262,43 +283,53 @@
                         value={years}
                         onChange={(e) => setYears(e.target.value)}
                         className={
-                          "w-full rounded-xl px-3 py-2 outline-none focus:ring-2 transition " +
-                          t("bg-white/10 border border-white/10 focus:ring-cyan-400/50",
-                            "bg-slate-50 border border-slate-300 focus:ring-cyan-300")
+                          (isDark
+                            ? "bg-white/10 border-white/10"
+                            : "bg-slate-50 border-slate-300") +
+                          " w-full rounded-xl px-3 py-2 outline-none focus:ring-2 focus:ring-cyan-400/50"
                         }
                       />
-                      <p className={"text-xs mt-1 " + t("text-slate-400","text-slate-500")}>
-                        Tam yıl kullanın (1, 2, 3, …). Bitiş = satış tarihi + yıl.
+                      <p className="text-xs text-slate-400 mt-1">
+                        Tam yıl kullanın (1, 2, 3, …). Bitiş = satış tarihi +
+                        yıl.
                       </p>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
-                        <label className={"block text-sm mb-1 " + t("text-slate-300","text-slate-700")} htmlFor="saleDate">Satış Tarihi</label>
+                        <label
+                          className="block text-sm mb-1"
+                          htmlFor="saleDate"
+                        >
+                          Satış Tarihi
+                        </label>
                         <input
+                          ref={saleRef}
                           id="saleDate"
-                          type="text"
-                          ref={saleInputRef}
                           className={
-                            "w-full rounded-xl px-3 py-2 outline-none focus:ring-2 transition cursor-pointer " +
-                            t("bg-white/10 border border-white/10 focus:ring-cyan-400/50",
-                              "bg-slate-50 border border-slate-300 focus:ring-cyan-300")
+                            (isDark
+                              ? "bg-white/10 border-white/10"
+                              : "bg-slate-50 border-slate-300") +
+                            " w-full rounded-xl px-3 py-2 outline-none focus:ring-2 focus:ring-cyan-400/50"
                           }
-                          readOnly
                         />
                       </div>
                       <div>
-                        <label className={"block text-sm mb-1 " + t("text-slate-300","text-slate-700")} htmlFor="asOfDate">Hesaplama Tarihi</label>
+                        <label
+                          className="block text-sm mb-1"
+                          htmlFor="asOfDate"
+                        >
+                          Hesaplama Tarihi
+                        </label>
                         <input
+                          ref={asOfRef}
                           id="asOfDate"
-                          type="text"
-                          ref={asOfInputRef}
                           className={
-                            "w-full rounded-xl px-3 py-2 outline-none focus:ring-2 transition cursor-pointer " +
-                            t("bg-white/10 border border-white/10 focus:ring-cyan-400/50",
-                              "bg-slate-50 border border-slate-300 focus:ring-cyan-300")
+                            (isDark
+                              ? "bg-white/10 border-white/10"
+                              : "bg-slate-50 border-slate-300") +
+                            " w-full rounded-xl px-3 py-2 outline-none focus:ring-2 focus:ring-cyan-400/50"
                           }
-                          readOnly
                         />
                       </div>
                     </div>
@@ -306,53 +337,111 @@
                 </div>
               </section>
 
-              {/* Results */}
               <section className="lg:col-span-2">
-                <div className={
-                  "rounded-2xl p-5 border shadow-2xl transition " +
-                  t("backdrop-blur-xl bg-white/5 border-white/10 shadow-black/30",
-                    "bg-slate-50/90 border-slate-300 shadow-sm")
-                }>
+                <div
+                  className={
+                    (isDark
+                      ? "backdrop-blur-xl bg-white/5 border border-white/10"
+                      : "backdrop-blur-xl bg-slate-50/90 border border-slate-300") +
+                    " rounded-2xl p-5 shadow-xl"
+                  }
+                >
                   <h2 className="text-lg font-medium mb-4">Sonuçlar</h2>
 
                   {!result ? (
-                    <div className={ t("text-slate-400","text-slate-600") }>Sonuçları görmek için tüm alanları doldurun.</div>
+                    <div className="text-slate-400">
+                      Sonuçları görmek için tüm alanları doldurun.
+                    </div>
                   ) : (
                     <div className="space-y-6">
                       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-                        <KPI label="Sözleşme Tutarı" value={fmt.format(result.amountNum)} isDark={isDark} />
-                        <KPI label="Kalan Tutar" value={fmt.format(Math.round(result.remaining))} highlight isDark={isDark} />
-                        <KPI label="Bugüne Kadar Gelirleşen" value={fmt.format(Math.round(result.recognized))} isDark={isDark} />
-                        <KPI label="Günlük Oran" value={fmt.format(Math.round(result.dailyRate))} isDark={isDark} />
+                        <KPI
+                          label="Sözleşme Tutarı"
+                          value={fmt.format(result.amountNum)}
+                        />
+                        <KPI
+                          label="Kalan Tutar"
+                          value={fmt.format(Math.round(result.remaining))}
+                          highlight
+                        />
+                        <KPI
+                          label="Bugüne Kadar Geçen"
+                          value={fmt.format(Math.round(result.recognized))}
+                        />
+                        <KPI
+                          label="Günlük Oran"
+                          value={fmt.format(Math.round(result.dailyRate))}
+                        />
                       </div>
 
                       <div>
                         <div className="flex items-end justify-between mb-2">
-                          <span className={ "text-sm " + t("text-slate-300","text-slate-700") }>İlerleme</span>
-                          <span className={ "text-xs " + t("text-slate-400","text-slate-600") }>
-                            {fmtNum.format(result.elapsed)} / {fmtNum.format(result.totalDays)} gün (%{pct(result.elapsed, result.totalDays).toFixed(1)})
+                          <span className="text-sm">İlerleme</span>
+                          <span className="text-xs text-slate-400">
+                            {fmtNum.format(result.elapsed)} /{" "}
+                            {fmtNum.format(result.totalDays)} gün (%{pct(
+                              result.elapsed,
+                              result.totalDays
+                            ).toFixed(1)})
                           </span>
                         </div>
-                        <div className={ "h-3 w-full rounded-full overflow-hidden " + t("bg-white/10","bg-slate-300/60") }>
-                          <div className="h-3" style={{ backgroundColor: "rgb(34 211 238 / 0.9)", width: pct(result.elapsed, result.totalDays) + "%" }} />
+                        <div className="h-3 w-full rounded-full bg-white/10 overflow-hidden">
+                          <div
+                            className="h-3 bg-cyan-400/90"
+                            style={{
+                              width:
+                                pct(result.elapsed, result.totalDays) + "%",
+                            }}
+                          />
                         </div>
-                        <div className={ "flex items-center justify-between text-xs mt-2 " + t("text-slate-400","text-slate-600") }>
-                          <span>{formatDate(result.sale)}</span>
-                          <span>Bitiş: {formatDate(result.endDate)}</span>
+                        <div className="flex items-center justify-between text-xs text-slate-400 mt-2">
+                          <span>{result.sale.toISOString().slice(0, 10)}</span>
+                          <span>
+                            Bitiş: {result.endDate.toISOString().slice(0, 10)}
+                          </span>
                         </div>
                       </div>
 
-                      <div className={ "overflow-hidden rounded-xl border " + t("border-white/10","border-slate-300") }>
+                      <div
+                        className={
+                          (isDark ? "border-white/10" : "border-slate-300") +
+                          " overflow-hidden rounded-xl border"
+                        }
+                      >
                         <table className="w-full text-sm">
                           <tbody>
-                            <Row k="Satış Tarihi" v={formatDate(result.sale)} isDark={isDark} />
-                            <Row k="Hesaplama Tarihi" v={formatDate(result.asof)} isDark={isDark} />
-                            <Row k="Sözleşme Bitişi" v={formatDate(result.endDate)} isDark={isDark} />
-                            <Row k="Toplam Gün" v={fmtNum.format(result.totalDays)} isDark={isDark} />
-                            <Row k="Geçen Gün" v={fmtNum.format(result.elapsed)} isDark={isDark} />
-                            <Row k="Kalan Gün" v={fmtNum.format(result.remainingDays)} isDark={isDark} />
-                            <Row k="Gelirleşen Tutar" v={fmt.format(Math.round(result.recognized))} isDark={isDark} />
-                            <Row k="Kalan Tutar" v={fmt.format(Math.round(result.remaining))} isDark={isDark} />
+                            <Row
+                              k="Satış Tarihi"
+                              v={result.sale.toISOString().slice(0, 10)}
+                            />
+                            <Row
+                              k="Hesaplama Tarihi"
+                              v={result.asof.toISOString().slice(0, 10)}
+                            />
+                            <Row
+                              k="Sözleşme Bitişi"
+                              v={result.endDate.toISOString().slice(0, 10)}
+                            />
+                            <Row
+                              k="Toplam Gün"
+                              v={fmtNum.format(result.totalDays)}
+                            />
+                            <Row
+                              k="Geçen Gün"
+                              v={fmtNum.format(result.elapsed)}
+                            />
+                            <Row
+                              k="Kalan Gün"
+                              v={fmtNum.format(result.remainingDays)}
+                            />
+                            <Row
+                              k="Geçen Tutar"
+                              v={fmt.format(Math.round(result.recognized))}
+                            />
+                            <Row
+                              k="Kalan Tutar"
+                              v={fmt.format(Math.round(result.remaining))}
+                            />
                           </tbody>
                         </table>
                       </div>
@@ -365,25 +454,30 @@
         );
       }
 
-      function KPI({ label, value, highlight=false, isDark }) {
+      function KPI({ label, value, highlight = false }) {
         return (
-          <div className={
-            "rounded-2xl p-4 border transition " +
-            (highlight
-              ? (isDark ? "bg-cyan-500/10 border-white/10" : "bg-cyan-50 border-cyan-200")
-              : (isDark ? "bg-white/5 border-white/10"     : "bg-slate-50/90 border-slate-300 shadow-sm"))
-          }>
-            <div className={ "text-xs " + (isDark ? "text-slate-400" : "text-slate-600") }>{label}</div>
-            <div className="text-xl md:text-2xl font-semibold mt-1 tracking-tight">{value}</div>
+          <div
+            className={`rounded-2xl p-4 border ${
+              highlight ? "bg-cyan-500/10 border-cyan-200" : "border-slate-300 bg-slate-50/60 dark:border-white/10 dark:bg-white/5"
+            }`}
+          >
+            <div className="text-xs text-slate-400">{label}</div>
+            <div className="text-xl md:text-2xl font-semibold mt-1 tracking-tight">
+              {value}
+            </div>
           </div>
         );
       }
 
-      function Row({ k, v, isDark }) {
+      function Row({ k, v }) {
         return (
-          <tr className={ isDark ? "odd:bg-white/0 even:bg-white/5" : "odd:bg-slate-50 even:bg-slate-100" }>
-            <td className={ "px-4 py-3 w-1/3 " + (isDark ? "text-slate-300" : "text-slate-700") }>{k}</td>
-            <td className={ "px-4 py-3 " + (isDark ? "text-slate-100" : "text-slate-900") }>{v}</td>
+          <tr className="odd:bg-slate-50 even:bg-slate-100 dark:odd:bg-white/0 dark:even:bg-white/5">
+            <td className="px-4 py-3 text-slate-600 dark:text-slate-300 w-1/3">
+              {k}
+            </td>
+            <td className="px-4 py-3 text-slate-900 dark:text-slate-100">
+              {v}
+            </td>
           </tr>
         );
       }
