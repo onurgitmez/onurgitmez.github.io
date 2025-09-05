@@ -25,7 +25,7 @@
     <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/tr.js"></script>
 
     <style>
-      /* --- Flatpickr dark-mode fixes --- */
+      /* --- Flatpickr dark-mode tweaks --- */
       .dark .flatpickr-calendar {
         background: #0b1220;
         border: 1px solid rgba(255, 255, 255, 0.15);
@@ -55,36 +55,24 @@
       .dark .flatpickr-monthDropdown-months,
       .dark .numInputWrapper input { color: #e5e7eb; }
 
-      /* FIX 1: Calendar navigation (month) arrows */
+      /* Month nav arrows */
       .dark .flatpickr-prev-month,
-      .dark .flatpickr-next-month {
-        fill: #e5e7eb !important;
-      }
+      .dark .flatpickr-next-month { fill: #e5e7eb !important; }
       .dark .flatpickr-prev-month svg,
-      .dark .flatpickr-next-month svg {
-        fill: #e5e7eb !important;
-        stroke: none;
-      }
+      .dark .flatpickr-next-month svg { fill: #e5e7eb !important; stroke: none; }
 
-      /* FIX 2: YEAR up/down arrows (the problem you described)
-         Flatpickr draws these as CSS triangles on :after of .arrowUp / .arrowDown.
-         We recolor the triangle borders for dark mode. */
+      /* Year increment/decrement arrows (fix) */
       .dark .flatpickr-current-month .numInputWrapper .arrowUp,
-      .dark .flatpickr-current-month .numInputWrapper .arrowDown {
-        opacity: 1; /* ensure not dimmed */
-      }
+      .dark .flatpickr-current-month .numInputWrapper .arrowDown { opacity: 1; }
       .dark .flatpickr-current-month .numInputWrapper .arrowUp:after {
-        border-bottom-color: #e5e7eb !important; /* up-triangle color */
+        border-bottom-color: #e5e7eb !important;
       }
       .dark .flatpickr-current-month .numInputWrapper .arrowDown:after {
-        border-top-color: #e5e7eb !important; /* down-triangle color */
+        border-top-color: #e5e7eb !important;
       }
-
-      /* Optional: better hit targets on arrows in dark mode */
       .dark .flatpickr-current-month .numInputWrapper .arrowUp,
       .dark .flatpickr-current-month .numInputWrapper .arrowDown {
-        width: 18px;
-        height: 50%;
+        width: 18px; height: 50%;
       }
     </style>
   </head>
@@ -94,20 +82,66 @@
     <script type="text/babel">
       const { useState, useMemo, useEffect, useRef } = React;
 
-      function useFlatpickr(initialISO, onChangeISO) {
+      /* ---------- Local-date helpers (NO UTC / NO toISOString) ---------- */
+      function startOfDayLocal(d) {
+        const x = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+        x.setHours(0,0,0,0);
+        return x;
+      }
+      function todayYMD() {
+        const t = new Date();
+        const y = t.getFullYear();
+        const m = String(t.getMonth()+1).padStart(2, "0");
+        const d = String(t.getDate()).padStart(2, "0");
+        return `${y}-${m}-${d}`;
+      }
+      function parseYMD(ymd) {
+        const [y, m, d] = ymd.split("-").map(Number);
+        return new Date(y, (m||1)-1, d||1); // local
+      }
+      function formatYMDLocal(date) {
+        const y = date.getFullYear();
+        const m = String(date.getMonth()+1).padStart(2, "0");
+        const d = String(date.getDate()).padStart(2, "0");
+        return `${y}-${m}-${d}`;
+      }
+      function addYearsLocal(date, years) {
+        const d = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+        d.setFullYear(d.getFullYear() + years);
+        return d;
+      }
+      function diffDaysLocal(a, b) {
+        const A = startOfDayLocal(a).getTime();
+        const B = startOfDayLocal(b).getTime();
+        const MS = 86400000;
+        return Math.floor((B - A) / MS);
+      }
+      function formatDDMMYYYY(date) {
+        const d = String(date.getDate()).padStart(2,"0");
+        const m = String(date.getMonth()+1).padStart(2,"0");
+        const y = date.getFullYear();
+        return `${d}/${m}/${y}`;
+      }
+
+      /* ---------- Flatpickr hook (uses Date objects, outputs YYYY-MM-DD) ---------- */
+      function useFlatpickr(ymd, onChangeYMD) {
         const ref = useRef(null);
         useEffect(() => {
           if (!ref.current) return;
+          const initial = parseYMD(ymd); // local Date object
           const fp = flatpickr(ref.current, {
-            dateFormat: "d/m/Y",         // shows dd/mm/yyyy to user
-            defaultDate: initialISO,     // initialize
+            dateFormat: "d/m/Y",            // shown to user
+            defaultDate: initial,           // Date object avoids string parsing bugs
             locale: flatpickr.l10ns.tr,
             onChange: (dates) => {
-              if (dates.length) onChangeISO(dates[0].toISOString().slice(0,10));
+              if (dates.length) {
+                const picked = dates[0];    // local Date
+                onChangeYMD(formatYMDLocal(picked)); // back to YYYY-MM-DD
+              }
             },
           });
           return () => fp.destroy();
-        }, []);
+        }, []); // mount once
         return ref;
       }
 
@@ -124,32 +158,16 @@
         }, [theme]);
         const isDark = theme === "dark";
 
-        // Data
-        const todayISO = new Date().toISOString().slice(0,10);
+        // Data (store as YYYY-MM-DD strings)
         const [amount, setAmount] = useState("");
-        const [years, setYears]   = useState("1");
-        const [saleDate, setSaleDate]   = useState(todayISO);
-        const [asOfDate, setAsOfDate]   = useState(todayISO);
+        const [years, setYears] = useState("1");
+        const [saleDate, setSaleDate] = useState(todayYMD());
+        const [asOfDate, setAsOfDate] = useState(todayYMD());
 
-        // Calendar refs (consistent popup on all browsers)
+        // Calendar refs
         const saleRef = useFlatpickr(saleDate, setSaleDate);
-        const asOfRef = useFlatpickr(asOfDate, setAsOfDate);
+        const asOfRef  = useFlatpickr(asOfDate, setAsOfDate);
 
-        // Helpers
-        function parseISO(d){ const [y,m,day]=d.split("-").map(Number); return new Date(Date.UTC(y,(m||1)-1,day||1));}
-        function addYears(date,y){ const d=new Date(date.getTime()); d.setUTCFullYear(d.getUTCFullYear()+y); return d;}
-        function diffDays(a,b){
-          const MS=86400000;
-          const A=Date.UTC(a.getUTCFullYear(),a.getUTCMonth(),a.getUTCDate());
-          const B=Date.UTC(b.getUTCFullYear(),b.getUTCMonth(),b.getUTCDate());
-          return Math.floor((B-A)/MS);
-        }
-        function formatDate(date){
-          const d=String(date.getUTCDate()).padStart(2,"0");
-          const m=String(date.getUTCMonth()+1).padStart(2,"0");
-          const y=date.getUTCFullYear();
-          return `${d}/${m}/${y}`;
-        }
         const fmt    = new Intl.NumberFormat("tr-TR",{style:"currency",currency:"TRY",maximumFractionDigits:0});
         const fmtNum = new Intl.NumberFormat("tr-TR",{maximumFractionDigits:0});
         const pct = (n,d)=> d<=0?0:Math.min(100,Math.max(0,(n/d)*100));
@@ -158,14 +176,16 @@
           const amountNum = Number((amount||"").toString().replace(/[^0-9.,-]/g,"").replace(/,/g,"."));
           if (!saleDate || !asOfDate || !amountNum || amountNum < 0) return null;
 
-          const sale = parseISO(saleDate);
-          const asof = parseISO(asOfDate);
+          const sale = parseYMD(saleDate);       // local
+          const asof = parseYMD(asOfDate);       // local
+
           let yearsNum = parseInt(years||"1",10);
           if (isNaN(yearsNum) || yearsNum < 1) yearsNum = 1;
 
-          const end = addYears(sale, yearsNum);
-          const totalDays = Math.max(0, diffDays(sale, end));
-          const elapsedRaw = diffDays(sale, asof);
+          const end = addYearsLocal(sale, yearsNum);
+
+          const totalDays = Math.max(0, diffDaysLocal(sale, end));
+          const elapsedRaw = diffDaysLocal(sale, asof);
           const elapsed = Math.min(Math.max(0, elapsedRaw), totalDays);
           const remainingDays = Math.max(0, totalDays - elapsed);
 
@@ -173,7 +193,11 @@
           const recognized = dailyRate * elapsed;
           const remaining = Math.max(0, amountNum - recognized);
 
-          return { totalDays, elapsed, remainingDays, dailyRate, recognized, remaining, endDate:end, sale, asof, amountNum };
+          return {
+            totalDays, elapsed, remainingDays,
+            dailyRate, recognized, remaining,
+            endDate: end, sale, asof, amountNum
+          };
         }, [amount, years, saleDate, asOfDate]);
 
         return (
@@ -297,17 +321,17 @@
                           <div className="h-3" style={{ backgroundColor: "rgb(34 211 238 / 0.9)", width: pct(result.elapsed, result.totalDays) + "%" }} />
                         </div>
                         <div className={"flex items-center justify-between text-xs mt-2 " + (isDark ? "text-slate-400" : "text-slate-600")}>
-                          <span>{formatDate(result.sale)}</span>
-                          <span>Bitiş: {formatDate(result.endDate)}</span>
+                          <span>{formatDDMMYYYY(result.sale)}</span>
+                          <span>Bitiş: {formatDDMMYYYY(result.endDate)}</span>
                         </div>
                       </div>
 
                       <div className={"overflow-hidden rounded-xl border " + (isDark ? "border-white/10" : "border-slate-300")}>
                         <table className="w-full text-sm">
                           <tbody>
-                            <Row k="Satış Tarihi"      v={formatDate(result.sale)}     isDark={isDark} />
-                            <Row k="Hesaplama Tarihi"  v={formatDate(result.asof)}     isDark={isDark} />
-                            <Row k="Sözleşme Bitişi"   v={formatDate(result.endDate)}  isDark={isDark} />
+                            <Row k="Satış Tarihi"      v={formatDDMMYYYY(result.sale)}     isDark={isDark} />
+                            <Row k="Hesaplama Tarihi"  v={formatDDMMYYYY(result.asof)}     isDark={isDark} />
+                            <Row k="Sözleşme Bitişi"   v={formatDDMMYYYY(result.endDate)}  isDark={isDark} />
                             <Row k="Toplam Gün"        v={fmtNum.format(result.totalDays)}      isDark={isDark} />
                             <Row k="Geçen Gün"         v={fmtNum.format(result.elapsed)}        isDark={isDark} />
                             <Row k="Kalan Gün"         v={fmtNum.format(result.remainingDays)}  isDark={isDark} />
