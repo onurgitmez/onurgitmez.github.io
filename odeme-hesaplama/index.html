@@ -275,8 +275,7 @@
                         <div className={"h-3 w-full rounded-full overflow-hidden " + (isDark ? "bg-white/10" : "bg-slate-300/60")}>
                           <div className="h-3" style={{ backgroundColor: "rgb(34 211 238 / 0.9)", width: pct(result.elapsed, result.totalDays) + "%" }} />
                         </div>
-                        <div className={"flex items-center justify-between text-xs mt-2 " + (isDark ? "text-slate-400" : "text-slate-600")}>
-                          <span>{formatDate(result.sale)}</span>
+                        <div className={"flex items-center justify-between text-xs mt-2 " + (isDark ? "text-slate-400" : "text-slate-600")}>\n                          <span>{formatDate(result.sale)}</span>
                           <span>Bitiş: {formatDate(result.endDate)}</span>
                         </div>
                       </div>
@@ -320,4 +319,15 @@
 
       function Row({ k, v, isDark }) {
         return (
-          <tr className={isDark
+          <tr className={isDark ? "odd:bg-white/0 even:bg-white/5" : "odd:bg-slate-50 even:bg-slate-100"}>
+            <td className={"px-4 py-3 w-1/3 " + (isDark ? "text-slate-300" : "text-slate-700")}>{k}</td>
+            <td className={"px-4 py-3 " + (isDark ? "text-slate-100" : "text-slate-900")}>{v}</td>
+          </tr>
+        );
+      }
+
+      const root = ReactDOM.createRoot(document.getElementById("root"));
+      root.render(<App />);
+    </script>
+  </body>
+</html>
