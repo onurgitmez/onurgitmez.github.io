@@ -84,6 +84,40 @@
 
       /* Slightly clearer hover for days in light mode */
       .flatpickr-day:not(.selected):hover { background: rgba(14, 165, 233, 0.12); } /* cyan-500/12 */
+      /* --- FIX: Dark mode month nav arrows visible --- */
+.dark .flatpickr-months .flatpickr-prev-month,
+.dark .flatpickr-months .flatpickr-next-month {
+  /* force a light icon color on dark bg */
+  color: #e5e7eb !important;              /* slate-200 */
+}
+
+.dark .flatpickr-months .flatpickr-prev-month svg,
+.dark .flatpickr-months .flatpickr-next-month svg {
+  fill: currentColor !important;
+  stroke: none !important;
+}
+
+/* Optional: subtle hover so you can see it responds */
+.dark .flatpickr-months .flatpickr-prev-month:hover,
+.dark .flatpickr-months .flatpickr-next-month:hover {
+  background-color: rgba(255,255,255,0.08);
+  border-radius: 6px;
+}
+
+/* In case Flatpickr injects disabled state styles */
+.dark .flatpickr-months .flatpickr-prev-month.flatpickr-disabled,
+.dark .flatpickr-months .flatpickr-next-month.flatpickr-disabled {
+  color: #64748b !important;              /* slate-500 for disabled */
+}
+
+/* (You already handled year arrows via currentColor, but this keeps them crisp) */
+.dark .flatpickr-current-month .numInputWrapper .arrowUp:after {
+  border-bottom-color: #e5e7eb !important;
+}
+.dark .flatpickr-current-month .numInputWrapper .arrowDown:after {
+  border-top-color: #e5e7eb !important;
+}
+
     </style>
   </head>
   <body class="min-h-screen">
