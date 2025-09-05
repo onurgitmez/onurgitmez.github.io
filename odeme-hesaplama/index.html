@@ -19,12 +19,97 @@
 
     <!-- Babel for in-page JSX -->
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <!-- Flatpickr (calendar) -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/tr.js"></script>
+
+    <style>
+      /* Soften flatpickr a bit in light mode to match your palette */
+      .flatpickr-calendar {
+        border-radius: 12px;
+        border: 1px solid rgba(15, 23, 42, 0.2); /* slate-800/20 */
+        box-shadow: 0 10px 25px rgba(0,0,0,0.10);
+      }
+      .dark .flatpickr-calendar {
+        border: 1px solid rgba(255,255,255,0.15);
+        background: #0b1220; /* near-slate-950 */
+        color: #e5e7eb; /* slate-200 */
+      }
+      .dark .flatpickr-months, .dark .flatpickr-weekdays,
+      .dark .flatpickr-days, .dark .flatpickr-day {
+        background: transparent;
+        color: #e5e7eb;
+      }
+      .dark .flatpickr-day:hover {
+        background: rgba(34,211,238,0.15);
+      }
+      .dark .flatpickr-day.selected,
+      .dark .flatpickr-day.startRange,
+      .dark .flatpickr-day.endRange,
+      .dark .flatpickr-day.selected:hover {
+        background: rgba(34,211,238,0.9);
+        color: #0b1220;
+      }
+    </style>
   </head>
   <body class="min-h-screen">
     <div id="root"></div>
 
     <script type="text/babel">
-      const { useMemo, useState, useEffect } = React;
+      const { useMemo, useState, useEffect, useRef } = React;
+
+      function useFlatpickr({ valueISO, onChangeISO, isDark }) {
+        const inputRef = useRef(null);
+        const fpRef = useRef(null);
+
+        // init
+        useEffect(() => {
+          if (!inputRef.current) return;
+          fpRef.current = flatpickr(inputRef.current, {
+            locale: flatpickr.l10ns.tr,
+            dateFormat: "Y-m-d",     // underlying value (ISO-like)
+            altInput: true,
+            altFormat: "d/m/Y",      // user-facing dd/mm/yyyy
+            allowInput: false,
+            defaultDate: valueISO,
+            clickOpens: true,
+            onChange: (selectedDates, dateStr /* Y-m-d */) => {
+              if (!dateStr) return;
+              onChangeISO(dateStr);
+            },
+          });
+          return () => { try { fpRef.current?.destroy(); } catch {} };
+        }, []);
+
+        // keep picker in sync if state changes from outside
+        useEffect(() => {
+          if (fpRef.current) {
+            // only update if different, to avoid cursor jumps
+            const current = fpRef.current.input.value;
+            if (valueISO && fpRef.current.selectedDates?.[0]) {
+              const y = fpRef.current.selectedDates[0].getUTCFullYear().toString().padStart(4,"0");
+              const m = (fpRef.current.selectedDates[0].getUTCMonth()+1).toString().padStart(2,"0");
+              const d = fpRef.current.selectedDates[0].getUTCDate().toString().padStart(2,"0");
+              const iso = `${y}-${m}-${d}`;
+              if (iso !== valueISO) fpRef.current.setDate(valueISO, true);
+            } else if (valueISO) {
+              fpRef.current.setDate(valueISO, true);
+            }
+          }
+        }, [valueISO]);
+
+        // re-open to reflow theme if toggled while open (cosmetic)
+        useEffect(() => {
+          if (fpRef.current?.isOpen) {
+            fpRef.current.close();
+            setTimeout(() => fpRef.current.open(), 0);
+          }
+        }, [isDark]);
+
+        return inputRef;
+      }
 
       function App() {
         // THEME: prefers-color-scheme with persistence
@@ -103,6 +188,10 @@
         const fmt = new Intl.NumberFormat("tr-TR", { style: "currency", currency: "TRY", maximumFractionDigits: 0 });
         const fmtNum = new Intl.NumberFormat("tr-TR", { maximumFractionDigits: 0 });
         const pct = (n, d) => (d <= 0 ? 0 : Math.min(100, Math.max(0, (n / d) * 100)));
+
+        // Hook up flatpickr to inputs (consistent calendar in both themes)
+        const saleInputRef  = useFlatpickr({ valueISO: saleDate, onChangeISO: setSaleDate, isDark });
+        const asOfInputRef  = useFlatpickr({ valueISO: asOfDate, onChangeISO: setAsOfDate, isDark });
 
         return (
           <div className={
@@ -188,28 +277,28 @@
                         <label className={"block text-sm mb-1 " + t("text-slate-300","text-slate-700")} htmlFor="saleDate">Satış Tarihi</label>
                         <input
                           id="saleDate"
-                          type="date"
-                          value={saleDate}
-                          onChange={(e) => setSaleDate(e.target.value)}
+                          type="text"
+                          ref={saleInputRef}
                           className={
-                            "w-full rounded-xl px-3 py-2 outline-none focus:ring-2 transition " +
+                            "w-full rounded-xl px-3 py-2 outline-none focus:ring-2 transition cursor-pointer " +
                             t("bg-white/10 border border-white/10 focus:ring-cyan-400/50",
                               "bg-slate-50 border border-slate-300 focus:ring-cyan-300")
                           }
+                          readOnly
                         />
                       </div>
                       <div>
                         <label className={"block text-sm mb-1 " + t("text-slate-300","text-slate-700")} htmlFor="asOfDate">Hesaplama Tarihi</label>
                         <input
                           id="asOfDate"
-                          type="date"
-                          value={asOfDate}
-                          onChange={(e) => setAsOfDate(e.target.value)}
+                          type="text"
+                          ref={asOfInputRef}
                           className={
-                            "w-full rounded-xl px-3 py-2 outline-none focus:ring-2 transition " +
+                            "w-full rounded-xl px-3 py-2 outline-none focus:ring-2 transition cursor-pointer " +
                             t("bg-white/10 border border-white/10 focus:ring-cyan-400/50",
                               "bg-slate-50 border border-slate-300 focus:ring-cyan-300")
                           }
+                          readOnly
                         />
                       </div>
                     </div>
