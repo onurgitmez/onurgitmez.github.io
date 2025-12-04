@@ -1,0 +1,548 @@
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Ödeme Hesaplama</title>
+    <meta name="color-scheme" content="light dark" />
+
+    <script>
+      window.tailwind = { config: { darkMode: "class" } };
+    </script>
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/tr.js"></script>
+
+    <style>
+      /* --- 1. General Flatpickr Overrides --- */
+      .flatpickr-calendar {
+        font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        border: none !important;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        border-radius: 1rem;
+        overflow: hidden; 
+      }
+      
+      /* --- 2. Header Layout --- */
+      .flatpickr-months {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        position: relative;
+        background: transparent;
+        padding: 10px 10px 5px 10px;
+        height: 40px;
+      }
+
+      .flatpickr-current-month {
+        position: absolute;
+        left: 0;
+        right: 0;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0;
+        font-weight: 400 !important; /* Force normal weight */
+      }
+      
+      /* --- 3. FIXING THE BOLD YEAR (Stronger Selectors) --- */
+      
+      /* Month Name */
+      .flatpickr-current-month .cur-month {
+        font-weight: 400 !important; /* Normal weight */
+        margin-right: 6px; 
+      }
+      
+      /* Year Input Text */
+      .flatpickr-current-month input.cur-year {
+        font-weight: 400 !important; /* Force Normal weight */
+        font-size: inherit;
+        padding: 0;
+        margin: 0;
+        vertical-align: middle;
+        box-sizing: content-box;
+      }
+
+      /* Year Wrapper */
+      .flatpickr-current-month .numInputWrapper {
+        width: 6ch;
+        display: inline-block;
+      }
+
+      /* --- 4. Custom Arrows --- */
+      .flatpickr-current-month .numInputWrapper input[type=number]::-webkit-inner-spin-button,
+      .flatpickr-current-month .numInputWrapper input[type=number]::-webkit-outer-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+      }
+      
+      .flatpickr-current-month .numInputWrapper span.arrowUp,
+      .flatpickr-current-month .numInputWrapper span.arrowDown {
+        opacity: 1 !important;
+        display: block;
+        height: 10px;
+        padding: 0;
+        border: none;
+        right: -18px;
+      }
+      
+      .flatpickr-current-month .numInputWrapper span.arrowUp:after { border-bottom-color: #64748b !important; top: 40%; }
+      .flatpickr-current-month .numInputWrapper span.arrowDown:after { border-top-color: #64748b !important; top: 40%; }
+      
+      .dark .flatpickr-current-month .numInputWrapper span.arrowUp:after { border-bottom-color: #94a3b8 !important; }
+      .dark .flatpickr-current-month .numInputWrapper span.arrowDown:after { border-top-color: #94a3b8 !important; }
+      
+      .flatpickr-current-month .numInputWrapper span.arrowUp:hover:after { border-bottom-color: #06b6d4 !important; }
+      .flatpickr-current-month .numInputWrapper span.arrowDown:hover:after { border-top-color: #06b6d4 !important; }
+
+      /* --- 5. Navigation Arrows --- */
+      .flatpickr-prev-month, .flatpickr-next-month {
+        position: relative !important;
+        height: 28px;
+        width: 28px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0;
+        top: 0;
+        z-index: 10;
+      }
+      
+      .flatpickr-prev-month svg, .flatpickr-next-month svg { 
+        fill: #334155 !important;
+        width: 14px; 
+        height: 14px;
+      }
+      
+      /* --- 6. Dark Mode Colors --- */
+      .dark .flatpickr-calendar {
+        background: #1e293b; 
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 10px 10px -5px rgba(0, 0, 0, 0.3);
+        border: 1px solid rgba(255,255,255,0.1) !important;
+      }
+      
+      .dark .flatpickr-current-month { color: #f8fafc; }
+      .dark .flatpickr-months .flatpickr-month { color: #f8fafc; }
+      .dark span.flatpickr-weekday { color: #94a3b8 !important; background: transparent; }
+
+      .dark .flatpickr-prev-month svg, .dark .flatpickr-next-month svg { fill: #f8fafc !important; }
+      .dark .flatpickr-prev-month:hover svg, .dark .flatpickr-next-month:hover svg { fill: #22d3ee !important; }
+
+      .flatpickr-days { border-top: 1px solid rgba(0,0,0,0.05); }
+      .dark .flatpickr-days { border-top: 1px solid rgba(255,255,255,0.05); }
+      
+      .dark .flatpickr-day { color: #cbd5e1; }
+      .dark .flatpickr-day.flatpickr-disabled { color: #475569; }
+      .dark .flatpickr-day:hover { background: #334155; border-color: #334155; }
+      
+      .flatpickr-day.selected, .flatpickr-day.selected:hover {
+        background: #06b6d4;
+        border-color: #06b6d4;
+        color: white;
+      }
+    </style>
+  </head>
+  <body class="min-h-screen">
+    <div id="root"></div>
+
+    <script type="text/babel">
+      const { useState, useMemo, useEffect, useRef } = React;
+
+      /* ---------- Logic Helpers ---------- */
+      function startOfDayLocal(d) {
+        const x = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+        x.setHours(0,0,0,0);
+        return x;
+      }
+      function todayYMD() {
+        const t = new Date();
+        const y = t.getFullYear();
+        const m = String(t.getMonth()+1).padStart(2, "0");
+        const d = String(t.getDate()).padStart(2, "0");
+        return `${y}-${m}-${d}`;
+      }
+      function parseYMD(ymd) {
+        const [y, m, d] = ymd.split("-").map(Number);
+        return new Date(y, (m||1)-1, d||1);
+      }
+      function formatYMDLocal(date) {
+        const y = date.getFullYear();
+        const m = String(date.getMonth()+1).padStart(2, "0");
+        const d = String(date.getDate()).padStart(2, "0");
+        return `${y}-${m}-${d}`;
+      }
+      function addMonthsLocal(date, totalMonths) {
+        const d = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+        d.setMonth(d.getMonth() + totalMonths);
+        return d;
+      }
+      function diffDaysLocal(a, b) {
+        const A = startOfDayLocal(a).getTime();
+        const B = startOfDayLocal(b).getTime();
+        const MS = 86400000;
+        return Math.floor((B - A) / MS);
+      }
+      function formatDDMMYYYY(date) {
+        const d = String(date.getDate()).padStart(2,"0");
+        const m = String(date.getMonth()+1).padStart(2,"0");
+        const y = date.getFullYear();
+        return `${d}/${m}/${y}`;
+      }
+      function formatTRInput(val) {
+        if (!val) return "";
+        const digits = val.toString().replace(/\D/g, ""); 
+        if (!digits) return "";
+        return Number(digits).toLocaleString("tr-TR");
+      }
+      function parseTRInput(val) {
+        if (!val) return 0;
+        const digits = val.toString().replace(/\./g, "").replace(/,/g, ".");
+        return Number(digits);
+      }
+
+      /* ---------- Hooks ---------- */
+      function useFlatpickr(ymd, onChangeYMD) {
+        const ref = useRef(null);
+        useEffect(() => {
+          if (!ref.current) return;
+          const initial = parseYMD(ymd);
+          const fp = flatpickr(ref.current, {
+            dateFormat: "d/m/Y",
+            defaultDate: initial,
+            locale: flatpickr.l10ns.tr,
+            disableMobile: true, 
+            animate: false,
+            onChange: (dates) => {
+              if (dates.length) {
+                onChangeYMD(formatYMDLocal(dates[0]));
+              }
+            },
+          });
+          return () => fp.destroy();
+        }, []);
+        return ref;
+      }
+
+      function App() {
+        const prefersDark = typeof window !== "undefined"
+          && window.matchMedia?.("(prefers-color-scheme: dark)").matches;
+        const [theme, setTheme] = useState(() =>
+          localStorage.getItem("odeme-theme") || (prefersDark ? "dark" : "light")
+        );
+        useEffect(() => {
+          localStorage.setItem("odeme-theme", theme);
+          document.documentElement.classList.toggle("dark", theme === "dark");
+        }, [theme]);
+        const isDark = theme === "dark";
+
+        // State
+        const [amountStr, setAmountStr] = useState("");
+        const [yearsStr, setYearsStr] = useState("1");
+        const [monthsStr, setMonthsStr] = useState("0");
+        const [saleDate, setSaleDate] = useState(todayYMD());
+        const [asOfDate, setAsOfDate] = useState(todayYMD());
+
+        const saleRef = useFlatpickr(saleDate, setSaleDate);
+        const asOfRef  = useFlatpickr(asOfDate, setAsOfDate);
+
+        const fmt = new Intl.NumberFormat("tr-TR",{style:"currency",currency:"TRY",maximumFractionDigits:0});
+        const fmtNum = new Intl.NumberFormat("tr-TR",{maximumFractionDigits:0});
+        const pct = (n,d)=> d<=0?0:Math.min(100,Math.max(0,(n/d)*100));
+
+        const handleAmountChange = (e) => setAmountStr(formatTRInput(e.target.value));
+
+        // Calc
+        const result = useMemo(() => {
+          const amountNum = parseTRInput(amountStr);
+          if (!saleDate || !asOfDate || !amountNum || amountNum <= 0) return null;
+          const sale = parseYMD(saleDate);
+          const asof = parseYMD(asOfDate);
+          const y = parseInt(yearsStr || "0", 10);
+          const m = parseInt(monthsStr || "0", 10);
+          const totalMonthsDuration = (isNaN(y)?0:y*12) + (isNaN(m)?0:m);
+          if (totalMonthsDuration <= 0) return null;
+
+          const end = addMonthsLocal(sale, totalMonthsDuration);
+          const totalDays = Math.max(0, diffDaysLocal(sale, end));
+          const elapsedRaw = diffDaysLocal(sale, asof);
+          const elapsed = Math.min(Math.max(0, elapsedRaw), totalDays);
+          const remainingDays = Math.max(0, totalDays - elapsed);
+          const dailyRate = totalDays>0 ? amountNum/totalDays : 0;
+          const recognized = dailyRate * elapsed;
+          const remaining = Math.max(0, amountNum - recognized);
+
+          return { totalDays, elapsed, remainingDays, dailyRate, recognized, remaining, endDate: end, sale, asof, amountNum };
+        }, [amountStr, yearsStr, monthsStr, saleDate, asOfDate]);
+
+        return (
+          <div className={
+            "min-h-screen w-full transition-colors font-sans " +
+            (isDark
+              ? "bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800 text-slate-100"
+              : "bg-gradient-to-br from-slate-200 via-slate-100 to-slate-50 text-slate-900")
+          }>
+            <header className="px-6 pt-8 pb-4 max-w-7xl mx-auto">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <h1 className="text-3xl md:text-4xl font-semibold tracking-tight">Ödeme Hesaplama</h1>
+                  <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
+                    Sadece sözleşme bedelini giriniz (entegrasyon vs. hariç).
+                  </p>
+                </div>
+                <button
+                  onClick={() => setTheme(isDark ? "light" : "dark")}
+                  className={
+                    "select-none rounded-xl px-3 py-2 text-sm font-medium border transition " +
+                    (isDark
+                      ? "bg-white/10 border-white/10 hover:bg-white/20 text-slate-100"
+                      : "bg-slate-50/90 border-slate-300 hover:bg-slate-100 text-slate-900 shadow-sm")
+                  }
+                >
+                  {isDark ? "☀️" : "🌙"}
+                </button>
+              </div>
+            </header>
+
+            <main className="px-6 pb-12 grid grid-cols-1 lg:grid-cols-3 gap-6 items-start max-w-7xl mx-auto">
+              {/* --- INPUTS --- */}
+              <section className="lg:col-span-1">
+                <div className={
+                  "rounded-2xl p-5 border shadow-2xl transition " +
+                  (isDark
+                    ? "backdrop-blur-xl bg-white/5 border-white/10 shadow-black/30"
+                    : "bg-slate-50/90 border-slate-300 shadow-sm")
+                }>
+                  <h2 className="text-lg font-medium mb-4">Girdiler</h2>
+                  <div className="space-y-5">
+                    
+                    {/* Amount */}
+                    <div>
+                      <label className={"block text-sm mb-1.5 font-medium " + (isDark ? "text-slate-300" : "text-slate-700")} htmlFor="amount">Satış Tutarı</label>
+                      <div className="relative">
+                        <input id="amount" type="text" inputMode="numeric" placeholder="365.000"
+                          value={amountStr} onChange={handleAmountChange}
+                          className={
+                            "w-full rounded-xl pl-3 pr-12 py-2.5 outline-none focus:ring-2 transition font-mono tracking-wide " +
+                            (isDark
+                              ? "bg-white/10 border border-white/10 focus:ring-cyan-400/50 placeholder-slate-500"
+                              : "bg-white border border-slate-300 focus:ring-cyan-300 placeholder-slate-400")
+                          } />
+                        <div className={"absolute right-4 top-2.5 pointer-events-none text-sm " + (isDark ? "text-slate-400" : "text-slate-400")}>₺</div>
+                      </div>
+                    </div>
+
+                    {/* Duration */}
+                    <div>
+                      <label className={"block text-sm mb-1.5 font-medium " + (isDark ? "text-slate-300" : "text-slate-700")}>Sözleşme Süresi</label>
+                      <div className="flex gap-3">
+                        <div className="flex-1 relative">
+                          <input id="years" type="number" min="0" value={yearsStr}
+                            onChange={(e) => setYearsStr(e.target.value)}
+                            className={
+                              "w-full rounded-xl pl-3 pr-10 py-2.5 outline-none focus:ring-2 transition text-center " +
+                              (isDark
+                                ? "bg-white/10 border border-white/10 focus:ring-cyan-400/50"
+                                : "bg-white border border-slate-300 focus:ring-cyan-300")
+                            } />
+                           <span className={"absolute right-3 top-3 text-xs pointer-events-none " + (isDark ? "text-slate-400" : "text-slate-400")}>Yıl</span>
+                        </div>
+                        <div className="flex-1 relative">
+                          <input id="months" type="number" min="0" max="11" value={monthsStr}
+                            onChange={(e) => setMonthsStr(e.target.value)}
+                            className={
+                              "w-full rounded-xl pl-3 pr-10 py-2.5 outline-none focus:ring-2 transition text-center " +
+                              (isDark
+                                ? "bg-white/10 border border-white/10 focus:ring-cyan-400/50"
+                                : "bg-white border border-slate-300 focus:ring-cyan-300")
+                            } />
+                            <span className={"absolute right-3 top-3 text-xs pointer-events-none " + (isDark ? "text-slate-400" : "text-slate-400")}>Ay</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Dates */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className={"block text-sm mb-1.5 font-medium " + (isDark ? "text-slate-300" : "text-slate-700")} htmlFor="saleDate">Satış Tarihi</label>
+                        <div className="relative">
+                          <input ref={saleRef} id="saleDate"
+                            className={
+                              "w-full rounded-xl pl-3 pr-10 py-2.5 outline-none focus:ring-2 transition cursor-pointer " +
+                              (isDark
+                                ? "bg-white/10 border border-white/10 focus:ring-cyan-400/50"
+                                : "bg-white border border-slate-300 focus:ring-cyan-300")
+                            } />
+                          <div className={"absolute right-3 top-3 pointer-events-none " + (isDark ? "text-slate-400" : "text-slate-400")}>
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                          </div>
+                        </div>
+                      </div>
+                      <div>
+                        <label className={"block text-sm mb-1.5 font-medium " + (isDark ? "text-slate-300" : "text-slate-700")} htmlFor="asOfDate">Hesaplama Tarihi</label>
+                        <div className="relative">
+                          <input ref={asOfRef} id="asOfDate"
+                            className={
+                              "w-full rounded-xl pl-3 pr-10 py-2.5 outline-none focus:ring-2 transition cursor-pointer " +
+                              (isDark
+                                ? "bg-white/10 border border-white/10 focus:ring-cyan-400/50"
+                                : "bg-white border border-slate-300 focus:ring-cyan-300")
+                            } />
+                           <div className={"absolute right-3 top-3 pointer-events-none " + (isDark ? "text-slate-400" : "text-slate-400")}>
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                  </div>
+                </div>
+              </section>
+
+              {/* --- RESULTS --- */}
+              <section className="lg:col-span-2">
+                <div className={
+                  "rounded-2xl p-6 border shadow-2xl transition min-h-[400px] flex flex-col " +
+                  (isDark
+                    ? "backdrop-blur-xl bg-white/5 border-white/10 shadow-black/30"
+                    : "bg-slate-50/90 border-slate-300 shadow-sm")
+                }>
+                  <h2 className="text-lg font-medium mb-6">Sonuçlar</h2>
+
+                  {!result ? (
+                    <div className="flex-1 flex flex-col items-center justify-center text-center p-8 opacity-60">
+                      <div className={"w-24 h-24 mb-4 rounded-full flex items-center justify-center " + (isDark ? "bg-slate-800 text-slate-600" : "bg-slate-200 text-slate-400")}>
+                        <svg className="w-12 h-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                        </svg>
+                      </div>
+                      <h3 className={"text-lg font-medium " + (isDark ? "text-slate-300" : "text-slate-600")}>Hesaplama Bekleniyor</h3>
+                      <p className={"text-sm mt-1 max-w-xs mx-auto " + (isDark ? "text-slate-500" : "text-slate-500")}>
+                        Lütfen sol taraftaki panelden bilgileri giriniz.
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-500">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+                        <KPI label="Sözleşme Tutarı" value={fmt.format(result.amountNum)} isDark={isDark} />
+                        {/* Passed allowCopy={true} to Kalan Tutar */}
+                        <KPI label="Kalan Tutar" value={fmt.format(Math.round(result.remaining))} highlight isDark={isDark} allowCopy />
+                        <KPI label="Bugüne Kadar Geçen" value={fmt.format(Math.round(result.recognized))} isDark={isDark} />
+                        <KPI label="Günlük Oran" value={fmt.format(Math.round(result.dailyRate))} isDark={isDark} />
+                      </div>
+
+                      <div>
+                        <div className="flex items-end justify-between mb-2">
+                          <span className={"text-sm font-medium " + (isDark ? "text-slate-300" : "text-slate-700")}>İlerleme Durumu</span>
+                          <span className={"text-xs font-mono " + (isDark ? "text-slate-400" : "text-slate-600")}>
+                            {fmtNum.format(result.elapsed)} / {fmtNum.format(result.totalDays)} gün (%{pct(result.elapsed, result.totalDays).toFixed(1)})
+                          </span>
+                        </div>
+                        <div className={"h-4 w-full rounded-full overflow-hidden " + (isDark ? "bg-white/5 ring-1 ring-white/10" : "bg-slate-200 ring-1 ring-slate-300")}>
+                          <div className="h-full transition-all duration-1000 ease-out relative" style={{ width: pct(result.elapsed, result.totalDays) + "%", backgroundColor: "#06b6d4" }}>
+                            <div className="absolute inset-0 bg-white/20"></div>
+                          </div>
+                        </div>
+                        <div className={"flex items-center justify-between text-xs mt-2 " + (isDark ? "text-slate-400" : "text-slate-500")}>
+                          <span>Başlangıç: {formatDDMMYYYY(result.sale)}</span>
+                          <span>Bitiş: {formatDDMMYYYY(result.endDate)}</span>
+                        </div>
+                      </div>
+
+                      <div className={"overflow-hidden rounded-xl border " + (isDark ? "border-white/10" : "border-slate-300")}>
+                        <table className="w-full text-sm">
+                          <tbody>
+                            <Row k="Satış Tarihi"      v={formatDDMMYYYY(result.sale)}     isDark={isDark} />
+                            <Row k="Hesaplama Tarihi"  v={formatDDMMYYYY(result.asof)}     isDark={isDark} />
+                            <Row k="Sözleşme Bitişi"   v={formatDDMMYYYY(result.endDate)}  isDark={isDark} />
+                            <Row k="Toplam Gün"        v={fmtNum.format(result.totalDays)}      isDark={isDark} />
+                            <Row k="Geçen Gün"         v={fmtNum.format(result.elapsed)}        isDark={isDark} />
+                            <Row k="Kalan Gün"         v={fmtNum.format(result.remainingDays)}  isDark={isDark} />
+                            <Row k="Geçen Tutar"  v={fmt.format(Math.round(result.recognized))} isDark={isDark} />
+                            <Row k="Kalan Tutar"       v={fmt.format(Math.round(result.remaining))}  isDark={isDark} />
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </section>
+            </main>
+          </div>
+        );
+      }
+
+      // --- Updated KPI with Copy Logic ---
+      function KPI({ label, value, highlight=false, isDark, allowCopy=false }) {
+        const [copied, setCopied] = useState(false);
+
+        const handleCopy = () => {
+          if (!value) return;
+          // Strip "₺" and extra spaces to get clean number (e.g. "125.000")
+          // This makes it pasteable into Excel without currency format errors
+          const cleanValue = value.toString().replace("₺", "").trim();
+          navigator.clipboard.writeText(cleanValue);
+          setCopied(true);
+          setTimeout(() => setCopied(false), 2000);
+        };
+
+        return (
+          <div className={
+            "relative rounded-2xl p-4 border transition group " +
+            (highlight
+              ? (isDark ? "bg-cyan-500/10 border-cyan-500/30" : "bg-cyan-50 border-cyan-200")
+              : (isDark ? "bg-white/5 border-white/5 hover:border-white/10"     : "bg-white border-slate-200 shadow-sm"))
+          }>
+            <div className="flex justify-between items-start">
+              <div className={"text-xs " + (isDark ? "text-slate-400" : "text-slate-500")}>{label}</div>
+              
+              {/* Copy Button */}
+              {allowCopy && (
+                <button 
+                  onClick={handleCopy}
+                  title="Tutarı Kopyala"
+                  className={
+                    "p-1.5 -mr-1 -mt-1 rounded-lg transition opacity-0 group-hover:opacity-100 focus:opacity-100 " +
+                    (isDark 
+                      ? "hover:bg-white/10 text-slate-400 hover:text-white" 
+                      : "hover:bg-black/5 text-slate-400 hover:text-slate-700")
+                  }
+                >
+                  {copied ? (
+                    // Check Icon
+                    <svg className="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path></svg>
+                  ) : (
+                    // Copy Icon
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                  )}
+                </button>
+              )}
+            </div>
+            
+            <div className={"text-xl md:text-2xl font-semibold mt-1 tracking-tight truncate " + (highlight && !isDark ? "text-cyan-900" : "")}>{value}</div>
+          </div>
+        );
+      }
+
+      function Row({ k, v, isDark }) {
+        return (
+          <tr className={"group " + (isDark ? "odd:bg-white/0 even:bg-white/5 hover:bg-white/10" : "odd:bg-white even:bg-slate-50 hover:bg-slate-100")}>
+            <td className={"px-4 py-3 w-1/3 transition-colors " + (isDark ? "text-slate-400 group-hover:text-slate-200" : "text-slate-600 group-hover:text-slate-900")}>{k}</td>
+            <td className={"px-4 py-3 font-medium " + (isDark ? "text-slate-200" : "text-slate-900")}>{v}</td>
+          </tr>
+        );
+      }
+
+      const root = ReactDOM.createRoot(document.getElementById("root"));
+      root.render(<App />);
+    </script>
+  </body>
+</html>
