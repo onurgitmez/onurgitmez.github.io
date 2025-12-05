@@ -13,7 +13,7 @@
         tailwind.config = {
           theme: {
             extend: {
-              fontFamily: { sans: ['system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'] },
+              fontFamily: { sans: ['Inter', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'] },
               colors: { card: '#1c1c1c', base: '#0f0f0f' },
               animation: {
                 'fade-in-up': 'fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards',
@@ -32,14 +32,14 @@
     <style>
         body { background-color: #050505; color: white; }
         
-        /* PREMIUM HOVER PHYSICS + BUG FIX */
+        /* PREMIUM HOVER PHYSICS */
         .bento-card { 
             /* Motion */
             transition: all 0.5s cubic-bezier(0.2, 0.8, 0.2, 1); 
             will-change: transform, box-shadow;
             
             /* Border */
-            border: 1px solid rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.08);
             
             /* FIX: Prevent sharp corners during animation */
             transform: translateZ(0); 
@@ -50,9 +50,9 @@
         }
         
         .bento-card:hover { 
-            transform: scale(1.015) translateY(-4px) translateZ(0); /* Maintain hardware accel */
+            transform: scale(1.02) translateY(-4px) translateZ(0); /* Maintain hardware accel */
             box-shadow: 0 20px 40px -5px rgba(0, 0, 0, 0.6);
-            border-color: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.2);
             z-index: 50; 
         }
         
@@ -63,7 +63,7 @@
 </head>
 <body class="antialiased p-4 md:p-12 flex justify-center items-center min-h-screen selection:bg-indigo-500 selection:text-white">
 
-    <main class="max-w-7xl w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 auto-rows-[190px] animate-fade-in-up">
+    <main class="max-w-7xl w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-x-6 gap-y-5 auto-rows-[190px] animate-fade-in-up">
 
         <div class="bento-card col-span-1 md:col-span-2 row-span-2 bg-[#121212] p-8 flex flex-col justify-between relative group">
             <div class="z-10 relative">
@@ -71,9 +71,16 @@
                 
                 <h1 class="text-4xl md:text-5xl font-bold leading-tight mb-3 tracking-tight text-white">Ali Onur Gitmez</h1>
                 
-                <p class="text-zinc-300 text-lg md:text-xl font-medium leading-relaxed max-w-sm">
+                <p class="text-zinc-200 text-lg md:text-xl font-medium leading-relaxed max-w-sm">
                     Building data-driven web apps & modern digital experiences.
                 </p>
+
+                <div class="flex flex-wrap gap-2 mt-4 opacity-80">
+                    <span class="px-2.5 py-1 rounded-md bg-white/5 border border-white/10 text-[11px] font-bold uppercase tracking-wider text-zinc-400">Vue.js</span>
+                    <span class="px-2.5 py-1 rounded-md bg-white/5 border border-white/10 text-[11px] font-bold uppercase tracking-wider text-zinc-400">Python</span>
+                    <span class="px-2.5 py-1 rounded-md bg-white/5 border border-white/10 text-[11px] font-bold uppercase tracking-wider text-zinc-400">R Stats</span>
+                    <span class="px-2.5 py-1 rounded-md bg-white/5 border border-white/10 text-[11px] font-bold uppercase tracking-wider text-zinc-400">Data Viz</span>
+                </div>
             </div>
             
             <div class="z-10 mt-6 flex gap-3">
@@ -84,11 +91,11 @@
                 </a>
             </div>
 
-            <div class="absolute -right-10 -bottom-10 w-80 h-80 bg-indigo-600/20 blur-[100px] rounded-full group-hover:bg-indigo-600/30 transition duration-700"></div>
+            <div class="absolute -right-10 -bottom-10 w-80 h-80 bg-indigo-600/15 blur-[100px] rounded-full group-hover:bg-indigo-600/25 transition duration-700"></div>
         </div>
 
-        <a href="https://gitmez.com/pokedex/pokedex.html" class="bento-card col-span-1 md:col-span-2 bg-red-950/30 relative group">
-            <img src="https://images.unsplash.com/photo-1613771404784-3a5686aa2be3?auto=format&fit=crop&q=80&w=800" class="absolute inset-0 w-full h-full object-cover opacity-50 group-hover:scale-105 transition duration-700 mix-blend-overlay">
+        <a href="https://gitmez.com/pokedex/pokedex.html" class="bento-card col-span-1 md:col-span-2 bg-red-950/30 relative group overflow-hidden">
+            <img src="https://images.unsplash.com/photo-1613771404784-3a5686aa2be3?auto=format&fit=crop&q=80&w=800" class="absolute inset-0 w-full h-full object-cover opacity-50 group-hover:scale-110 transition duration-700 mix-blend-overlay">
             <div class="absolute inset-0 bg-gradient-to-r from-black/90 via-black/50 to-transparent"></div>
             
             <div class="absolute bottom-6 left-6 z-10">
@@ -100,13 +107,13 @@
                      <span class="text-xs font-semibold bg-white/10 border border-white/10 px-3 py-1 rounded-full text-white hover:bg-white/20 transition">Rest API</span>
                 </div>
             </div>
-            <div class="absolute top-5 right-5 bg-black/30 p-2.5 rounded-full backdrop-blur border border-white/10 group-hover:bg-red-500/20 group-hover:border-red-500/30 transition">
+            <div class="absolute top-5 right-5 bg-black/30 p-2.5 rounded-full backdrop-blur border border-white/10 group-hover:bg-red-500/20 group-hover:border-red-500/30 transition shadow-lg">
                 <i class="ph ph-pokeball text-red-400 text-xl group-hover:text-red-200"></i>
             </div>
         </a>
 
-        <a href="http://gitmez.com/election/election.html" class="bento-card col-span-1 md:col-span-2 bg-blue-950/30 relative group">
-             <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&q=80&w=800" class="absolute inset-0 w-full h-full object-cover opacity-40 group-hover:scale-105 transition duration-700">
+        <a href="http://gitmez.com/election/election.html" class="bento-card col-span-1 md:col-span-2 bg-blue-950/30 relative group overflow-hidden">
+             <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&q=80&w=800" class="absolute inset-0 w-full h-full object-cover opacity-40 group-hover:scale-110 transition duration-700">
             <div class="absolute inset-0 bg-gradient-to-t from-black/90 to-transparent"></div>
             
             <div class="absolute bottom-6 left-6 z-10">
@@ -117,13 +124,13 @@
                      <span class="text-xs font-semibold bg-white/10 border border-white/10 text-white px-3 py-1 rounded-full">Algorithms</span>
                 </div>
             </div>
-             <div class="absolute top-5 right-5 bg-black/30 p-2.5 rounded-full backdrop-blur border border-white/10 group-hover:bg-blue-500/20 group-hover:border-blue-500/30 transition">
+             <div class="absolute top-5 right-5 bg-black/30 p-2.5 rounded-full backdrop-blur border border-white/10 group-hover:bg-blue-500/20 group-hover:border-blue-500/30 transition shadow-lg">
                 <i class="ph ph-chart-bar text-blue-400 text-xl group-hover:text-blue-200"></i>
             </div>
         </a>
 
-        <a href="http://gitmez.com/odeme-hesaplama/onur_odeme.html" class="bento-card relative p-6 flex flex-col justify-between group">
-            <div class="absolute inset-0 bg-gradient-to-br from-emerald-900/90 to-black transition duration-500 group-hover:scale-110"></div>
+        <a href="http://gitmez.com/odeme-hesaplama/onur_odeme.html" class="bento-card relative p-6 flex flex-col justify-between group overflow-hidden">
+            <div class="absolute inset-0 bg-gradient-to-br from-emerald-900/80 to-black transition duration-500 group-hover:scale-110"></div>
             
             <div class="relative z-10 w-14 h-14 bg-emerald-500/20 rounded-2xl flex items-center justify-center text-emerald-300 border border-emerald-500/20 group-hover:bg-emerald-400/20 group-hover:text-emerald-200 transition shadow-lg shadow-emerald-900/20">
                 <i class="ph ph-currency-dollar text-3xl"></i>
@@ -135,8 +142,8 @@
             </div>
         </a>
 
-        <a href="https://gitmez.com/rdersi/rdersi.html" class="bento-card relative p-6 flex flex-col justify-between group">
-            <div class="absolute inset-0 bg-gradient-to-br from-blue-900/90 to-black transition duration-500 group-hover:scale-110"></div>
+        <a href="https://gitmez.com/rdersi/rdersi.html" class="bento-card relative p-6 flex flex-col justify-between group overflow-hidden">
+            <div class="absolute inset-0 bg-gradient-to-br from-blue-900/80 to-black transition duration-500 group-hover:scale-110"></div>
             
             <div class="relative z-10 w-14 h-14 bg-blue-500/20 rounded-2xl flex items-center justify-center text-blue-300 border border-blue-500/20 group-hover:bg-blue-400/20 group-hover:text-blue-200 transition shadow-lg shadow-blue-900/20">
                 <span class="font-bold font-serif text-2xl italic">R</span>
@@ -148,11 +155,11 @@
             </div>
         </a>
 
-        <div class="bento-card col-span-1 md:col-span-2 bg-gradient-to-b from-zinc-800/40 to-zinc-900/40 p-6 flex flex-col relative backdrop-blur-sm">
+        <div class="bento-card col-span-1 md:col-span-2 bg-gradient-to-br from-[#27272a] via-[#18181b] to-black p-6 flex flex-col relative backdrop-blur-sm group">
             
             <div class="flex justify-between items-center mb-5">
                 <h3 class="font-bold text-lg flex items-center gap-2 text-zinc-100">
-                    <div class="p-1.5 bg-yellow-500/10 rounded-lg">
+                    <div class="p-1.5 bg-yellow-500/10 rounded-lg border border-yellow-500/10 group-hover:border-yellow-500/30 transition">
                         <i class="ph ph-pencil-simple text-yellow-500"></i> 
                     </div>
                     Writings
@@ -167,7 +174,7 @@
                 <a href="https://gitmez.com/blog/simulator.html" class="block group/item">
                     <div class="flex justify-between items-center">
                         <span class="text-sm font-semibold text-zinc-300 group-hover/item:text-white transition">2023 Turkish Election Simulator</span>
-                        <span class="text-xs text-zinc-600 bg-zinc-800/50 px-2 py-1 rounded">2025</span>
+                        <span class="text-xs text-zinc-500 font-mono bg-black/40 border border-white/5 px-2 py-1 rounded">2025</span>
                     </div>
                     <div class="w-full h-[1px] bg-white/5 mt-3 relative overflow-hidden">
                         <div class="absolute inset-0 bg-indigo-500 w-full -translate-x-full group-hover/item:translate-x-0 transition-transform duration-500 ease-out"></div>
@@ -177,7 +184,7 @@
                 <a href="https://gitmez.com/blog/dhondt.html" class="block group/item">
                     <div class="flex justify-between items-center">
                         <span class="text-sm font-semibold text-zinc-300 group-hover/item:text-white transition">R Package for D'Hondt Simulations</span>
-                        <span class="text-xs text-zinc-600 bg-zinc-800/50 px-2 py-1 rounded">2024</span>
+                        <span class="text-xs text-zinc-500 font-mono bg-black/40 border border-white/5 px-2 py-1 rounded">2024</span>
                     </div>
                     <div class="w-full h-[1px] bg-white/5 mt-3 relative overflow-hidden">
                         <div class="absolute inset-0 bg-blue-500 w-full -translate-x-full group-hover/item:translate-x-0 transition-transform duration-500 ease-out"></div>
@@ -186,8 +193,8 @@
                 
                 <a href="https://gitmez.com/blog/pythondhondt.html" class="block group/item">
                     <div class="flex justify-between items-center">
-                        <span class="text-sm font-semibold text-zinc-300 group-hover/item:text-white transition">Python Library for D'Hondt Simulations</span>
-                        <span class="text-xs text-zinc-600 bg-zinc-800/50 px-2 py-1 rounded">2024</span>
+                        <span class="text-sm font-semibold text-zinc-300 group-hover/item:text-white transition">Python Library for D'Hondt</span>
+                        <span class="text-xs text-zinc-500 font-mono bg-black/40 border border-white/5 px-2 py-1 rounded">2024</span>
                     </div>
                     <div class="w-full h-[1px] bg-white/5 mt-3 relative overflow-hidden">
                         <div class="absolute inset-0 bg-red-500 w-full -translate-x-full group-hover/item:translate-x-0 transition-transform duration-500 ease-out"></div>
@@ -198,7 +205,6 @@
         </div>
 
         <div class="bento-card bg-black p-5 flex flex-col justify-between group relative">
-            
             <p class="text-[10px] uppercase tracking-widest text-zinc-500 font-bold">Connect</p>
 
             <div class="flex gap-3 justify-center py-2">
@@ -222,18 +228,18 @@
                 <i class="ph ph-copy text-zinc-600 group-hover/email:text-white text-xs transition"></i>
             </button>
 
-            <div id="toast" class="absolute inset-0 bg-zinc-950/95 flex flex-col items-center justify-center text-white opacity-0 pointer-events-none transition-opacity duration-300 z-50">
+            <div id="toast" class="absolute inset-0 bg-zinc-950/95 flex flex-col items-center justify-center text-white opacity-0 pointer-events-none transition-opacity duration-300 z-50 rounded-2xl">
                 <i class="ph ph-check-circle text-3xl text-emerald-500 mb-2"></i>
                 <span class="text-sm font-bold">Address Copied!</span>
             </div>
         </div>
 
-        <div class="bento-card bg-zinc-900 flex items-center justify-center relative">
-             <img src="https://images.unsplash.com/photo-1524661135-423995f22d0b?auto=format&fit=crop&q=80&w=400" class="absolute inset-0 w-full h-full object-cover opacity-50 grayscale hover:grayscale-0 transition duration-700">
+        <div class="bento-card bg-zinc-900 flex items-center justify-center relative overflow-hidden group">
+             <img src="https://images.unsplash.com/photo-1524661135-423995f22d0b?auto=format&fit=crop&q=80&w=400" class="absolute inset-0 w-full h-full object-cover opacity-50 grayscale group-hover:grayscale-0 transition duration-700 group-hover:scale-110">
             
-             <div class="relative z-10 text-center bg-black/60 p-5 rounded-2xl backdrop-blur-md border border-white/10 shadow-xl">
+             <div class="relative z-10 text-center bg-zinc-950/80 p-5 rounded-2xl backdrop-blur-md border border-white/10 shadow-xl">
                 <div class="flex items-center justify-center gap-2 mb-1">
-                    <i class="ph ph-map-pin text-red-400 drop-shadow-[0_0_8px_rgba(248,113,113,0.5)] animate-bounce"></i>
+                    <i class="ph ph-map-pin text-red-500 drop-shadow-[0_0_8px_rgba(248,113,113,0.5)] animate-bounce"></i>
                     <span class="font-bold text-sm text-white">Ankara, TR</span>
                 </div>
                 <p class="text-xs text-zinc-400 font-mono" id="time">Loading...</p>
