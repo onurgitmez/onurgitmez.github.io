@@ -1,200 +1,362 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>R Lessons</title>
-    <link rel="stylesheet" href="styles.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <title>R Dersleri | Ali Onur Gitmez</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        rblue: '#276DC3',
+                        rgray: '#8496a8',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Custom Scrollbar for Webkit */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1; 
+        }
+        .dark ::-webkit-scrollbar-track {
+            background: #1f2937; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8; 
+        }
+    </style>
 </head>
-<body>
+<body class="bg-gray-50 text-gray-800 dark:bg-gray-900 dark:text-gray-100 transition-colors duration-300 flex flex-col min-h-screen">
 
-<h1>
-    <a href="https://gitmez.com" class="home-button" title="Go to Main Page">
-        <i class="fas fa-home"></i>
-    </a>
-    <img src="RStudio.png" alt="Logo" class="logo">
-    R Dersleri - Ali Onur Gitmez
-</h1>
+    <nav class="sticky top-0 z-50 bg-white/80 dark:bg-gray-800/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-700">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16 items-center">
+                <div class="flex items-center gap-3">
+                    <a href="https://gitmez.com" class="text-rblue hover:text-blue-700 transition">
+                        <i class="fas fa-home text-xl"></i>
+                    </a>
+                    <div class="h-6 w-px bg-gray-300 dark:bg-gray-600 mx-2"></div>
+                    <div class="flex items-center gap-2">
+                        <span class="font-bold text-xl tracking-tight">R Dersleri</span>
+                    </div>
+                </div>
 
-<!-- Tab buttons -->
-<div class="tab">
-    <a href="https://gitmez.com/rdersi.html" class="tablinks">Ana Sayfa</a>
-    <a href="https://gitmez.com/r-ders-1.html" class="tablinks">Ders 1</a>
-    <a href="https://gitmez.com/r-ders-2.html" class="tablinks">Ders 2</a>
-    <a href="https://gitmez.com/r-ders-3.html" class="tablinks">Ders 3</a>
-    <a href="https://gitmez.com/r-ders-4.html" class="tablinks">Ders 4</a>
-    <a href="https://gitmez.com/r-ders-5.html" class="tablinks">Ders 5</a>
-    <a href="https://gitmez.com/r-ders-6.html" class="tablinks">Ders 6</a>
-    <a href="https://gitmez.com/r-ders-7.html" class="tablinks">Ders 7</a>
-    <a href="https://gitmez.com/r-ders-8.html" class="tablinks">Ders 8</a>
-    <a href="https://gitmez.com/r-ders-9.html" class="tablinks">Ders 9</a>
-    <a href="https://gitmez.com/r-ders-10.html" class="tablinks">Ders 10</a>
-    <a href="https://gitmez.com/r-ders-11.html" class="tablinks">Ders 11</a>
-    <a href="https://gitmez.com/r-ders-12.html" class="tablinks">Ders 12</a>
-    <a href="https://gitmez.com/r-ders-13.html" class="tablinks">Ders 13</a>
-    <a href="https://gitmez.com/r-ders-14.html" class="tablinks">Ders 14</a>
-    <a href="https://gitmez.com/r-ders-15.html" class="tablinks">Ders 15</a>
-</div>
+                <div class="flex items-center gap-4">
+                    <a href="https://gitmez.com" class="hidden sm:block text-sm font-medium hover:text-rblue transition">Main Site</a>
+                    
+                    <button id="theme-toggle" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition focus:outline-none">
+                        <i class="fas fa-moon dark:hidden text-gray-600"></i>
+                        <i class="fas fa-sun hidden dark:block text-yellow-400"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
 
-<!-- Content section -->
-<div class="content">
-    <h2>Weekly Topics</h2>
+    <header class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+        <div class="max-w-7xl mx-auto py-16 px-4 sm:px-6 lg:px-8 text-center">
+            <h1 class="text-4xl font-extrabold text-gray-900 dark:text-white sm:text-5xl sm:tracking-tight lg:text-6xl">
+                Master R Programming
+            </h1>
+            <p class="mt-5 max-w-xl mx-auto text-xl text-gray-500 dark:text-gray-400">
+                15 weeks of comprehensive data science training, from basic syntax to machine learning.
+            </p>
+            <div class="mt-8 flex justify-center gap-4">
+                <a href="#week-1" class="px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-rblue hover:bg-blue-700 md:py-4 md:text-lg md:px-10 shadow-lg shadow-blue-500/30 transition-all">
+                    Start Learning
+                </a>
+            </div>
+        </div>
+    </header>
 
-    <div class="topic-outline">
-        <div class="topic-card">
-            <h3>Week 1: Introduction to R and Basic Concepts</h3>
-            <ul>
-                <li>Introduction to R and RStudio</li>
-                <li>Workspace management</li>
-                <li>Basic R operations and syntax</li>
-                <li>Data types</li>
-                <li>R as a calculator</li>
-            </ul>
+    <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div class="flex items-center justify-between mb-8">
+            <h2 class="text-2xl font-bold leading-7 text-gray-900 dark:text-white sm:truncate">
+                Course Curriculum
+            </h2>
+            <span class="text-sm text-gray-500 dark:text-gray-400">15 Modules</span>
         </div>
 
-        <div class="topic-card">
-            <h3>Week 2: Data Structures-1</h3>
-            <ul>
-                <li>Vectors</li>
-                <li>Lists</li>
-                <li>Factors</li>
-            </ul>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+            <a href="https://gitmez.com/r-ders-1.html" id="week-1" class="group block p-6 bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border border-gray-100 dark:border-gray-700">
+                <div class="flex items-center justify-between mb-4">
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+                        Week 1
+                    </span>
+                    <i class="fas fa-arrow-right text-gray-300 group-hover:text-rblue transition"></i>
+                </div>
+                <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2 group-hover:text-rblue transition">Intro to R & Basics</h3>
+                <ul class="text-sm text-gray-500 dark:text-gray-400 space-y-1">
+                    <li>• RStudio Setup & Workspace</li>
+                    <li>• Basic Operations</li>
+                    <li>• Data Types</li>
+                </ul>
+            </a>
+
+            <a href="https://gitmez.com/r-ders-2.html" class="group block p-6 bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border border-gray-100 dark:border-gray-700">
+                <div class="flex items-center justify-between mb-4">
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+                        Week 2
+                    </span>
+                    <i class="fas fa-arrow-right text-gray-300 group-hover:text-rblue transition"></i>
+                </div>
+                <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2 group-hover:text-rblue transition">Data Structures I</h3>
+                <ul class="text-sm text-gray-500 dark:text-gray-400 space-y-1">
+                    <li>• Vectors</li>
+                    <li>• Lists</li>
+                    <li>• Factors</li>
+                </ul>
+            </a>
+
+            <a href="https://gitmez.com/r-ders-3.html" class="group block p-6 bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border border-gray-100 dark:border-gray-700">
+                <div class="flex items-center justify-between mb-4">
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+                        Week 3
+                    </span>
+                    <i class="fas fa-arrow-right text-gray-300 group-hover:text-rblue transition"></i>
+                </div>
+                <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2 group-hover:text-rblue transition">Data Structures II</h3>
+                <ul class="text-sm text-gray-500 dark:text-gray-400 space-y-1">
+                    <li>• Matrices & Arrays</li>
+                    <li>• Data Frames</li>
+                    <li>• Tibbles</li>
+                </ul>
+            </a>
+
+            <a href="https://gitmez.com/r-ders-4.html" class="group block p-6 bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border border-gray-100 dark:border-gray-700">
+                <div class="flex items-center justify-between mb-4">
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200">
+                        Week 4
+                    </span>
+                    <i class="fas fa-arrow-right text-gray-300 group-hover:text-rblue transition"></i>
+                </div>
+                <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2 group-hover:text-rblue transition">Functions & Logic I</h3>
+                <ul class="text-sm text-gray-500 dark:text-gray-400 space-y-1">
+                    <li>• Creating Functions</li>
+                    <li>• If / Else Control flow</li>
+                </ul>
+            </a>
+
+            <a href="https://gitmez.com/r-ders-5.html" class="group block p-6 bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border border-gray-100 dark:border-gray-700">
+                <div class="flex items-center justify-between mb-4">
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200">
+                        Week 5
+                    </span>
+                    <i class="fas fa-arrow-right text-gray-300 group-hover:text-rblue transition"></i>
+                </div>
+                <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2 group-hover:text-rblue transition">Functions & Logic II</h3>
+                <ul class="text-sm text-gray-500 dark:text-gray-400 space-y-1">
+                    <li>• Logical Operators</li>
+                    <li>• For & While Loops</li>
+                </ul>
+            </a>
+
+            <a href="https://gitmez.com/r-ders-6.html" class="group block p-6 bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border border-gray-100 dark:border-gray-700">
+                <div class="flex items-center justify-between mb-4">
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200">
+                        Week 6
+                    </span>
+                    <i class="fas fa-arrow-right text-gray-300 group-hover:text-rblue transition"></i>
+                </div>
+                <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2 group-hover:text-rblue transition">Functional Programming</h3>
+                <ul class="text-sm text-gray-500 dark:text-gray-400 space-y-1">
+                    <li>• Apply family</li>
+                    <li>• purrr package</li>
+                </ul>
+            </a>
+
+            <a href="https://gitmez.com/r-ders-7.html" class="group block p-6 bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border border-gray-100 dark:border-gray-700">
+                <div class="flex items-center justify-between mb-4">
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">
+                        Week 7
+                    </span>
+                    <i class="fas fa-arrow-right text-gray-300 group-hover:text-rblue transition"></i>
+                </div>
+                <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2 group-hover:text-rblue transition">Data Wrangling I</h3>
+                <ul class="text-sm text-gray-500 dark:text-gray-400 space-y-1">
+                    <li>• Import/Export</li>
+                    <li>• dplyr & tidyr</li>
+                    <li>• Missing Data</li>
+                </ul>
+            </a>
+
+            <a href="https://gitmez.com/r-ders-8.html" class="group block p-6 bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border border-gray-100 dark:border-gray-700">
+                <div class="flex items-center justify-between mb-4">
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">
+                        Week 8
+                    </span>
+                    <i class="fas fa-arrow-right text-gray-300 group-hover:text-rblue transition"></i>
+                </div>
+                <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2 group-hover:text-rblue transition">Data Wrangling II</h3>
+                <ul class="text-sm text-gray-500 dark:text-gray-400 space-y-1">
+                    <li>• String Manipulation</li>
+                    <li>• Date-time (Lubridate)</li>
+                </ul>
+            </a>
+
+            <a href="https://gitmez.com/r-ders-9.html" class="group block p-6 bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border border-gray-100 dark:border-gray-700">
+                <div class="flex items-center justify-between mb-4">
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-pink-100 text-pink-800 dark:bg-pink-900 dark:text-pink-200">
+                        Week 9
+                    </span>
+                    <i class="fas fa-arrow-right text-gray-300 group-hover:text-rblue transition"></i>
+                </div>
+                <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2 group-hover:text-rblue transition">Data Visualization</h3>
+                <ul class="text-sm text-gray-500 dark:text-gray-400 space-y-1">
+                    <li>• Base R Plots</li>
+                    <li>• ggplot2 Essentials</li>
+                    <li>• Custom Themes</li>
+                </ul>
+            </a>
+
+            <a href="https://gitmez.com/r-ders-10.html" class="group block p-6 bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border border-gray-100 dark:border-gray-700">
+                <div class="flex items-center justify-between mb-4">
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200">
+                        Week 10
+                    </span>
+                    <i class="fas fa-arrow-right text-gray-300 group-hover:text-rblue transition"></i>
+                </div>
+                <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2 group-hover:text-rblue transition">Descriptive Statistics</h3>
+                <ul class="text-sm text-gray-500 dark:text-gray-400 space-y-1">
+                    <li>• Central Tendency</li>
+                    <li>• Dispersion Measures</li>
+                    <li>• Categorical Data Stats</li>
+                </ul>
+            </a>
+
+             <a href="https://gitmez.com/r-ders-11.html" class="group block p-6 bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border border-gray-100 dark:border-gray-700">
+                <div class="flex items-center justify-between mb-4">
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200">
+                        Week 11
+                    </span>
+                    <i class="fas fa-arrow-right text-gray-300 group-hover:text-rblue transition"></i>
+                </div>
+                <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2 group-hover:text-rblue transition">Inferential Statistics</h3>
+                <ul class="text-sm text-gray-500 dark:text-gray-400 space-y-1">
+                    <li>• Hypothesis Testing</li>
+                    <li>• T-tests</li>
+                    <li>• ANOVA</li>
+                </ul>
+            </a>
+
+             <a href="https://gitmez.com/r-ders-12.html" class="group block p-6 bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border border-gray-100 dark:border-gray-700">
+                <div class="flex items-center justify-between mb-4">
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200">
+                        Week 12
+                    </span>
+                    <i class="fas fa-arrow-right text-gray-300 group-hover:text-rblue transition"></i>
+                </div>
+                <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2 group-hover:text-rblue transition">Regression Analysis I</h3>
+                <ul class="text-sm text-gray-500 dark:text-gray-400 space-y-1">
+                    <li>• Linear Regression</li>
+                    <li>• Model Diagnostics</li>
+                </ul>
+            </a>
+
+             <a href="https://gitmez.com/r-ders-13.html" class="group block p-6 bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border border-gray-100 dark:border-gray-700">
+                <div class="flex items-center justify-between mb-4">
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200">
+                        Week 13
+                    </span>
+                    <i class="fas fa-arrow-right text-gray-300 group-hover:text-rblue transition"></i>
+                </div>
+                <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2 group-hover:text-rblue transition">Regression Analysis II</h3>
+                <ul class="text-sm text-gray-500 dark:text-gray-400 space-y-1">
+                    <li>• Logistic Regression</li>
+                    <li>• Interpretation</li>
+                </ul>
+            </a>
+
+            <a href="https://gitmez.com/r-ders-14.html" class="group block p-6 bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border border-gray-100 dark:border-gray-700">
+                <div class="flex items-center justify-between mb-4">
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200">
+                        Week 14
+                    </span>
+                    <i class="fas fa-arrow-right text-gray-300 group-hover:text-rblue transition"></i>
+                </div>
+                <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2 group-hover:text-rblue transition">Reporting & Causality</h3>
+                <ul class="text-sm text-gray-500 dark:text-gray-400 space-y-1">
+                    <li>• R Markdown (HTML/PDF)</li>
+                    <li>• Intro to Causal Inference</li>
+                </ul>
+            </a>
+
+            <a href="https://gitmez.com/r-ders-15.html" class="group block p-6 bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border border-gray-100 dark:border-gray-700">
+                <div class="flex items-center justify-between mb-4">
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200">
+                        Week 15
+                    </span>
+                    <i class="fas fa-arrow-right text-gray-300 group-hover:text-rblue transition"></i>
+                </div>
+                <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2 group-hover:text-rblue transition">Computational Methods</h3>
+                <ul class="text-sm text-gray-500 dark:text-gray-400 space-y-1">
+                    <li>• Web Scraping</li>
+                    <li>• Text Mining / Sentiment</li>
+                    <li>• Intro to ML</li>
+                </ul>
+            </a>
+
         </div>
+    </main>
 
-        <div class="topic-card">
-            <h3>Week 3: Data Structures-2</h3>
-            <ul>
-                <li>Matrices</li>
-                <li>Arrays</li>
-                <li>Data Frames</li>
-                <li>Tibbles</li>
-            </ul>
+    <footer class="bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 py-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-4">
+            <div class="text-sm text-gray-500 dark:text-gray-400">
+                &copy; 2024 Ali Onur Gitmez. All rights reserved.
+            </div>
+            <div class="flex gap-4">
+                <a href="#" class="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300">
+                    <i class="fab fa-github text-xl"></i>
+                </a>
+                <a href="#" class="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300">
+                    <i class="fab fa-linkedin text-xl"></i>
+                </a>
+                <a href="#" class="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300">
+                    <i class="fas fa-envelope text-xl"></i>
+                </a>
+            </div>
         </div>
+    </footer>
 
-        <div class="topic-card">
-            <h3>Week 4: Functions and Control Structures-1</h3>
-            <ul>
-                <li>Creating and using functions</li>
-                <li>If functions</li>
-                <li>If-else functions</li>
-            </ul>
-        </div>
+    <script>
+        const toggleBtn = document.getElementById('theme-toggle');
+        const html = document.documentElement;
 
-        <div class="topic-card">
-            <h3>Week 5: Functions and Control Structures-2</h3>
-            <ul>
-                <li>Logical operators</li>
-                <li>For loop</li>
-                <li>While loop</li>
-                <li>Operations on loops</li>
-            </ul>
-        </div>
+        // Check local storage or system preference
+        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            html.classList.add('dark');
+        } else {
+            html.classList.remove('dark');
+        }
 
-        <div class="topic-card">
-            <h3>Week 6: Functional Programming</h3>
-            <ul>
-                <li>Apply family functions</li>
-                <li>purrr package</li>
-            </ul>
-        </div>
-
-        <div class="topic-card">
-            <h3>Week 7: Data Import, Manipulation, Cleaning and Missing Data</h3>
-            <ul>
-                <li>Data import and export</li>
-                <li>Data manipulation with base R and dplyr/tidyr</li>
-                <li>Reshaping data</li>
-                <li>Data cleaning techniques</li>
-                <li>Missing data handling</li>
-            </ul>
-        </div>
-
-        <div class="topic-card">
-            <h3>Week 8: Advanced Manipulation Techniques</h3>
-            <ul>
-                <li>String manipulation</li>
-                <li>Date-time manipulation</li>
-            </ul>
-        </div>
-
-        <div class="topic-card">
-            <h3>Week 9: Data Visualization</h3>
-            <ul>
-                <li>Data visualization techniques with base R</li>
-                <li>Introduction to ggplot2</li>
-                <li>Customizing plots</li>
-                <li>Advanced plotting techniques</li>
-            </ul>
-        </div>
-
-        <div class="topic-card">
-            <h3>Week 10: Descriptive Statistics</h3>
-            <ul>
-                <li>Measures of central tendency</li>
-                <li>Measures of dispersion</li>
-                <li>Measures of position and shape</li>
-                <li>Relationship measures</li>
-                <li>Descriptive statistics for categorical data</li>
-            </ul>
-        </div>
-
-        <div class="topic-card">
-            <h3>Week 11: Inferential Statistics</h3>
-            <ul>
-                <li>Introduction to hypothesis testing</li>
-                <li>t-test and Variants</li>
-                <li>ANOVA and Variants</li>
-            </ul>
-        </div>
-
-        <div class="topic-card">
-            <h3>Week 12: Regression Analysis-1</h3>
-            <ul>
-                <li>Introduction to regression analysis</li>
-                <li>Linear regression</li>
-                <li>Model diagnostics and interpretation</li>
-            </ul>
-        </div>
-
-        <div class="topic-card">
-            <h3>Week 13: Regression Analysis-2</h3>
-            <ul>
-                <li>Logistic regression</li>
-                <li>Model diagnostics and interpretation</li>
-            </ul>
-        </div>
-
-        <div class="topic-card">
-            <h3>Week 14: R Markdown and Introduction to Causal Inference</h3>
-            <ul>
-                <li>Introduction to R Markdown</li>
-                <li>Creating documents with R Markdown</li>
-                <li>Including tables and figures</li>
-                <li>Creating different output formats (HTML, PDF, Word)</li>
-                <li>LaTeX</li>
-                <li>Brief intro to Causal Inference</li>
-            </ul>
-        </div>
-
-        <div class="topic-card">
-            <h3>Week 15: Introduction to Computational Methods</h3>
-            <ul>
-                <li>Introduction to Web Scraping</li>
-                <li>Textual Analysis Tools</li>
-                <li>Sentiment Analysis</li>
-                <li>Network Analysis</li>
-                <li>Maps and Geospatial Analysis</li>
-                <li>Machine Learning</li>
-            </ul>
-        </div>
-    </div>
-</div>
-
-<!-- Footer -->
-<footer>
-    &copy; 2024 Ali Onur Gitmez | R Dersleri
-</footer>
-
+        toggleBtn.addEventListener('click', () => {
+            html.classList.toggle('dark');
+            if (html.classList.contains('dark')) {
+                localStorage.theme = 'dark';
+            } else {
+                localStorage.theme = 'light';
+            }
+        });
+    </script>
 </body>
 </html>
