@@ -23,44 +23,22 @@
                     colors: {
                         rblue: '#276DC3',
                     },
-                    // 2. Customizing the typography plugin
+                    // We configure the typography plugin to make links blue and code blocks dark
                     typography: (theme) => ({
                         DEFAULT: {
                             css: {
-                                maxWidth: 'none', // Allow text to fill width
+                                maxWidth: 'none', 
                                 color: theme('colors.gray.700'),
-                                h1: { color: theme('colors.gray.900') },
-                                h2: { color: theme('colors.gray.900'), marginTop: '1.5em' },
-                                a: { color: '#276DC3', textDecoration: 'none', '&:hover': { textDecoration: 'underline' } },
-                                'code::before': { content: '""' }, // Remove weird backticks
+                                a: { color: '#276DC3', textDecoration: 'none', fontWeight: '600' },
+                                'code::before': { content: '""' },
                                 'code::after': { content: '""' },
                                 code: { 
                                     backgroundColor: '#f3f4f6', 
                                     padding: '0.2rem 0.4rem', 
                                     borderRadius: '0.25rem', 
                                     fontWeight: '400',
-                                    color: '#c026d3' // Purple for inline code
+                                    color: '#c026d3'
                                 },
-                                pre: {
-                                    backgroundColor: '#1f2937',
-                                    color: '#e5e7eb',
-                                    borderRadius: '0.5rem',
-                                }
-                            },
-                        },
-                        invert: {
-                            css: {
-                                color: theme('colors.gray.300'),
-                                h1: { color: theme('colors.white') },
-                                h2: { color: theme('colors.white') },
-                                a: { color: '#60a5fa' },
-                                code: { 
-                                    backgroundColor: '#374151',
-                                    color: '#e879f9' 
-                                },
-                                pre: {
-                                    backgroundColor: '#111827',
-                                }
                             }
                         }
                     }),
@@ -69,83 +47,56 @@
         }
     </script>
 </head>
-<body class="bg-gray-50 text-gray-800 dark:bg-gray-900 dark:text-gray-100 transition-colors duration-300 h-screen overflow-hidden">
+<body class="bg-gray-50 text-gray-800 dark:bg-gray-900 dark:text-gray-100 h-screen overflow-hidden">
 
 <div id="app" class="flex flex-col h-full">
 
-    <nav class="sticky top-0 z-50 bg-white/90 dark:bg-gray-800/90 backdrop-blur border-b border-gray-200 dark:border-gray-700 h-16 flex-none">
+    <nav class="sticky top-0 z-50 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 h-16 flex-none shadow-sm">
         <div class="max-w-7xl mx-auto px-4 h-full flex items-center justify-between">
             <div class="flex items-center gap-3 cursor-pointer" @click="currentLesson = null">
                 <i class="fas fa-home text-rblue text-xl"></i>
                 <span class="font-bold text-xl tracking-tight">R Dersleri</span>
             </div>
-            <div class="flex items-center gap-4">
-                <button @click="toggleTheme" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition focus:outline-none">
-                    <i class="fas" :class="isDark ? 'fa-sun text-yellow-400' : 'fa-moon text-gray-600'"></i>
-                </button>
-                <button @click="showSidebar = !showSidebar" class="md:hidden p-2 text-gray-600 dark:text-gray-300">
-                    <i class="fas fa-bars"></i>
-                </button>
-            </div>
+            <button @click="toggleTheme" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition">
+                <i class="fas" :class="isDark ? 'fa-sun text-yellow-400' : 'fa-moon text-gray-600'"></i>
+            </button>
         </div>
     </nav>
 
     <div class="flex flex-1 overflow-hidden relative">
         
-        <aside :class="showSidebar ? 'translate-x-0' : '-translate-x-full'" class="absolute inset-y-0 left-0 md:relative md:translate-x-0 z-40 w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 transition-transform duration-300 flex flex-col">
-            <div class="p-4 overflow-y-auto flex-1">
+        <aside class="hidden md:block w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 overflow-y-auto">
+            <div class="p-4">
                 <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-4">Curriculum</h3>
                 <div class="space-y-1">
                     <button v-for="week in weeks" :key="week.id" 
                         @click="loadLesson(week.id)"
                         class="w-full text-left px-3 py-2 rounded-md text-sm font-medium transition-colors"
-                        :class="currentLesson === week.id ? 'bg-blue-50 text-rblue dark:bg-blue-900/20 dark:text-blue-200' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700/50'">
-                        <span class="font-bold mr-2">W{{ week.id }}</span> {{ week.title }}
+                        :class="currentLesson === week.id ? 'bg-blue-50 text-rblue dark:bg-blue-900/20' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'">
+                        Week {{ week.id }}
                     </button>
                 </div>
             </div>
         </aside>
 
-        <div v-if="showSidebar" @click="showSidebar = false" class="fixed inset-0 bg-black/20 z-30 md:hidden"></div>
-
-        <main class="flex-1 overflow-y-auto p-4 md:p-8 scroll-smooth w-full" ref="mainContent">
+        <main class="flex-1 overflow-y-auto p-4 md:p-8 scroll-smooth w-full">
             <div class="max-w-4xl mx-auto min-h-full">
                 
-                <div v-if="loading" class="flex justify-center py-20">
-                    <i class="fas fa-circle-notch fa-spin text-4xl text-rblue"></i>
+                <div v-if="loading" class="flex justify-center py-20"><i class="fas fa-circle-notch fa-spin text-4xl text-rblue"></i></div>
+                <div v-else-if="error" class="bg-red-50 text-red-700 p-6 rounded-lg">{{ error }}</div>
+
+                <div v-else-if="!currentLesson" class="text-center py-10">
+                    <h1 class="text-4xl font-extrabold mb-4">Welcome back, Ali.</h1>
+                    <p class="text-gray-500">Select a module from the sidebar to begin.</p>
                 </div>
 
-                <div v-else-if="error" class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 p-6 rounded-lg text-center">
-                    <i class="fas fa-exclamation-circle text-2xl mb-2"></i>
-                    <p>{{ error }}</p>
-                    <p class="text-sm mt-2 opacity-75">Make sure 'lessons/{{ currentLesson }}.html' exists.</p>
-                </div>
-
-                <div v-else-if="!currentLesson" class="animate-fade-in">
-                    <div class="text-center py-10">
-                        <h1 class="text-4xl font-extrabold mb-4 text-gray-900 dark:text-white">Welcome back, Ali.</h1>
-                        <p class="text-lg text-gray-500 dark:text-gray-400">Select a module to continue learning.</p>
-                    </div>
-                    
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        <div v-for="week in weeks" :key="week.id" @click="loadLesson(week.id)" class="cursor-pointer group p-5 bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow-md border border-gray-200 dark:border-gray-700 transition-all hover:-translate-y-1">
-                            <div class="flex items-center justify-between mb-3">
-                                <span class="text-xs font-bold text-rblue bg-blue-50 dark:bg-blue-900/30 px-2.5 py-1 rounded">Week {{ week.id }}</span>
-                                <i class="fas fa-arrow-right text-gray-300 group-hover:text-rblue transition"></i>
-                            </div>
-                            <h3 class="font-bold text-gray-800 dark:text-gray-100 group-hover:text-rblue transition">{{ week.title }}</h3>
-                        </div>
-                    </div>
-                </div>
-
-                <div v-else class="bg-white dark:bg-gray-800 p-8 md:p-10 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 animate-fade-in">
+                <div v-else class="bg-white dark:bg-gray-800 p-8 md:p-12 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700">
                     <div class="prose prose-lg dark:prose-invert max-w-none" v-html="lessonContent"></div>
                 </div>
 
             </div>
         </main>
     </div>
-
 </div>
 
 <script>
@@ -154,86 +105,53 @@
     createApp({
         setup() {
             const isDark = ref(false);
-            const showSidebar = ref(false);
             const currentLesson = ref(null);
             const lessonContent = ref('');
             const loading = ref(false);
             const error = ref(null);
 
             const weeks = [
-                { id: 1, title: 'Intro to R & Basics' },
+                { id: 1, title: 'Intro to R' },
                 { id: 2, title: 'Data Structures I' },
                 { id: 3, title: 'Data Structures II' },
-                { id: 4, title: 'Functions & Logic I' },
-                { id: 5, title: 'Functions & Logic II' },
+                { id: 4, title: 'Functions I' },
+                { id: 5, title: 'Functions II' },
                 { id: 6, title: 'Functional Programming' },
                 { id: 7, title: 'Data Wrangling I' },
                 { id: 8, title: 'Data Wrangling II' },
-                { id: 9, title: 'Data Visualization' },
-                { id: 10, title: 'Descriptive Statistics' },
-                { id: 11, title: 'Inferential Statistics' },
-                { id: 12, title: 'Regression Analysis I' },
-                { id: 13, title: 'Regression Analysis II' },
-                { id: 14, title: 'Reporting & Causality' },
+                { id: 9, title: 'Visualization' },
+                { id: 10, title: 'Descriptive Stats' },
+                { id: 11, title: 'Inferential Stats' },
+                { id: 12, title: 'Regression I' },
+                { id: 13, title: 'Regression II' },
+                { id: 14, title: 'Reporting' },
                 { id: 15, title: 'Computational Methods' }
             ];
-
-            const toggleTheme = () => {
-                isDark.value = !isDark.value;
-                if (isDark.value) {
-                    document.documentElement.classList.add('dark');
-                    localStorage.setItem('theme', 'dark');
-                } else {
-                    document.documentElement.classList.remove('dark');
-                    localStorage.setItem('theme', 'light');
-                }
-            };
 
             const loadLesson = async (id) => {
                 loading.value = true;
                 error.value = null;
                 currentLesson.value = id;
-                showSidebar.value = false; 
-
-                // Scroll to top
-                window.scrollTo(0,0);
-
                 try {
+                    // Fetches content from lessons/1.html
                     const response = await fetch(`./lessons/${id}.html`);
                     if (!response.ok) throw new Error(`HTTP Error: ${response.status}`);
-                    const text = await response.text();
-                    lessonContent.value = text;
+                    lessonContent.value = await response.text();
                 } catch (err) {
-                    error.value = "Failed to load content. Please check that 'lessons/" + id + ".html' exists.";
-                    lessonContent.value = "";
+                    error.value = "Failed to load content. Ensure 'lessons/" + id + ".html' exists.";
                 } finally {
                     loading.value = false;
                 }
             };
 
-            onMounted(() => {
-                if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-                    isDark.value = true;
-                    document.documentElement.classList.add('dark');
-                }
-            });
-
-            return {
-                isDark, toggleTheme, weeks, currentLesson, loadLesson, lessonContent, loading, error, showSidebar
+            const toggleTheme = () => {
+                isDark.value = !isDark.value;
+                document.documentElement.classList.toggle('dark');
             };
+
+            return { isDark, toggleTheme, weeks, currentLesson, loadLesson, lessonContent, loading, error };
         }
     }).mount('#app');
 </script>
-
-<style>
-    .animate-fade-in { animation: fadeIn 0.4s ease-out; }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
-    
-    /* Scrollbar Polish */
-    ::-webkit-scrollbar { width: 6px; height: 6px; }
-    ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
-    .dark ::-webkit-scrollbar-thumb { background: #475569; }
-</style>
 </body>
 </html>
