@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2023 Turkish Election Simulator | Blog</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    
+    <script>
+        tailwind.config = {
+          theme: {
+            extend: {
+              fontFamily: { sans: ['system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'] },
+              colors: { base: '#050505', card: '#121212' }
+            }
+          }
+        }
+    </script>
+    
+    <style>
+        body { background-color: #050505; color: #e4e4e7; }
+        
+        /* TYPOGRAPHY FOR BLOG CONTENT */
+        .prose p { margin-bottom: 1.5rem; line-height: 1.8; color: #d4d4d8; font-size: 1.05rem; }
+        .prose h2 { font-size: 1.5rem; font-weight: 700; margin-top: 3rem; margin-bottom: 1rem; color: white; letter-spacing: -0.01em; }
+        .prose a { color: #818cf8; text-decoration: none; border-bottom: 1px solid #818cf8; transition: all 0.2s; }
+        .prose a:hover { color: #a5b4fc; border-bottom-color: transparent; }
+        .prose img { width: 100%; height: auto; border-radius: 1rem; border: 1px solid rgba(255,255,255,0.1); margin: 2.5rem 0; }
+        
+        /* FADE IN ANIMATION */
+        .animate-fade-in { animation: fadeIn 0.6s ease-out forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body class="antialiased min-h-screen flex justify-center selection:bg-indigo-500 selection:text-white">
+
+    <a href="/index.html" class="fixed top-5 left-5 z-50 flex items-center gap-2 px-4 py-2 bg-zinc-900/90 backdrop-blur-md border border-white/10 rounded-full text-zinc-300 text-sm font-medium hover:bg-zinc-800 hover:text-white transition shadow-lg">
+        <i class="ph ph-arrow-left"></i> Home
+    </a>
+
+    <main class="w-full max-w-2xl px-6 py-24 md:py-32 animate-fade-in">
+
+        <header class="mb-12 border-b border-white/10 pb-12">
+            <div class="flex flex-wrap items-center gap-3 mb-6">
+                <span class="px-3 py-1 rounded-full bg-zinc-900 border border-white/10 text-zinc-400 text-xs font-medium font-mono">
+                    May 26, 2023
+                </span>
+                <span class="px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-300 text-xs font-bold uppercase tracking-wider">
+                    R / Shiny
+                </span>
+                <span class="px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-300 text-xs font-bold uppercase tracking-wider">
+                    Data Analysis
+                </span>
+            </div>
+            
+            <h1 class="text-3xl md:text-5xl font-bold text-white tracking-tight mb-6 leading-tight">
+                2023 Turkish Election Simulator
+            </h1>
+            
+            <p class="text-xl text-zinc-400 leading-relaxed font-light">
+                Developing an R Shiny application to simulate D'Hondt seat distribution for the critical 2023 General Elections.
+            </p>
+        </header>
+
+        <article class="prose">
+            
+            <div class="bg-indigo-900/20 border border-indigo-500/30 p-6 rounded-2xl mb-10 flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
+                <div>
+                    <h4 class="font-bold text-indigo-300 mb-1 flex items-center gap-2">
+                        <i class="ph ph-sparkle-fill"></i> Update (2025)
+                    </h4>
+                    <p class="text-sm text-indigo-200/80 m-0">
+                        I have rebuilt this tool using modern JavaScript for faster performance. 
+                    </p>
+                </div>
+                <a href="/election/election.html" class="whitespace-nowrap px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-sm font-bold transition !border-0 !no-underline shadow-lg shadow-indigo-900/50">
+                    Try New Simulator &rarr;
+                </a>
+            </div>
+
+            <p>
+                In this blogpost I will talk about a software that I created using <strong>R Shiny</strong>. This software allows you to enter vote shares for parties that compete in 2023 Turkish General Elections for each electoral district. It then calculates the seat distribution using the <strong>D'Hondt method</strong> and creates a table for the seat distribution.
+            </p>
+
+            <h2>Context: The 2023 Election Systems</h2>
+
+            <p>
+                2023 General Elections in Turkey sparked a debate on the best way to enter the election for parties. First, the threshold was decreased to 7% but the alliance voting system—which allowed parties to benefit from the distribution of alliance votes—was removed. Following these changes, the discussion revolved around how smaller parties should enter the election and whether larger parties of the alliance can benefit from entering the election under a single ticket (entering under the most powerful party in that district) so that they will receive the most seats.
+            </p>
+
+            <p>
+                In <strong>People’s Alliance</strong>, HUDA-PAR and DSP entered the election under the incumbent AKP, and MHP entered the election as a party. In <strong>Nation Alliance</strong>, Gelecek, Deva, DP, and SP entered the election from CHP lists and IYIP entered on its own. The same issue was also discussed in <strong>Labour and Freedom Alliance</strong> where YSP and TIP entered under a general ticket in some districts but on their own in others. Turkey has 87 electoral districts with d’Hondt being used to allocate seats to parties in all of them.
+            </p>
+
+            <h2>The Simulator</h2>
+
+            <p>
+                Following this discussion, I developed a parliamentary election simulator for the 2023 Turkish National Elections. This application allows you to select a specific district and input the vote shares for different political parties. Using the D'Hondt method, the application calculates the allocation of seats for each party within that district.
+            </p>
+
+            <p>
+                You can access the original R-Shiny version here: <br>
+                <a href="https://onurgitmez.shinyapps.io/2023TurkishElectionSimulator/" target="_blank">2023 Turkish Parliamentary Election Simulator (ShinyApps)</a>
+            </p>
+
+            <p>
+                In this app, you can choose the electoral district that you would like to simulate. Changing the district will also change the total number of seats to be allocated as shown in the table on the right.
+            </p>
+
+            <p>
+                One positive aspect of this simulator is that you are able to enter either the vote share or the number of votes received, depending on your preference and the precision you would like.
+            </p>
+
+            <figure>
+                <img src="/images/software/turkeyelectionsimulator.png" alt="Turkish Election Simulator Interface">
+                <figcaption class="text-center text-xs text-zinc-500 mt-2">Screenshot of the R Shiny Interface (2023)</figcaption>
+            </figure>
+
+            <h2>Features</h2>
+
+            <p>
+                According to news sites in the 2018 elections, CHP won 35.78%, IYI won 12.5%, AKP won 29.57%, MHP won 10.58%, and HDP won 8.56% of the vote. We can enter these numbers into our simulator. When entering the vote shares you can notice two features:
+            </p>
+
+            <ul>
+                <li><strong>Live Verification:</strong> You can see the total number of votes entered at the bottom of the right table. This ensures you do not have to worry about going above 100% or making calculation errors.</li>
+                <li><strong>Dynamic Sorting:</strong> When you enter a party's vote it will be placed above others in the table automatically based on results. For example, if you entered CHP's vote last; it will be placed at the top of the table since they earned the most seats from the district.</li>
+            </ul>
+
+        </article>
+        
+        <footer class="mt-20 pt-10 border-t border-white/10 text-center">
+            <p class="text-zinc-600 text-sm">© 2025 Ali Onur Gitmez</p>
+        </footer>
+
+    </main>
+</body>
+</html>
