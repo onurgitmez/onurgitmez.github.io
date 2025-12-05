@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ali Onur Gitmez | Resume</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <script>
+        tailwind.config = {
+          theme: {
+            extend: {
+              fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] },
+              colors: { base: '#050505', card: '#121212' }
+            }
+          }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        
+        body { background-color: #050505; color: #e4e4e7; }
+
+        @media print {
+            /* Reset to White Paper Standard */
+            body { background-color: white !important; color: black !important; -webkit-print-color-adjust: exact; }
+            .no-print { display: none !important; } /* Hide buttons */
+            .print-black { color: black !important; }
+            .print-border { border-color: #e5e7eb !important; }
+            .print-bg-none { background: none !important; border: none !important; box-shadow: none !important; padding: 0 !important; }
+            
+            /* Layout Tweaks for A4 */
+            .page-container { max-width: 100% !important; margin: 0 !important; padding: 0 !important; }
+            a { text-decoration: none !important; color: black !important; }
+        }
+    </style>
+</head>
+<body class="antialiased min-h-screen flex justify-center py-12 px-4 selection:bg-indigo-500 selection:text-white">
+
+    <div class="fixed top-5 left-5 z-50 no-print flex gap-3">
+        <a href="index.html" class="flex items-center gap-2 px-4 py-2 bg-zinc-900/90 backdrop-blur-md border border-white/10 rounded-full text-zinc-300 text-sm font-medium hover:bg-zinc-800 hover:text-white transition shadow-lg">
+            <i class="ph ph-arrow-left"></i> Home
+        </a>
+    </div>
+
+    <div class="fixed top-5 right-5 z-50 no-print">
+        <button onclick="window.print()" class="flex items-center gap-2 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-full font-bold shadow-lg shadow-indigo-500/20 transition transform hover:scale-105">
+            <i class="ph ph-download-simple text-lg"></i> Save as PDF
+        </button>
+    </div>
+
+    <main class="page-container w-full max-w-[850px] bg-[#121212] print-bg-none print:text-black rounded-3xl p-8 md:p-12 border border-white/5 print-border shadow-2xl print:shadow-none">
+
+        <header class="border-b border-white/10 print-border pb-8 mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+            <div>
+                <h1 class="text-4xl md:text-5xl font-bold text-white print-black mb-2 tracking-tight">Ali Onur Gitmez</h1>
+                <p class="text-lg text-zinc-400 print-black font-medium">Data Analyst & Web Developer</p>
+            </div>
+            
+            <div class="flex flex-col gap-2 text-sm text-zinc-400 print-black text-right">
+                <a href="mailto:hello@alionurgitmez.com" class="hover:text-white transition flex items-center justify-end gap-2">
+                    hello@alionurgitmez.com <i class="ph ph-envelope-simple"></i>
+                </a>
+                <a href="https://linkedin.com/in/yourprofile" class="hover:text-white transition flex items-center justify-end gap-2">
+                    linkedin.com/in/yourprofile <i class="ph ph-linkedin-logo"></i>
+                </a>
+                <a href="https://github.com/yourusername" class="hover:text-white transition flex items-center justify-end gap-2">
+                    github.com/yourusername <i class="ph ph-github-logo"></i>
+                </a>
+                <span class="flex items-center justify-end gap-2">
+                    Ankara, Türkiye <i class="ph ph-map-pin"></i>
+                </span>
+            </div>
+        </header>
+
+        <section class="mb-8">
+            <h2 class="text-xs font-bold uppercase tracking-widest text-zinc-500 mb-4 print-black">Profile</h2>
+            <p class="text-zinc-300 print-black leading-relaxed">
+                Detail-oriented developer and analyst with a background in academia. transitioning into tech. 
+                Skilled in building data-driven web applications using Vue.js and Tailwind CSS, and performing complex statistical analysis with R. 
+                Passionate about creating modern, accessible, and high-performance user interfaces.
+            </p>
+        </section>
+
+        <section class="mb-8">
+            <h2 class="text-xs font-bold uppercase tracking-widest text-zinc-500 mb-6 print-black">Experience</h2>
+            
+            <div class="mb-6">
+                <div class="flex justify-between items-baseline mb-1">
+                    <h3 class="text-xl font-bold text-white print-black">Data Developer (Self-Employed)</h3>
+                    <span class="text-sm text-zinc-500 print-black font-mono">2024 - Present</span>
+                </div>
+                <div class="text-indigo-400 print-black font-medium text-sm mb-2">Freelance / Open Source</div>
+                <ul class="list-disc list-inside text-zinc-400 print-black text-sm space-y-1">
+                    <li>Developed "Election Simulator 2025", a D'Hondt algorithm calculator used for election forecasting.</li>
+                    <li>Built custom dashboard solutions for data visualization using modern web technologies.</li>
+                </ul>
+            </div>
+
+            <div class="mb-6">
+                <div class="flex justify-between items-baseline mb-1">
+                    <h3 class="text-xl font-bold text-white print-black">Academic Researcher</h3>
+                    <span class="text-sm text-zinc-500 print-black font-mono">2020 - 2024</span>
+                </div>
+                <div class="text-indigo-400 print-black font-medium text-sm mb-2">University Name</div>
+                <ul class="list-disc list-inside text-zinc-400 print-black text-sm space-y-1">
+                    <li>Conducted statistical analysis using R to interpret complex datasets.</li>
+                    <li>Published 3 papers on political science methodologies.</li>
+                    <li>Managed data collection processes for large-scale surveys.</li>
+                </ul>
+            </div>
+        </section>
+
+        <section class="mb-8">
+            <h2 class="text-xs font-bold uppercase tracking-widest text-zinc-500 mb-6 print-black">Key Projects</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="bg-zinc-900/50 print-bg-none border border-white/5 print-border rounded-xl p-4">
+                    <h3 class="font-bold text-white print-black mb-1">Election Seat Calculator</h3>
+                    <p class="text-xs text-zinc-400 print-black mb-2">Interactive D'Hondt visualization tool.</p>
+                    <div class="flex gap-2">
+                        <span class="text-[10px] bg-white/10 print-border border border-transparent print:border-gray-300 px-2 py-0.5 rounded text-zinc-300 print-black">JavaScript</span>
+                        <span class="text-[10px] bg-white/10 print-border border border-transparent print:border-gray-300 px-2 py-0.5 rounded text-zinc-300 print-black">Tailwind</span>
+                    </div>
+                </div>
+
+                <div class="bg-zinc-900/50 print-bg-none border border-white/5 print-border rounded-xl p-4">
+                    <h3 class="font-bold text-white print-black mb-1">Pokédex App</h3>
+                    <p class="text-xs text-zinc-400 print-black mb-2">Modern database consuming REST APIs.</p>
+                    <div class="flex gap-2">
+                        <span class="text-[10px] bg-white/10 print-border border border-transparent print:border-gray-300 px-2 py-0.5 rounded text-zinc-300 print-black">Vue.js</span>
+                        <span class="text-[10px] bg-white/10 print-border border border-transparent print:border-gray-300 px-2 py-0.5 rounded text-zinc-300 print-black">API</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            
+            <section>
+                <h2 class="text-xs font-bold uppercase tracking-widest text-zinc-500 mb-4 print-black">Education</h2>
+                <div>
+                    <h3 class="font-bold text-white print-black">M.Sc. Political Science</h3>
+                    <div class="text-sm text-zinc-500 print-black">Middle East Technical University</div>
+                    <div class="text-xs text-zinc-600 print-black font-mono mt-1">2018 - 2021</div>
+                </div>
+            </section>
+
+            <section>
+                <h2 class="text-xs font-bold uppercase tracking-widest text-zinc-500 mb-4 print-black">Technical Skills</h2>
+                <div class="flex flex-wrap gap-2">
+                    <span class="px-3 py-1 rounded bg-zinc-800 print-bg-none print-border border border-transparent print:border-gray-300 text-sm text-zinc-300 print-black">R / RStudio</span>
+                    <span class="px-3 py-1 rounded bg-zinc-800 print-bg-none print-border border border-transparent print:border-gray-300 text-sm text-zinc-300 print-black">HTML / CSS</span>
+                    <span class="px-3 py-1 rounded bg-zinc-800 print-bg-none print-border border border-transparent print:border-gray-300 text-sm text-zinc-300 print-black">Vue.js</span>
+                    <span class="px-3 py-1 rounded bg-zinc-800 print-bg-none print-border border border-transparent print:border-gray-300 text-sm text-zinc-300 print-black">Tailwind CSS</span>
+                    <span class="px-3 py-1 rounded bg-zinc-800 print-bg-none print-border border border-transparent print:border-gray-300 text-sm text-zinc-300 print-black">Git / GitHub</span>
+                    <span class="px-3 py-1 rounded bg-zinc-800 print-bg-none print-border border border-transparent print:border-gray-300 text-sm text-zinc-300 print-black">SQL</span>
+                </div>
+            </section>
+        </div>
+
+    </main>
+
+</body>
+</html>
