@@ -16,32 +16,34 @@ function topFunction() {
     document.documentElement.scrollTop = 0; // For Chrome, Firefox, IE, and Opera
 }
 
-/* INJECT TOP NAVIGATION MENU */
+/* INJECT NAVIGATION BAR */
 document.addEventListener("DOMContentLoaded", function() {
-    // 1. Create the Navbar HTML matching your main site style
-    const navHTML = `
+    // 1. Define the HTML for the top bar
+    const navbarHTML = `
     <nav class="lesson-nav">
         <div class="nav-content">
             <div class="nav-left">
-                <a href="https://gitmez.com" class="home-icon"><i class="fas fa-home"></i></a>
-                <span class="divider">/</span>
+                <a href="https://gitmez.com" class="home-link"><i class="fas fa-home"></i></a>
+                <span style="color:#e5e7eb">/</span>
                 <span class="nav-title">R Dersleri</span>
             </div>
             
             <div class="nav-right">
-                <div class="dropdown">
-                    <button class="dropbtn">Jump to Week <i class="fas fa-chevron-down"></i></button>
-                    <div class="dropdown-content">
+                <div class="dropdown-wrapper">
+                    <button class="dropdown-btn">
+                        Select Week <i class="fas fa-chevron-down" style="font-size:0.8em; margin-left:5px;"></i>
+                    </button>
+                    <div class="dropdown-menu">
                         ${Array.from({length: 15}, (_, i) => 
                             `<a href="r-ders-${i+1}.html">Week ${i+1}</a>`
                         ).join('')}
                     </div>
                 </div>
-                <a href="https://gitmez.com/rdersi/rdersi.html" class="nav-link">Course Home</a>
+                <a href="https://gitmez.com/rdersi/rdersi.html" style="font-size:0.9rem; font-weight:600;">Back to Course</a>
             </div>
         </div>
     </nav>`;
 
-    // 2. Insert it at the very start of the body
-    document.body.insertAdjacentHTML("afterbegin", navHTML);
+    // 2. Insert it immediately after the opening <body> tag
+    document.body.insertAdjacentHTML("afterbegin", navbarHTML);
 });
