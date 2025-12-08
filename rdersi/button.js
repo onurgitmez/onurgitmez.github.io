@@ -1,29 +1,27 @@
-/* button-2.js */
-
 document.addEventListener("DOMContentLoaded", function() {
-    
-    // 1. Clean up old elements
+
+    // 1. Remove old elements if they exist
     const oldTab = document.querySelector('.tab');
     if(oldTab) oldTab.remove();
 
-    // 2. Navbar HTML
+    // 2. The HTML for your new Modern Navbar
     const navbarHTML = `
     <nav class="lesson-nav">
         <div class="nav-content">
-            <div class="nav-left" style="display:flex; align-items:center; gap:12px;">
-                <a href="https://gitmez.com" style="color:#276DC3; font-size:1.2rem; text-decoration:none;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <a href="https://gitmez.com" style="color: #276DC3; font-size: 1.2rem; text-decoration: none;">
                     <i class="fas fa-home"></i>
                 </a>
-                <span style="color:#e5e7eb">/</span>
-                <span style="font-weight:600; color:#1f2937;">R Dersleri</span>
+                <span style="color: #e5e7eb;">/</span>
+                <span style="font-weight: 600; color: #111;">R Dersleri</span>
             </div>
-            
-            <div class="nav-right" style="display:flex; align-items:center; gap:20px; position:relative;">
+
+            <div style="display: flex; align-items: center; gap: 20px;">
                 
-                <div style="position: relative;">
+                <div class="dropdown-wrapper">
                     <button class="dropdown-btn" id="weekBtn">
                         <span>Hafta Seçiniz</span>
-                        <i class="fas fa-chevron-down" style="font-size: 0.7em; opacity: 0.6;"></i>
+                        <i class="fas fa-chevron-down" style="font-size: 0.8em; opacity: 0.6;"></i>
                     </button>
                     
                     <div class="dropdown-menu-custom" id="weekMenu">
@@ -33,34 +31,41 @@ document.addEventListener("DOMContentLoaded", function() {
                     </div>
                 </div>
 
-                <a href="https://gitmez.com/rdersi/rdersi.html" style="font-weight:600; font-size:0.9rem; color:#276DC3; text-decoration:none;">
+                <a href="https://gitmez.com/rdersi/rdersi.html" style="font-size: 14px; font-weight: 600; color: #276DC3; text-decoration: none;">
                     Ana Sayfa
                 </a>
             </div>
         </div>
-    </nav>`;
+    </nav>
+    `;
 
-    // 3. Inject
+    // 3. Inject into Body
     document.body.insertAdjacentHTML("afterbegin", navbarHTML);
 
-    // 4. Interaction
+    // 4. Dropdown Click Logic
     const btn = document.getElementById("weekBtn");
     const menu = document.getElementById("weekMenu");
+    const arrow = btn.querySelector(".fa-chevron-down");
 
     if(btn && menu) {
-        btn.addEventListener("click", (e) => {
+        btn.addEventListener("click", function(e) {
             e.stopPropagation();
-            menu.classList.toggle("show");
-            // Rotate arrow effect (optional)
-            const icon = btn.querySelector('.fa-chevron-down');
-            if(icon) icon.style.transform = menu.classList.contains('show') ? 'rotate(180deg)' : 'rotate(0deg)';
+            const isOpen = menu.classList.contains("show");
+            
+            if (isOpen) {
+                menu.classList.remove("show");
+                arrow.style.transform = "rotate(0deg)";
+            } else {
+                menu.classList.add("show");
+                arrow.style.transform = "rotate(180deg)";
+            }
         });
 
-        document.addEventListener("click", (e) => {
+        // Close when clicking outside
+        document.addEventListener("click", function(e) {
             if (!menu.contains(e.target) && !btn.contains(e.target)) {
                 menu.classList.remove("show");
-                const icon = btn.querySelector('.fa-chevron-down');
-                if(icon) icon.style.transform = 'rotate(0deg)';
+                arrow.style.transform = "rotate(0deg)";
             }
         });
     }
