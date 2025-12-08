@@ -3,15 +3,14 @@ body {
     justify-content: center;
     align-items: center;
     min-height: 100vh;
-    background-color: #050505; /* Matches your main site background */
+    background-color: #050505;
     font-family: 'Inter', system-ui, sans-serif;
     color: white;
     margin: 0;
     flex-direction: column;
 }
 
-/* --- PREMIUM GLASS BUTTON --- */
-/* Mimics your Portfolio's "View Resume" button style */
+/* --- GLASS BACK BUTTON --- */
 .glass-btn {
     position: absolute;
     top: 30px;
@@ -19,46 +18,37 @@ body {
     display: flex;
     align-items: center;
     gap: 10px;
-    
-    /* Shape & Size */
     padding: 12px 24px;
-    border-radius: 9999px; /* Rounded Full */
+    border-radius: 9999px;
     text-decoration: none;
-    font-size: 0.875rem; /* Text-sm */
-    font-weight: 600; /* Font-semibold */
-    letter-spacing: 0.025em; /* Tracking-wide */
-    
-    /* Glassmorphism Colors */
+    font-size: 0.875rem;
+    font-weight: 600;
+    letter-spacing: 0.025em;
     background: rgba(255, 255, 255, 0.1);
     border: 1px solid rgba(255, 255, 255, 0.1);
     color: white;
-    backdrop-filter: blur(12px); /* Blur effect */
-    
-    /* Animation */
+    backdrop-filter: blur(12px);
     transition: all 0.3s ease;
     z-index: 100;
 }
 
 .glass-btn:hover {
     background: rgba(255, 255, 255, 0.2);
-    transform: translateY(-2px); /* Slight lift */
-    box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.5);
-}
-
-.glass-btn i {
-    font-size: 1.1rem;
+    transform: translateY(-2px);
 }
 
 /* --- PIANO CONTAINER --- */
 .piano-container {
     text-align: center;
     max-width: 100%;
-    overflow-x: auto; 
+    overflow-x: auto; /* Allows horizontal scroll for the whole piano */
     padding: 20px;
+    /* Smooth momentum scrolling on iOS */
+    -webkit-overflow-scrolling: touch; 
 }
 
 .status {
-    color: #a1a1aa; /* Zinc-400 equivalent */
+    color: #a1a1aa;
     margin-bottom: 25px;
     font-size: 0.9em;
     font-weight: 500;
@@ -66,21 +56,22 @@ body {
 
 .instructions {
     margin-top: 30px;
-    color: #71717a; /* Zinc-500 equivalent */
+    color: #71717a;
     font-size: 0.85em;
-    letter-spacing: 0.05em;
 }
 
 /* --- KEYS LAYOUT --- */
 .piano {
     display: inline-flex;
     position: relative;
-    background: #18181b; /* Zinc-900 equivalent */
+    background: #18181b;
     padding: 12px 12px 0 12px;
     border-radius: 12px;
-    /* Deep shadow for depth */
-    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
     border: 1px solid rgba(255, 255, 255, 0.1);
+    
+    /* CRITICAL FOR MOBILE: Prevents page from dragging when playing */
+    touch-action: none;
 }
 
 .key {
@@ -98,26 +89,27 @@ body {
     user-select: none;
     font-size: 0.9rem;
     transition: all 0.05s ease;
+    
+    /* CRITICAL FOR MOBILE: Prevents zoom on double tap */
+    touch-action: none; 
+    -webkit-tap-highlight-color: transparent; /* Removes blue highlight on Android */
 }
 
-/* --- WHITE KEYS --- */
+/* --- KEY COLORS --- */
 .white {
-    background: linear-gradient(to bottom, #fff 0%, #e4e4e7 100%); /* Zinc-200 fade */
+    background: linear-gradient(to bottom, #fff 0%, #e4e4e7 100%);
     color: #18181b;
     z-index: 1;
-    box-shadow: inset 0 -5px 0 #d4d4d8; /* Zinc-300 shadow */
+    box-shadow: inset 0 -5px 0 #d4d4d8;
 }
 
 .white:active, .white.active {
     background: #d4d4d8;
-    box-shadow: inset 0 -2px 0 #a1a1aa;
     transform: translateY(2px);
-    background: linear-gradient(to bottom, #fff 0%, #d4d4d8 100%);
 }
 
-/* --- BLACK KEYS --- */
 .black {
-    background: linear-gradient(to bottom, #27272a 0%, #000 100%); /* Zinc-800 to Black */
+    background: linear-gradient(to bottom, #27272a 0%, #000 100%);
     color: white;
     height: 150px;
     width: 34px;
@@ -131,18 +123,18 @@ body {
 }
 
 .black:active, .black.active {
-    background: linear-gradient(to bottom, #18181b 0%, #000 100%);
+    background: #18181b;
     box-shadow: inset 0 -1px 0 #000;
 }
 
-/* --- MOBILE ADJUSTMENTS --- */
+/* --- MOBILE RESPONSIVE --- */
 @media (max-width: 600px) {
     .glass-btn {
         position: relative;
         top: 0;
         left: 0;
         margin-bottom: 20px;
-        align-self: flex-start; /* Aligns left */
+        align-self: flex-start;
         margin-left: 20px;
     }
 }
