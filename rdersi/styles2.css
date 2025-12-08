@@ -123,11 +123,16 @@ h1.title { margin-top: 0; font-size: 2.5rem; }
 }
 .dropdown-menu-custom a:hover { background-color: #f3f4f6; color: #276DC3; }
 
-/* --- 4. BACK TO TOP BUTTON --- */
+CSS
+/* styles2.css */
+
+/* ... keep previous rules ... */
+
+/* --- 4. BACK TO TOP BUTTON (Updated Position) --- */
 #backToTopBtn {
-    display: none; /* Hidden by default */
+    display: none;
     position: fixed;
-    bottom: 30px;
+    bottom: 100px; /* Moved UP (was 30px) to avoid hitting the Next button */
     right: 30px;
     z-index: 9999;
     border: none;
@@ -135,24 +140,26 @@ h1.title { margin-top: 0; font-size: 2.5rem; }
     background-color: #276DC3;
     color: white;
     cursor: pointer;
-    width: 50px;
-    height: 50px;
+    width: 45px; /* Slightly smaller for a cleaner look */
+    height: 45px;
     border-radius: 50%;
-    font-size: 1.2rem;
+    font-size: 1.1rem;
     box-shadow: 0 4px 10px rgba(39, 109, 195, 0.3);
     transition: transform 0.2s, background-color 0.2s;
     align-items: center;
     justify-content: center;
 }
+
 #backToTopBtn:hover {
     background-color: #1d4ed8;
     transform: translateY(-3px);
 }
 
-/* --- 5. BOTTOM NAVIGATION (NEXT/PREV) --- */
+/* --- 5. BOTTOM NAVIGATION (Updated Spacing) --- */
 .bottom-nav-container {
     margin-top: 60px;
     padding-top: 30px;
+    padding-bottom: 60px; /* Added extra space at the very bottom of the page */
     border-top: 1px solid #e5e7eb;
     display: flex;
     justify-content: space-between;
@@ -162,21 +169,24 @@ h1.title { margin-top: 0; font-size: 2.5rem; }
 .bottom-nav-btn {
     display: inline-flex;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
     padding: 12px 24px;
     background-color: white;
     border: 1px solid #e5e7eb;
-    border-radius: 8px;
+    border-radius: 50px; /* Made fully rounded (pill shape) to match top menu */
     color: #374151;
     text-decoration: none;
     font-weight: 500;
     transition: all 0.2s;
     font-size: 0.95rem;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05); /* Subtle lift */
 }
+
 .bottom-nav-btn:hover {
     border-color: #276DC3;
     color: #276DC3;
     background-color: #f0f7ff;
     text-decoration: none;
     transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(39, 109, 195, 0.15);
 }
