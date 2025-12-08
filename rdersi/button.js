@@ -1,46 +1,24 @@
 /* =========================================
-   1. SCROLL & BACK TO TOP LOGIC
-   ========================================= */
-window.onscroll = function() {scrollFunction()};
-
-function scrollFunction() {
-    let btn = document.getElementById("backToTopBtn");
-    if (!btn) return; // Guard clause if button doesn't exist yet
-    
-    if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
-        btn.style.display = "block";
-    } else {
-        btn.style.display = "none";
-    }
-}
-
-function topFunction() {
-    document.body.scrollTop = 0;
-    document.documentElement.scrollTop = 0;
-}
-
-/* =========================================
-   2. UI INJECTION (NAVBAR & SIDEBAR LOGIC)
+   1. UI CLEANUP & SETUP
    ========================================= */
 document.addEventListener("DOMContentLoaded", function() {
 
-    // A. Inject the Back to Top Button if not present
-    if (!document.getElementById("backToTopBtn")) {
-        const btnHTML = `<button onclick="topFunction()" id="backToTopBtn" title="Go to top"><i class="fas fa-arrow-up"></i></button>`;
-        document.body.insertAdjacentHTML("beforeend", btnHTML);
-    }
+    // --- A. THE NAV KILLER (Removes the old top bar) ---
+    // We select typical RMarkdown navbar classes
+    const oldNavs = document.querySelectorAll('.navbar, .navbar-default, .navbar-fixed-top');
+    oldNavs.forEach(el => el.remove()); // Physically remove them from HTML
 
-    // B. Define the New Top Navigation HTML
+    // Also remove the padding RMarkdown adds to the body for the navbar
+    document.body.style.paddingTop = "0px";
+
+
+    // --- B. Inject NEW Top Navigation ---
     const navbarHTML = `
     <nav class="lesson-nav">
         <div class="nav-content">
             <div class="nav-left">
-                <button id="tocToggleBtn">
-                    <i class="fas fa-bars"></i>
-                </button>
-                
                 <a href="https://gitmez.com" class="home-link"><i class="fas fa-home"></i></a>
-                <span style="color:#e5e7eb">/</span>
+                <span style="color:#e5e7eb; margin:0 10px;">/</span>
                 <span class="nav-title">R Dersleri</span>
             </div>
             
@@ -55,47 +33,50 @@ document.addEventListener("DOMContentLoaded", function() {
                         ).join('')}
                     </div>
                 </div>
-                <a href="https://gitmez.com/rdersi/rdersi.html" style="font-size:0.9rem; font-weight:600; text-decoration:none; color:var(--r-blue);">Back to Course</a>
+                <a href="https://gitmez.com/rdersi/rdersi.html" style="font-size:0.9rem; font-weight:600; text-decoration:none; color:var(--r-blue); margin-left:15px;">Back to Course</a>
             </div>
         </div>
     </nav>`;
 
-    // C. Insert Navbar at the very top of body
     document.body.insertAdjacentHTML("afterbegin", navbarHTML);
 
-    // D. "Kidnap" the RMarkdown TOC and turn it into our Sidebar
-    // RMarkdown usually generates a div with id="TOC" inside a col-md-3.
-    // We want to move it out of there so we can control it fully.
+
+    // --- C. Setup the Sidebar (TOC) ---
     const tocElement = document.getElementById('TOC');
     
     if (tocElement) {
-        // 1. Add our custom class for styling
+        // Add our styling class
         tocElement.classList.add('toc-sidebar');
         
-        // 2. Move it to the <body> tag directly (detach from grid)
+        // Move it out of the bootstrap grid and directly into the body
+        // This ensures it sticks to the left properly
         document.body.appendChild(tocElement);
-        
-        // 3. Add Close functionality (optional close X inside menu)
-        // Not strictly needed since we toggle, but good for mobile
     }
-
-    // E. Setup Toggle Logic
-    const toggleBtn = document.getElementById('tocToggleBtn');
     
-    if (toggleBtn && tocElement) {
-        // Click button -> Toggle Menu
-        toggleBtn.addEventListener('click', function(e) {
-            e.stopPropagation(); // Prevent click from bubbling to document
-            tocElement.classList.toggle('open');
-        });
-
-        // Click Anywhere Else -> Close Menu
-        document.addEventListener('click', function(e) {
-            if (tocElement.classList.contains('open') && 
-                !tocElement.contains(e.target) && 
-                e.target !== toggleBtn) {
-                tocElement.classList.remove('open');
-            }
-        });
+    // --- D. Back to Top Button ---
+    if (!document.getElementById("backToTopBtn")) {
+        const btnHTML = `<button onclick="topFunction()" id="backToTopBtn" title="Go to top"><i class="fas fa-arrow-up"></i></button>`;
+        document.body.insertAdjacentHTML("beforeend", btnHTML);
     }
 });
+
+/* =========================================
+   2. SCROLL FUNCTIONS
+   ========================================= */
+window.onscroll = function() {scrollFunction()};
+
+function scrollFunction() {
+    let btn = document.getElementById("backToTopBtn");
+    if (!btn) return;
+    
+    if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
+        btn.style.display = "block";
+    } else {
+        btn.style.display = "none";
+    }
+}
+
+function topFunction() {
+    document.body.scrollTop = 0;
+    document.documentElement.scrollTop = 0;
+}
