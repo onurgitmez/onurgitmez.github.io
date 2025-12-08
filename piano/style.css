@@ -11,16 +11,14 @@ body {
 
 .piano-container {
     text-align: center;
-}
-
-.status {
-    color: #aaa;
-    margin-bottom: 20px;
-    font-size: 0.9em;
+    /* Allows the piano to scroll horizontally on small mobile screens */
+    max-width: 100%;
+    overflow-x: auto; 
+    padding: 20px;
 }
 
 .piano {
-    display: flex;
+    display: inline-flex; /* Changed to inline-flex to fit content */
     position: relative;
     background: #111;
     padding: 10px 10px 0 10px;
@@ -29,8 +27,8 @@ body {
 }
 
 .key {
-    height: 220px;
-    width: 60px;
+    height: 240px; /* Made keys slightly taller */
+    width: 50px;   /* Made keys slightly narrower to fit screen */
     border: 1px solid #000;
     border-radius: 0 0 5px 5px;
     position: relative;
@@ -41,7 +39,7 @@ body {
     font-weight: bold;
     cursor: pointer;
     user-select: none;
-    transition: all 0.05s ease;
+    font-size: 0.9rem;
 }
 
 .white {
@@ -61,17 +59,23 @@ body {
 .black {
     background: linear-gradient(to bottom, #333 0%, #000 100%);
     color: white;
-    height: 140px;
-    width: 40px;
-    margin-left: -20px;
-    margin-right: -20px;
+    height: 150px;
+    width: 34px; /* Narrower black keys */
+    margin-left: -17px; /* Adjusted overlap */
+    margin-right: -17px;
     z-index: 2;
     padding-bottom: 10px;
-    font-size: 0.8em;
+    font-size: 0.7em;
     box-shadow: inset 0 -3px 0 #222;
 }
 
 .black:active, .black.active {
     background: linear-gradient(to bottom, #222 0%, #000 100%);
     box-shadow: inset 0 -1px 0 #111;
+}
+
+.instructions {
+    margin-top: 20px;
+    color: #888;
+    font-size: 0.9em;
 }
