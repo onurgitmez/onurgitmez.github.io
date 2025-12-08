@@ -15,7 +15,7 @@ body {
 /* HIDE OLD ELEMENTS */
 .navbar, .tab, .btn-group { display: none !important; }
 
-/* --- 2. TOC & CONTENT --- */
+/* --- 2. TOC (SIDEBAR) STYLES --- */
 .tocify {
     border: none !important;
     background: transparent !important;
@@ -40,6 +40,7 @@ body {
     border-radius: 0 6px 6px 0;
 }
 
+/* --- 3. MAIN CONTENT --- */
 .main-container { max-width: 1400px !important; }
 
 div.toc-content {
@@ -58,7 +59,7 @@ h1, h2, h3 {
 }
 h1.title { margin-top: 0; font-size: 2.5rem; }
 
-/* --- 3. NAVBAR STYLES --- */
+/* --- 4. TOP NAVBAR STYLES --- */
 .lesson-nav {
     position: fixed;
     top: 0;
@@ -81,8 +82,9 @@ h1.title { margin-top: 0; font-size: 2.5rem; }
     justify-content: space-between;
 }
 
-/* Dropdown */
+/* Dropdown Button */
 .dropdown-wrapper { position: relative; }
+
 .dropdown-btn {
     background: white;
     border: 1px solid #d1d5db;
@@ -94,45 +96,65 @@ h1.title { margin-top: 0; font-size: 2.5rem; }
     cursor: pointer;
     min-width: 160px;
     display: flex;
-    justify-content: space-between;
+    justify-content: space-between; /* Pushes text left, arrow right */
     align-items: center;
+    transition: all 0.2s;
 }
 .dropdown-btn:hover { border-color: #276DC3; color: #276DC3; }
 
+/* --- 5. GRID MENU (MODERN LAYOUT) --- */
 .dropdown-menu-custom {
     display: none;
     position: absolute;
-    top: 110%;
+    top: 115%; /* Slight gap */
     right: 0;
-    width: 100%;
+    
+    /* Grid Settings */
+    width: 320px; 
+    display: grid; 
+    grid-template-columns: repeat(3, 1fr); /* 3 Columns */
+    gap: 8px;
+    
     background: white;
     border: 1px solid #e5e7eb;
-    border-radius: 6px;
-    box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
-    max-height: 400px;
-    overflow-y: auto;
-    padding: 5px;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15);
+    padding: 12px;
+    z-index: 100;
 }
-.dropdown-menu-custom.show { display: block; }
+
+/* Ensure 'show' forces grid display (overriding display:none) */
+.dropdown-menu-custom.show { display: grid !important; }
+
+/* The Grid Items (Links) */
 .dropdown-menu-custom a {
-    display: block;
-    padding: 8px 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 0;
     color: #374151;
     text-decoration: none;
-    border-radius: 4px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    border-radius: 8px;
+    border: 1px solid transparent;
+    background-color: #f9fafb;
+    transition: all 0.2s;
 }
-.dropdown-menu-custom a:hover { background-color: #f3f4f6; color: #276DC3; }
 
-CSS
-/* styles2.css */
+.dropdown-menu-custom a:hover { 
+    background-color: #eff6ff; 
+    color: #276DC3; 
+    border-color: #bfdbfe;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(39, 109, 195, 0.1);
+}
 
-/* ... keep previous rules ... */
-
-/* --- 4. BACK TO TOP BUTTON (Updated Position) --- */
+/* --- 6. BACK TO TOP BUTTON --- */
 #backToTopBtn {
     display: none;
     position: fixed;
-    bottom: 100px; /* Moved UP (was 30px) to avoid hitting the Next button */
+    bottom: 100px; /* Moved UP to avoid hitting Next button */
     right: 30px;
     z-index: 9999;
     border: none;
@@ -140,7 +162,7 @@ CSS
     background-color: #276DC3;
     color: white;
     cursor: pointer;
-    width: 45px; /* Slightly smaller for a cleaner look */
+    width: 45px;
     height: 45px;
     border-radius: 50%;
     font-size: 1.1rem;
@@ -155,11 +177,11 @@ CSS
     transform: translateY(-3px);
 }
 
-/* --- 5. BOTTOM NAVIGATION (Updated Spacing) --- */
+/* --- 7. BOTTOM NAVIGATION --- */
 .bottom-nav-container {
     margin-top: 60px;
     padding-top: 30px;
-    padding-bottom: 60px; /* Added extra space at the very bottom of the page */
+    padding-bottom: 60px; /* Added extra space at the very bottom */
     border-top: 1px solid #e5e7eb;
     display: flex;
     justify-content: space-between;
@@ -173,13 +195,13 @@ CSS
     padding: 12px 24px;
     background-color: white;
     border: 1px solid #e5e7eb;
-    border-radius: 50px; /* Made fully rounded (pill shape) to match top menu */
+    border-radius: 50px; /* Pill shape */
     color: #374151;
     text-decoration: none;
     font-weight: 500;
     transition: all 0.2s;
     font-size: 0.95rem;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.05); /* Subtle lift */
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
 }
 
 .bottom-nav-btn:hover {
