@@ -5,107 +5,50 @@
 @import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css');
 
 :root {
-    --r-blue: #276DC3;      /* Your Brand Color */
-    --r-blue-hover: #1d4ed8;
-    --bg-page: #f9fafb;     /* Light Gray Background */
-    --bg-card: #ffffff;     /* White Card Background */
-    --text-main: #1f2937;   /* Dark Gray Text */
-    --text-muted: #6b7280;  /* Muted Text */
+    --r-blue: #276DC3;
+    --bg-page: #f9fafb;
+    --bg-card: #ffffff;
+    --text-main: #1f2937;
+    --text-muted: #9ca3af;
     --border-color: #e5e7eb;
 }
 
 /* =========================================
-   2. HIDE OLD MENUS ("Nuclear Option")
+   2. HIDE THE OLD DUPLICATE MENUS
    ========================================= */
-/* Hides Title Block, Bootstrap Navbars, Tab Buttons, and Code Download Buttons */
-#header,                /* Standard Title/Author block */
-.navbar,                /* Site Navigation Bar */
-.btn-group,             /* Code folding/Download buttons */
-.nav-pills,             /* Tab selectors */
-.nav-tabs,              /* Tab selectors */
-div[role="navigation"], /* Generic navigation containers */
-.dropdown-toggle        /* Any rogue dropdown buttons */
-{
+/* This kills the old top bars AND the weird side effects */
+.navbar, .btn-group, #header, .dropdown-toggle {
     display: none !important;
 }
 
 /* =========================================
-   3. PAGE BASE & LAYOUT
+   3. PAGE LAYOUT (The Modern "Docs" Look)
    ========================================= */
 body {
     font-family: 'Inter', sans-serif !important;
     background-color: var(--bg-page) !important;
     color: var(--text-main) !important;
-    font-size: 16px;
-    line-height: 1.7;
-    padding-top: 80px !important; /* Space for our NEW sticky header */
+    font-size: 17px;
+    line-height: 1.8;
+    padding-top: 80px !important;
     margin: 0;
 }
 
-/* The Main Container (Sidebar + Content) */
 .main-container {
-    max-width: 1400px !important;
+    max-width: 1200px !important;
     margin: 0 auto;
     padding: 20px;
-    display: flex; /* Puts Sidebar next to Content */
-    gap: 40px;
+    display: flex;
+    flex-direction: row; /* Align side-by-side */
     align-items: flex-start;
-}
-
-/* Mobile Layout: Stack them */
-@media (max-width: 1000px) {
-    .main-container {
-        flex-direction: column;
-        gap: 20px;
-    }
-    #TOC {
-        display: none !important; /* Hide Sidebar on mobile */
-    }
+    gap: 40px;
 }
 
 /* =========================================
-   4. THE SIDEBAR (Table of Contents)
-   ========================================= */
-#TOC {
-    width: 250px;           /* Fixed width */
-    position: sticky;       /* Sticks when scrolling */
-    top: 100px;             /* Below the top navbar */
-    max-height: 80vh;
-    overflow-y: auto;
-    border: none !important;
-    background: transparent !important;
-    flex-shrink: 0;         /* Prevent shrinking */
-}
-
-/* Custom Scrollbar */
-#TOC::-webkit-scrollbar { width: 4px; }
-#TOC::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-
-/* Sidebar Links */
-.list-group-item {
-    background: transparent !important;
-    border: none !important;
-    color: var(--text-muted) !important;
-    font-size: 0.9rem;
-    padding: 6px 0 !important;
-    transition: all 0.2s;
-}
-
-/* Active Section Styling */
-.list-group-item.active, .list-group-item:hover {
-    color: var(--r-blue) !important;
-    font-weight: 600 !important;
-    border-left: 3px solid var(--r-blue) !important;
-    padding-left: 12px !important;
-    background: transparent !important;
-    text-shadow: none !important;
-}
-
-/* =========================================
-   5. THE CONTENT CARD (Right Side)
+   4. CONTENT (Left Side - Takes Priority)
    ========================================= */
 div.toc-content {
-    flex: 1; /* Takes remaining width */
+    flex: 1; /* Takes all available space */
     background-color: var(--bg-card);
     padding: 60px;
     border-radius: 12px;
@@ -114,14 +57,70 @@ div.toc-content {
     min-width: 0; /* Prevents overflow */
 }
 
-/* Mobile Padding Adjustment */
-@media (max-width: 768px) {
-    div.toc-content { padding: 25px; }
+/* =========================================
+   5. NAVIGATION (Right Side - Subtle)
+   ========================================= */
+#TOC {
+    width: 240px;          /* Fixed width */
+    position: sticky;      /* Floats when you scroll */
+    top: 100px;
+    order: 2;              /* MOVES IT TO THE RIGHT SIDE */
+    max-height: 80vh;
+    overflow-y: auto;
+    border: none !important;
+    background: transparent !important;
+    padding-left: 20px;
+    border-left: 1px solid #eee !important; /* Divider Line */
+}
+
+/* HIDE THE TITLE ("Ders 1") FROM THE LIST */
+/* This hides the first item, which is usually the page title */
+#TOC > ul > li:first-child > a {
+    display: none !important;
+}
+
+/* Style the links to be clean and subtle */
+.list-group-item {
+    background: transparent !important;
+    border: none !important;
+    color: var(--text-muted) !important;
+    font-size: 0.85rem;
+    padding: 4px 0 !important;
+    transition: all 0.2s;
+}
+
+/* Active Section */
+.list-group-item.active, .list-group-item:hover {
+    color: var(--r-blue) !important;
+    font-weight: 600 !important;
+    border-left: 2px solid var(--r-blue) !important; /* Small blue marker */
+    padding-left: 10px !important;
+    background: transparent !important;
+}
+
+/* Mobile: Hide TOC completely */
+@media (max-width: 1100px) {
+    #TOC { display: none !important; }
+    .main-container { flex-direction: column; }
 }
 
 /* =========================================
-   6. IMAGES & LOGOS
+   6. TYPOGRAPHY & ELEMENTS
    ========================================= */
+/* Main Title inside the content */
+h1.title {
+    color: var(--r-blue);
+    font-weight: 800;
+    font-size: 2.8rem;
+    text-align: center;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 30px;
+    margin-bottom: 50px;
+}
+
+h1, h2, h3 { color: #111; font-weight: 700; margin-top: 2em; }
+
+/* Images */
 img {
     max-width: 100%;
     height: auto;
@@ -131,45 +130,9 @@ img {
     margin: 30px auto;
 }
 
-/* Specific fix for the top Logo if it has class 'logo' */
-img.logo {
-    border: none;
-    margin: 0 auto 20px auto;
-    max-height: 80px; /* Keep the logo size reasonable */
-}
-
-/* =========================================
-   7. TYPOGRAPHY
-   ========================================= */
-h1.title {
-    color: var(--r-blue);
-    font-weight: 800;
-    font-size: 2.5rem;
-    text-align: center;
-    border-bottom: 2px solid var(--border-color);
-    padding-bottom: 20px;
-    margin-bottom: 40px;
-}
-
-h1, h2, h3 { 
-    color: #111; 
-    font-weight: 700; 
-    margin-top: 1.5em; 
-}
-
-/* Links */
-a {
-    color: var(--r-blue);
-    text-decoration: none;
-    font-weight: 500;
-}
-a:hover { text-decoration: underline; }
-
-/* =========================================
-   8. CODE BLOCKS & TABLES
-   ========================================= */
+/* Code Blocks */
 pre {
-    background-color: #f8fafc !important; /* Slate 50 */
+    background-color: #f8fafc !important;
     border: 1px solid #e2e8f0 !important;
     border-radius: 8px !important;
     padding: 20px !important;
@@ -179,15 +142,6 @@ pre {
     overflow-x: auto;
 }
 
-/* Inline Code styling */
-code {
-    background-color: rgba(39, 109, 195, 0.1);
-    color: var(--r-blue);
-    padding: 2px 5px;
-    border-radius: 4px;
-    font-weight: 600;
-}
-
 /* Tables */
 table {
     display: block;
@@ -195,23 +149,21 @@ table {
     width: 100%;
     border-collapse: collapse;
     margin: 30px 0;
-    white-space: nowrap;
 }
 thead th {
     background-color: var(--r-blue);
     color: white;
-    padding: 12px 15px;
+    padding: 12px;
     text-align: left;
     border-radius: 6px 6px 0 0;
 }
 tbody td {
-    padding: 10px 15px;
+    padding: 10px;
     border-bottom: 1px solid #eee;
 }
-tbody tr:hover { background-color: #f8fafc; }
 
 /* =========================================
-   9. NEW TOP NAVBAR STYLING
+   7. TOP NAVBAR (New Week Selector)
    ========================================= */
 .lesson-nav {
     position: fixed;
@@ -219,7 +171,7 @@ tbody tr:hover { background-color: #f8fafc; }
     height: 70px;
     background-color: white;
     border-bottom: 1px solid var(--border-color);
-    z-index: 99999; /* Higher than anything else */
+    z-index: 99999;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -228,20 +180,17 @@ tbody tr:hover { background-color: #f8fafc; }
 
 .nav-content {
     width: 100%;
-    max-width: 1400px;
+    max-width: 1200px;
     padding: 0 20px;
     display: flex;
     justify-content: space-between;
     align-items: center;
 }
 
-/* Navbar Left Side */
 .nav-left { display: flex; align-items: center; gap: 15px; }
-.home-link { color: var(--r-blue); font-size: 1.2rem; transition: transform 0.2s; }
-.home-link:hover { transform: scale(1.1); }
+.home-link { color: var(--r-blue); font-size: 1.2rem; }
 .nav-title { font-weight: 700; font-size: 1.1rem; color: #111; }
 
-/* Navbar Right Side (Button) */
 .nav-right .dropdown-btn {
     background: white;
     border: 1px solid var(--border-color);
@@ -251,15 +200,11 @@ tbody tr:hover { background-color: #f8fafc; }
     color: var(--text-main);
     cursor: pointer;
     font-size: 0.9rem;
-    transition: 0.2s;
     font-family: 'Inter', sans-serif;
+    transition: 0.2s;
 }
-.nav-right .dropdown-btn:hover {
-    border-color: var(--r-blue);
-    color: var(--r-blue);
-}
+.nav-right .dropdown-btn:hover { border-color: var(--r-blue); color: var(--r-blue); }
 
-/* Navbar Dropdown Logic */
 .dropdown-wrapper { position: relative; }
 .dropdown-menu {
     display: none;
@@ -285,37 +230,4 @@ tbody tr:hover { background-color: #f8fafc; }
     font-size: 0.9rem;
     border-radius: 6px;
 }
-.dropdown-menu a:hover {
-    background-color: #eff6ff;
-    color: var(--r-blue);
-}
-
-/* =========================================
-   10. RESTORE "BACK TO TOP" BUTTON
-   ========================================= */
-#backToTopBtn {
-    display: none;
-    position: fixed;
-    bottom: 30px;
-    right: 30px;
-    z-index: 999;
-    border: none;
-    outline: none;
-    background-color: var(--r-blue);
-    color: white;
-    cursor: pointer;
-    padding: 0;
-    border-radius: 50%;
-    width: 50px;
-    height: 50px;
-    box-shadow: 0 4px 12px rgba(39, 109, 195, 0.4);
-    transition: all 0.3s ease;
-    text-align: center;
-    font-size: 18px;
-    line-height: 50px; /* Vertically center the arrow */
-}
-
-#backToTopBtn:hover {
-    background-color: var(--r-blue-hover);
-    transform: translateY(-3px);
-}
+.dropdown-menu a:hover { background-color: #eff6ff; color: var(--r-blue); }
