@@ -1,66 +1,76 @@
-// Show the button when the user scrolls down 20px from the top of the document
-window.onscroll = function() {scrollFunction()};
-
-function scrollFunction() {
-    let btn = document.getElementById("backToTopBtn");
-    if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
-        btn.style.display = "block";
-    } else {
-        btn.style.display = "none";
-    }
-}
-
-// When the user clicks on the button, scroll to the top of the document
-function topFunction() {
-    document.body.scrollTop = 0; // For Safari
-    document.documentElement.scrollTop = 0; // For Chrome, Firefox, IE, and Opera
-}
-
-/* INJECT NAVIGATION BAR */
+/* =========================================
+   TOC TOGGLE BUTTON (Show/Hide Table of Contents)
+   ========================================= */
 document.addEventListener("DOMContentLoaded", function() {
-    // 1. Define the HTML for the top bar
-    const navbarHTML = `
-    <nav class="lesson-nav">
-        <div class="nav-content">
-            <div class="nav-left">
-                <a href="https://gitmez.com" class="home-link"><i class="fas fa-home"></i></a>
-                <span style="color:#e5e7eb">/</span>
-                <span class="nav-title">R Dersleri</span>
-            </div>
+    // Ensure jQuery is available (RMarkdown pages usually load it by default)
+    if (typeof jQuery === 'undefined') return;
+    var $ = jQuery;
+
+    // 1. Create the Toggle Button
+    // We use icons from FontAwesome which is included in your project
+    var $btn = $('<button id="toc-toggle-btn" title="Toggle Table of Contents"><i class="fas fa-list"></i></button>');
+
+    // 2. Apply Styles to the Button (Fixed position on the left)
+    $btn.css({
+        "position": "fixed",
+        "top": "100px",        /* Positioning it below the top navbar */
+        "left": "10px",
+        "z-index": "1000",     /* Ensure it sits above other content */
+        "background-color": "#276DC3", /* Matches your --r-blue variable */
+        "color": "white",
+        "border": "none",
+        "padding": "10px 15px",
+        "border-radius": "5px",
+        "cursor": "pointer",
+        "font-size": "1.2rem",
+        "box-shadow": "0 2px 5px rgba(0,0,0,0.2)",
+        "transition": "all 0.3s ease"
+    });
+
+    // Optional: Add hover effect
+    $btn.hover(
+        function() { $(this).css("background-color", "#1d4ed8"); }, // Hover in
+        function() { $(this).css("background-color", "#276DC3"); }  // Hover out
+    );
+
+    // 3. Append the button to the body
+    $('body').append($btn);
+
+    // 4. Add the Click Logic
+    $btn.click(function() {
+        // Select the column containing the TOC (usually col-sm-4 or col-md-3)
+        var $tocColumn = $('#TOC').parent(); 
+        
+        // Select the column containing the main content
+        var $contentColumn = $('.toc-content'); 
+
+        if ($tocColumn.is(':visible')) {
+            // --- HIDE MODE ---
             
-            <div class="nav-right">
-                <div class="dropdown-wrapper">
-                    <button class="dropdown-btn">
-                        Select Week <i class="fas fa-chevron-down" style="font-size:0.8em; margin-left:5px;"></i>
-                    </button>
-                    <div class="dropdown-menu">
-                        ${Array.from({length: 15}, (_, i) => 
-                            `<a href="r-ders-${i+1}.html">Week ${i+1}</a>`
-                        ).join('')}
-                    </div>
-                </div>
-                <a href="https://gitmez.com/rdersi/rdersi.html" style="font-size:0.9rem; font-weight:600;">Back to Course</a>
-            </div>
-        </div>
-    </nav>`;
+            // Hide the TOC container
+            $tocColumn.hide();
+            
+            // Expand the content container to full width
+            // We remove the specific sizing classes and add full-width classes
+            $contentColumn.removeClass('col-sm-8 col-md-9').addClass('col-sm-12 col-md-12');
+            
+            // Optional: visual indication on button (e.g., make it semi-transparent)
+            $(this).css("opacity", "0.7");
+            
+        } else {
+            // --- VIEW MODE ---
+            
+            // Show the TOC container
+            $tocColumn.show();
+            
+            // Shrink the content container back to original width
+            $contentColumn.removeClass('col-sm-12 col-md-12').addClass('col-sm-8 col-md-9');
+            
+            // Restore button opacity
+            $(this).css("opacity", "1");
+        }
 
-    // 2. Insert it immediately after the opening <body> tag
-    document.body.insertAdjacentHTML("afterbegin", navbarHTML);
-});
-
-/* INJECT BRANDING HEADER */
-document.addEventListener("DOMContentLoaded", function() {
-    // Top Bar HTML
-    const navHTML = `
-    <nav class="lesson-nav">
-        <div style="font-weight:700; font-size:1.2rem; color:#1f2937; display:flex; align-items:center; gap:10px;">
-            <span style="color:#276DC3; font-size:1.4rem;">R</span>
-            <span>Dersleri - Ali Onur Gitmez</span>
-        </div>
-        <div style="margin-left:auto;">
-           <a href="https://gitmez.com" style="color:#276DC3; font-weight:600; text-decoration:none;">Home</a>
-        </div>
-    </nav>`;
-
-    document.body.insertAdjacentHTML("afterbegin", navHTML);
+        // Trigger a window resize event to ensure any R plots or widgets resize correctly
+        $(window).trigger('resize');
+    });
 });
