@@ -24,12 +24,19 @@
 </head>
 <body class="text-slate-800 h-screen overflow-hidden flex flex-col">
 
-    <header class="bg-red-600 text-white shadow-lg z-20 flex-none">
+    <header class="bg-red-600 text-white shadow-lg z-20 flex-none relative">
         <div class="max-w-7xl mx-auto px-4 py-4 flex flex-col lg:flex-row items-center justify-between gap-4">
+            
             <div class="flex items-center gap-3 w-full lg:w-auto justify-center lg:justify-start">
+                
+                <a href="/" class="group flex items-center justify-center w-10 h-10 rounded-full bg-black/10 text-red-100 hover:bg-white hover:text-red-600 transition-all duration-300 backdrop-blur-sm mr-2 shadow-sm" title="Back to Portfolio">
+                    <i class="fas fa-arrow-left text-lg transform group-hover:-translate-x-0.5 transition-transform"></i>
+                </a>
+
                 <div class="bg-white rounded-full p-1 border-4 border-blue-200 shadow-inner">
                     <div class="w-8 h-8 bg-blue-500 rounded-full shadow-inner animate-pulse"></div>
                 </div>
+                
                 <div>
                     <h1 class="text-3xl font-bold tracking-wider leading-none">POKÉDEX</h1>
                     <span class="text-red-200 text-xs font-medium tracking-widest block">GEN 1-9 • DATA DRIVEN</span>
@@ -78,7 +85,7 @@
 
         <div class="bg-red-700 py-2 overflow-x-auto no-scrollbar">
             <div class="max-w-7xl mx-auto px-4 flex gap-2 min-w-max" id="typeFilters">
-                </div>
+            </div>
         </div>
     </header>
 
