@@ -10,58 +10,67 @@ const sampler = new Tone.Sampler({
         "A6": "A6.mp3", "C7": "C7.mp3", "D#7": "Ds7.mp3", "F#7": "Fs7.mp3",
         "A7": "A7.mp3", "C8": "C8.mp3"
     },
-    baseUrl: "./audio/",
+    // Make sure your folder is named 'audio'
+    baseUrl: "./audio/", 
+    
     onload: () => {
-        document.querySelector('.status').innerText = "Ready! Tap keys to play.";
-        console.log("Audio loaded.");
+        document.querySelector('.status').innerText = "Ready!";
+        console.log("Samples loaded.");
     }
 }).toDestination();
 
-// 2. Play Note Helper Function
+// 2. THE FIX: Mobile Start Button Logic
+const startBtn = document.getElementById('start-btn');
+const overlay = document.getElementById('start-overlay');
+
+startBtn.addEventListener('click', async () => {
+    // This explicit user interaction unlocks the audio engine on mobile
+    await Tone.start(); 
+    console.log("Audio Context Started");
+    
+    // Hide the overlay so the user can play
+    overlay.style.opacity = '0';
+    setTimeout(() => {
+        overlay.style.display = 'none';
+    }, 500);
+});
+
+// 3. Helper: Play Note
 function triggerKey(key) {
     const note = key.getAttribute('data-note');
+    // "2n" = play for a half note duration
     sampler.triggerAttackRelease(note, "2n");
     
-    // Visual Feedback
+    // Visual feedback
     key.classList.add('active');
     setTimeout(() => key.classList.remove('active'), 150);
 }
 
-// 3. FORCE AUDIO TO WAKE UP (Crucial for Mobile)
-// Mobile browsers mute audio until the first interaction.
-const startAudio = async () => {
-    if (Tone.context.state !== 'running') {
-        await Tone.start();
-        console.log("Audio Context Started");
-    }
-};
-
-// Add global listener to wake up audio on first touch anywhere
-document.body.addEventListener('touchstart', startAudio, { once: true });
-document.body.addEventListener('click', startAudio, { once: true });
-
-
-// 4. Handle Input Events
+// 4. Handle Inputs
 const keys = document.querySelectorAll('.key');
 
 keys.forEach(key => {
-    // A. Mouse Click (Desktop)
+    // Mouse (Desktop)
     key.addEventListener('mousedown', (e) => {
         triggerKey(key);
     });
 
-    // B. Touch Start (Mobile) - "e.preventDefault()" stops scrolling while playing
+    // Touch (Mobile)
+    // 'touchstart' is faster than 'click' and supports multi-touch chords
     key.addEventListener('touchstart', (e) => {
-        e.preventDefault(); 
+        e.preventDefault(); // Prevents screen scrolling while playing
         triggerKey(key);
     });
 });
 
 // 5. Keyboard Support (Desktop)
 window.addEventListener('keydown', (e) => {
-    if (e.repeat) return;
+    if (e.repeat) return; // Prevent spamming sound when holding key
     const key = document.querySelector(`.key[data-key="${e.key.toLowerCase()}"]`);
-    if (key) {
-        triggerKey(key);
-    }
+    if (key) triggerKey(key);
+});
+
+window.addEventListener('keyup', (e) => {
+    const key = document.querySelector(`.key[data-key="${e.key.toLowerCase()}"]`);
+    if (key) key.classList.remove('active');
 });
