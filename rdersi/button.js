@@ -1,24 +1,30 @@
-/* =========================================
-   1. UI CLEANUP & SETUP
-   ========================================= */
+// Show the button when the user scrolls down 20px from the top of the document
+window.onscroll = function() {scrollFunction()};
+
+function scrollFunction() {
+    let btn = document.getElementById("backToTopBtn");
+    if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
+        btn.style.display = "block";
+    } else {
+        btn.style.display = "none";
+    }
+}
+
+// When the user clicks on the button, scroll to the top of the document
+function topFunction() {
+    document.body.scrollTop = 0; // For Safari
+    document.documentElement.scrollTop = 0; // For Chrome, Firefox, IE, and Opera
+}
+
+/* INJECT NAVIGATION BAR */
 document.addEventListener("DOMContentLoaded", function() {
-
-    // --- A. THE NAV KILLER (Removes the old top bar) ---
-    // We select typical RMarkdown navbar classes
-    const oldNavs = document.querySelectorAll('.navbar, .navbar-default, .navbar-fixed-top');
-    oldNavs.forEach(el => el.remove()); // Physically remove them from HTML
-
-    // Also remove the padding RMarkdown adds to the body for the navbar
-    document.body.style.paddingTop = "0px";
-
-
-    // --- B. Inject NEW Top Navigation ---
+    // 1. Define the HTML for the top bar
     const navbarHTML = `
     <nav class="lesson-nav">
         <div class="nav-content">
             <div class="nav-left">
                 <a href="https://gitmez.com" class="home-link"><i class="fas fa-home"></i></a>
-                <span style="color:#e5e7eb; margin:0 10px;">/</span>
+                <span style="color:#e5e7eb">/</span>
                 <span class="nav-title">R Dersleri</span>
             </div>
             
@@ -33,50 +39,28 @@ document.addEventListener("DOMContentLoaded", function() {
                         ).join('')}
                     </div>
                 </div>
-                <a href="https://gitmez.com/rdersi/rdersi.html" style="font-size:0.9rem; font-weight:600; text-decoration:none; color:var(--r-blue); margin-left:15px;">Back to Course</a>
+                <a href="https://gitmez.com/rdersi/rdersi.html" style="font-size:0.9rem; font-weight:600;">Back to Course</a>
             </div>
         </div>
     </nav>`;
 
+    // 2. Insert it immediately after the opening <body> tag
     document.body.insertAdjacentHTML("afterbegin", navbarHTML);
-
-
-    // --- C. Setup the Sidebar (TOC) ---
-    const tocElement = document.getElementById('TOC');
-    
-    if (tocElement) {
-        // Add our styling class
-        tocElement.classList.add('toc-sidebar');
-        
-        // Move it out of the bootstrap grid and directly into the body
-        // This ensures it sticks to the left properly
-        document.body.appendChild(tocElement);
-    }
-    
-    // --- D. Back to Top Button ---
-    if (!document.getElementById("backToTopBtn")) {
-        const btnHTML = `<button onclick="topFunction()" id="backToTopBtn" title="Go to top"><i class="fas fa-arrow-up"></i></button>`;
-        document.body.insertAdjacentHTML("beforeend", btnHTML);
-    }
 });
 
-/* =========================================
-   2. SCROLL FUNCTIONS
-   ========================================= */
-window.onscroll = function() {scrollFunction()};
+/* INJECT BRANDING HEADER */
+document.addEventListener("DOMContentLoaded", function() {
+    // Top Bar HTML
+    const navHTML = `
+    <nav class="lesson-nav">
+        <div style="font-weight:700; font-size:1.2rem; color:#1f2937; display:flex; align-items:center; gap:10px;">
+            <span style="color:#276DC3; font-size:1.4rem;">R</span>
+            <span>Dersleri - Ali Onur Gitmez</span>
+        </div>
+        <div style="margin-left:auto;">
+           <a href="https://gitmez.com" style="color:#276DC3; font-weight:600; text-decoration:none;">Home</a>
+        </div>
+    </nav>`;
 
-function scrollFunction() {
-    let btn = document.getElementById("backToTopBtn");
-    if (!btn) return;
-    
-    if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
-        btn.style.display = "block";
-    } else {
-        btn.style.display = "none";
-    }
-}
-
-function topFunction() {
-    document.body.scrollTop = 0;
-    document.documentElement.scrollTop = 0;
-}
+    document.body.insertAdjacentHTML("afterbegin", navHTML);
+});
