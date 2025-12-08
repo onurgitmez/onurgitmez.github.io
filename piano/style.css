@@ -10,6 +10,36 @@ body {
     flex-direction: column;
 }
 
+/* --- OVERLAY (Mobile Fix) --- */
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.85);
+    z-index: 9999;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    backdrop-filter: blur(10px);
+}
+
+#start-btn {
+    padding: 16px 32px;
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: white;
+    background: #4f46e5; /* Indigo-600 */
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    box-shadow: 0 0 20px rgba(79, 70, 229, 0.4);
+    transition: transform 0.2s;
+}
+
+#start-btn:active { transform: scale(0.95); }
+
 /* --- GLASS BACK BUTTON --- */
 .glass-btn {
     position: absolute;
@@ -23,7 +53,6 @@ body {
     text-decoration: none;
     font-size: 0.875rem;
     font-weight: 600;
-    letter-spacing: 0.025em;
     background: rgba(255, 255, 255, 0.1);
     border: 1px solid rgba(255, 255, 255, 0.1);
     color: white;
@@ -41,9 +70,8 @@ body {
 .piano-container {
     text-align: center;
     max-width: 100%;
-    overflow-x: auto; /* Allows horizontal scroll for the whole piano */
+    overflow-x: auto;
     padding: 20px;
-    /* Smooth momentum scrolling on iOS */
     -webkit-overflow-scrolling: touch; 
 }
 
@@ -51,7 +79,6 @@ body {
     color: #a1a1aa;
     margin-bottom: 25px;
     font-size: 0.9em;
-    font-weight: 500;
 }
 
 .instructions {
@@ -70,7 +97,7 @@ body {
     box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
     border: 1px solid rgba(255, 255, 255, 0.1);
     
-    /* CRITICAL FOR MOBILE: Prevents page from dragging when playing */
+    /* CRITICAL FOR MOBILE: Prevents scrolling while playing */
     touch-action: none;
 }
 
@@ -90,9 +117,9 @@ body {
     font-size: 0.9rem;
     transition: all 0.05s ease;
     
-    /* CRITICAL FOR MOBILE: Prevents zoom on double tap */
+    /* CRITICAL FOR MOBILE: Prevents zoom/selection */
     touch-action: none; 
-    -webkit-tap-highlight-color: transparent; /* Removes blue highlight on Android */
+    -webkit-tap-highlight-color: transparent;
 }
 
 /* --- KEY COLORS --- */
@@ -127,14 +154,9 @@ body {
     box-shadow: inset 0 -1px 0 #000;
 }
 
-/* --- MOBILE RESPONSIVE --- */
 @media (max-width: 600px) {
     .glass-btn {
         position: relative;
-        top: 0;
-        left: 0;
-        margin-bottom: 20px;
-        align-self: flex-start;
-        margin-left: 20px;
+        top: 0; left: 0; margin-bottom: 20px; align-self: flex-start; margin-left: 20px;
     }
 }
