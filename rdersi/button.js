@@ -1,76 +1,54 @@
-/* =========================================
-   TOC TOGGLE BUTTON (Show/Hide Table of Contents)
-   ========================================= */
+/* button-2.js */
+
 document.addEventListener("DOMContentLoaded", function() {
-    // Ensure jQuery is available (RMarkdown pages usually load it by default)
-    if (typeof jQuery === 'undefined') return;
-    var $ = jQuery;
+    
+    // 1. Create the Modern Navbar HTML
+    const navbarHTML = `
+    <nav class="lesson-nav">
+        <div class="nav-content">
+            <div class="nav-left">
+                <a href="https://gitmez.com" class="home-link">
+                    <i class="fas fa-home"></i>
+                </a>
+                <span style="color:#d1d5db">/</span>
+                <span style="color:#111;">R Dersleri</span>
+            </div>
+            
+            <div class="nav-right">
+                <div class="dropdown-wrapper">
+                    <button class="dropdown-btn" id="weekSelectBtn">
+                        Hafta Seçiniz <i class="fas fa-chevron-down" style="font-size:0.8em;"></i>
+                    </button>
+                    <div class="dropdown-menu" id="weekDropdown">
+                        ${Array.from({length: 15}, (_, i) => 
+                            `<a href="r-ders-${i+1}.html">Ders ${i+1}</a>`
+                        ).join('')}
+                    </div>
+                </div>
+                <a href="https://gitmez.com/rdersi/rdersi.html" style="text-decoration:none; font-size:0.9rem; font-weight:600; color:#276DC3;">
+                    Ana Sayfa
+                </a>
+            </div>
+        </div>
+    </nav>`;
 
-    // 1. Create the Toggle Button
-    // We use icons from FontAwesome which is included in your project
-    var $btn = $('<button id="toc-toggle-btn" title="Toggle Table of Contents"><i class="fas fa-list"></i></button>');
+    // 2. Inject it at the very top of the body
+    document.body.insertAdjacentHTML("afterbegin", navbarHTML);
 
-    // 2. Apply Styles to the Button (Fixed position on the left)
-    $btn.css({
-        "position": "fixed",
-        "top": "100px",        /* Positioning it below the top navbar */
-        "left": "10px",
-        "z-index": "1000",     /* Ensure it sits above other content */
-        "background-color": "#276DC3", /* Matches your --r-blue variable */
-        "color": "white",
-        "border": "none",
-        "padding": "10px 15px",
-        "border-radius": "5px",
-        "cursor": "pointer",
-        "font-size": "1.2rem",
-        "box-shadow": "0 2px 5px rgba(0,0,0,0.2)",
-        "transition": "all 0.3s ease"
+    // 3. Add Logic for the Dropdown
+    const btn = document.getElementById("weekSelectBtn");
+    const menu = document.getElementById("weekDropdown");
+
+    // Toggle menu on click
+    btn.addEventListener("click", function(e) {
+        e.stopPropagation(); // Prevent click from bubbling to document
+        menu.classList.toggle("show");
     });
 
-    // Optional: Add hover effect
-    $btn.hover(
-        function() { $(this).css("background-color", "#1d4ed8"); }, // Hover in
-        function() { $(this).css("background-color", "#276DC3"); }  // Hover out
-    );
-
-    // 3. Append the button to the body
-    $('body').append($btn);
-
-    // 4. Add the Click Logic
-    $btn.click(function() {
-        // Select the column containing the TOC (usually col-sm-4 or col-md-3)
-        var $tocColumn = $('#TOC').parent(); 
-        
-        // Select the column containing the main content
-        var $contentColumn = $('.toc-content'); 
-
-        if ($tocColumn.is(':visible')) {
-            // --- HIDE MODE ---
-            
-            // Hide the TOC container
-            $tocColumn.hide();
-            
-            // Expand the content container to full width
-            // We remove the specific sizing classes and add full-width classes
-            $contentColumn.removeClass('col-sm-8 col-md-9').addClass('col-sm-12 col-md-12');
-            
-            // Optional: visual indication on button (e.g., make it semi-transparent)
-            $(this).css("opacity", "0.7");
-            
-        } else {
-            // --- VIEW MODE ---
-            
-            // Show the TOC container
-            $tocColumn.show();
-            
-            // Shrink the content container back to original width
-            $contentColumn.removeClass('col-sm-12 col-md-12').addClass('col-sm-8 col-md-9');
-            
-            // Restore button opacity
-            $(this).css("opacity", "1");
+    // Close menu when clicking anywhere else on the page
+    document.addEventListener("click", function(e) {
+        if (!menu.contains(e.target) && !btn.contains(e.target)) {
+            menu.classList.remove("show");
         }
-
-        // Trigger a window resize event to ensure any R plots or widgets resize correctly
-        $(window).trigger('resize');
     });
 });
