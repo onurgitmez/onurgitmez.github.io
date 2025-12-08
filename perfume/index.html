@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scent Algorithm</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+</head>
+<body>
+
+    <div id="app" v-cloak>
+        
+        <a href="../index.html" class="back-btn">
+            <i class="ph-bold ph-arrow-left"></i> Portfolio
+        </a>
+
+        <div class="app-container">
+            
+            <header>
+                <i class="ph-duotone ph-drop text-accent"></i>
+                <h1>Scent Algo</h1>
+                <p>AI-Powered Fragrance Discovery</p>
+            </header>
+
+            <div v-if="step === 0" class="card start-card">
+                <div class="icon-circle">✨</div>
+                <h2>Find Your Signature</h2>
+                <p>Answer 3 quick questions to find the perfect fragrance match from our database.</p>
+                <button @click="nextStep" class="primary-btn">Start Analysis</button>
+            </div>
+
+            <div v-if="step > 0 && step <= questions.length" class="card question-card">
+                <div class="progress-bar">
+                    <div class="fill" :style="{ width: (step / questions.length) * 100 + '%' }"></div>
+                </div>
+                
+                <h3>{{ currentQuestion.text }}</h3>
+                
+                <div class="options-grid">
+                    <button 
+                        v-for="option in currentQuestion.options" 
+                        :key="option.text"
+                        @click="selectOption(option.value)"
+                        class="option-btn"
+                    >
+                        <span class="opt-icon">{{ option.icon }}</span>
+                        <span class="opt-text">{{ option.text }}</span>
+                    </button>
+                </div>
+            </div>
+
+            <div v-if="isLoading" class="card loading-card">
+                <div class="spinner"></div>
+                <p>Calculating Notes...</p>
+            </div>
+
+            <div v-if="showResults" class="results-container">
+                <h2>Top Matches</h2>
+                
+                <div class="perfume-list">
+                    <div v-for="(perfume, index) in topMatches" :key="perfume.name" class="perfume-card" :style="{ animationDelay: index * 0.1 + 's' }">
+                        <div class="match-badge">{{ perfume.score }}% Match</div>
+                        
+                        <div class="card-layout">
+                            <div class="img-container">
+                                <img v-if="perfume.image" :src="perfume.image" :alt="perfume.name">
+                                <div v-else class="placeholder-img">
+                                    <i class="ph ph-spray-bottle"></i>
+                                </div>
+                            </div>
+
+                            <div class="perfume-info">
+                                <h3>{{ perfume.name }}</h3>
+                                <span class="brand">{{ perfume.brand }}</span>
+                                
+                                <div class="tags">
+                                    <span class="tag">{{ perfume.type }}</span>
+                                    <span class="tag">{{ perfume.season }}</span>
+                                </div>
+                                
+                                <p class="desc">{{ perfume.description }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <button @click="resetQuiz" class="secondary-btn">Try Again</button>
+            </div>
+
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
