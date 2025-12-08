@@ -30,7 +30,7 @@ document.addEventListener("DOMContentLoaded", function() {
                         ).join('')}
                     </div>
                 </div>
-                <a href="https://gitmez.com/rdersi/rdersi.html" style="font-size: 14px; font-weight: 600; color: #276DC3; text-decoration: none;">
+                <a href="https://gitmez.com/rdersi/index.html" style="font-size: 14px; font-weight: 600; color: #276DC3; text-decoration: none;">
                     Ana Sayfa
                 </a>
             </div>
