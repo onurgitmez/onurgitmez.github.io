@@ -1,0 +1,133 @@
+/* 1. IMPORT FONTS */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+@import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css');
+
+/* 2. GLOBAL RESET & TYPOGRAPHY */
+body {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif !important;
+    background-color: #f9fafb; /* Matches 'bg-gray-50' from your site */
+    color: #1f2937;            /* Matches 'text-gray-800' */
+    font-size: 16px;
+    line-height: 1.7;
+    margin: 0;
+    padding: 0;
+}
+
+/* 3. THE "PAPER" CONTAINER */
+/* This mimics the rounded-xl white cards in your course list */
+.main-container {
+    max-width: 900px !important;
+    margin: 40px auto;
+    background-color: #ffffff;
+    padding: 60px;
+    border-radius: 0.75rem; /* rounded-xl */
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    border: 1px solid #e5e7eb;
+}
+
+/* 4. HEADERS */
+h1, h2, h3, h4 {
+    font-family: 'Inter', sans-serif;
+    font-weight: 700;
+    color: #111827; /* gray-900 */
+    margin-top: 2em;
+    margin-bottom: 0.75em;
+}
+
+/* The Main Title of the Lesson */
+h1.title {
+    color: #276DC3; /* Your specific 'rblue' color */
+    font-size: 2.5rem;
+    text-align: center;
+    border-bottom: 2px solid #e5e7eb;
+    padding-bottom: 20px;
+    margin-top: 0;
+}
+
+/* 5. CODE BLOCKS (R Input/Output) */
+pre {
+    background-color: #f8fafc !important; /* slate-50 */
+    border: 1px solid #e2e8f0 !important; /* slate-200 */
+    border-radius: 0.5rem !important;      /* rounded-lg */
+    padding: 15px !important;
+    font-size: 0.9em;
+    overflow-x: auto;
+    color: #334155;
+}
+
+/* Inline Code (e.g. `mean()`) */
+code {
+    background-color: rgba(39, 109, 195, 0.1) !important; /* Light rblue tint */
+    color: #276DC3 !important; /* rblue text */
+    font-weight: 600;
+    padding: 2px 5px;
+    border-radius: 4px;
+}
+
+/* 6. LINKS */
+a {
+    color: #276DC3;
+    text-decoration: none;
+    font-weight: 600;
+    border-bottom: 1px dotted transparent;
+    transition: all 0.2s;
+}
+
+a:hover {
+    color: #1d4ed8;
+    border-bottom-color: #1d4ed8;
+}
+
+/* 7. TABLES (Data Frames) */
+table {
+    border-collapse: collapse;
+    width: 100%;
+    margin: 30px 0;
+    font-size: 0.95em;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+thead th {
+    background-color: #276DC3; /* rblue header */
+    color: white;
+    padding: 12px 15px;
+    text-align: left;
+    font-weight: 600;
+}
+
+tbody td {
+    padding: 12px 15px;
+    border-bottom: 1px solid #f3f4f6;
+    color: #4b5563;
+}
+
+tbody tr:nth-of-type(even) {
+    background-color: #f9fafb;
+}
+
+/* 8. TABLE OF CONTENTS (Sidebar) */
+/* Modernizing the floating TOC if it exists */
+#TOC {
+    border: none !important;
+    background-color: transparent !important;
+}
+
+.list-group-item.active {
+    background-color: #276DC3 !important;
+    border-color: #276DC3 !important;
+    font-weight: 600;
+}
+
+/* 9. MOBILE RESPONSIVENESS */
+@media (max-width: 768px) {
+    .main-container {
+        padding: 20px;
+        margin: 10px;
+        width: auto;
+    }
+    h1.title {
+        font-size: 1.8rem;
+    }
+}
