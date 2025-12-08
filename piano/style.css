@@ -3,78 +3,97 @@ body {
     justify-content: center;
     align-items: center;
     min-height: 100vh;
-    background-color: #1e1e1e;
-    font-family: 'Inter', sans-serif;
+    background-color: #050505; /* Matches your main site background */
+    font-family: 'Inter', system-ui, sans-serif;
     color: white;
     margin: 0;
-    /* Allow column layout on mobile to fit the button */
-    flex-direction: column; 
+    flex-direction: column;
 }
 
-/* --- HOME BUTTON --- */
-.home-button {
+/* --- PREMIUM GLASS BUTTON --- */
+/* Mimics your Portfolio's "View Resume" button style */
+.glass-btn {
     position: absolute;
-    top: 20px;
-    left: 20px;
+    top: 30px;
+    left: 30px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    
+    /* Shape & Size */
+    padding: 12px 24px;
+    border-radius: 9999px; /* Rounded Full */
     text-decoration: none;
-    color: #888;
-    font-size: 0.9rem;
-    padding: 8px 16px;
-    border: 1px solid #444;
-    border-radius: 20px;
-    background: rgba(0, 0, 0, 0.3);
-    transition: all 0.2s ease;
+    font-size: 0.875rem; /* Text-sm */
+    font-weight: 600; /* Font-semibold */
+    letter-spacing: 0.025em; /* Tracking-wide */
+    
+    /* Glassmorphism Colors */
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: white;
+    backdrop-filter: blur(12px); /* Blur effect */
+    
+    /* Animation */
+    transition: all 0.3s ease;
     z-index: 100;
 }
 
-.home-button:hover {
-    color: white;
-    border-color: white;
-    background: rgba(255, 255, 255, 0.1);
-    transform: translateX(-2px);
+.glass-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateY(-2px); /* Slight lift */
+    box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.5);
+}
+
+.glass-btn i {
+    font-size: 1.1rem;
 }
 
 /* --- PIANO CONTAINER --- */
 .piano-container {
     text-align: center;
     max-width: 100%;
-    overflow-x: auto; /* Allows scrolling on small screens */
+    overflow-x: auto; 
     padding: 20px;
 }
 
 .status {
-    color: #aaa;
-    margin-bottom: 20px;
+    color: #a1a1aa; /* Zinc-400 equivalent */
+    margin-bottom: 25px;
     font-size: 0.9em;
+    font-weight: 500;
 }
 
 .instructions {
-    margin-top: 20px;
-    color: #888;
-    font-size: 0.9em;
+    margin-top: 30px;
+    color: #71717a; /* Zinc-500 equivalent */
+    font-size: 0.85em;
+    letter-spacing: 0.05em;
 }
 
 /* --- KEYS LAYOUT --- */
 .piano {
     display: inline-flex;
     position: relative;
-    background: #111;
-    padding: 10px 10px 0 10px;
-    border-radius: 8px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    background: #18181b; /* Zinc-900 equivalent */
+    padding: 12px 12px 0 12px;
+    border-radius: 12px;
+    /* Deep shadow for depth */
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .key {
     height: 240px;
     width: 50px;
-    border: 1px solid #000;
-    border-radius: 0 0 5px 5px;
+    border: 1px solid #111;
+    border-radius: 0 0 6px 6px;
     position: relative;
     display: flex;
     justify-content: center;
     align-items: flex-end;
     padding-bottom: 20px;
-    font-weight: bold;
+    font-weight: 600;
     cursor: pointer;
     user-select: none;
     font-size: 0.9rem;
@@ -83,22 +102,22 @@ body {
 
 /* --- WHITE KEYS --- */
 .white {
-    background: linear-gradient(to bottom, #fff 0%, #eee 100%);
-    color: #333;
+    background: linear-gradient(to bottom, #fff 0%, #e4e4e7 100%); /* Zinc-200 fade */
+    color: #18181b;
     z-index: 1;
-    box-shadow: inset 0 -5px 0 #ccc;
+    box-shadow: inset 0 -5px 0 #d4d4d8; /* Zinc-300 shadow */
 }
 
 .white:active, .white.active {
-    background: #ddd;
-    box-shadow: inset 0 -2px 0 #bbb;
+    background: #d4d4d8;
+    box-shadow: inset 0 -2px 0 #a1a1aa;
     transform: translateY(2px);
-    background: linear-gradient(to bottom, #fff 0%, #ccc 100%);
+    background: linear-gradient(to bottom, #fff 0%, #d4d4d8 100%);
 }
 
 /* --- BLACK KEYS --- */
 .black {
-    background: linear-gradient(to bottom, #333 0%, #000 100%);
+    background: linear-gradient(to bottom, #27272a 0%, #000 100%); /* Zinc-800 to Black */
     color: white;
     height: 150px;
     width: 34px;
@@ -107,23 +126,23 @@ body {
     z-index: 2;
     padding-bottom: 10px;
     font-size: 0.7em;
-    box-shadow: inset 0 -3px 0 #222;
+    box-shadow: inset 0 -3px 0 #18181b;
+    border: 1px solid #000;
 }
 
 .black:active, .black.active {
-    background: linear-gradient(to bottom, #222 0%, #000 100%);
-    box-shadow: inset 0 -1px 0 #111;
+    background: linear-gradient(to bottom, #18181b 0%, #000 100%);
+    box-shadow: inset 0 -1px 0 #000;
 }
 
-/* --- RESPONSIVE FIXES --- */
+/* --- MOBILE ADJUSTMENTS --- */
 @media (max-width: 600px) {
-    .home-button {
+    .glass-btn {
         position: relative;
-        display: inline-block;
         top: 0;
         left: 0;
         margin-bottom: 20px;
-        align-self: flex-start;
+        align-self: flex-start; /* Aligns left */
         margin-left: 20px;
     }
 }
