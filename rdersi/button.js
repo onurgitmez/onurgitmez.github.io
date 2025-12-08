@@ -47,3 +47,20 @@ document.addEventListener("DOMContentLoaded", function() {
     // 2. Insert it immediately after the opening <body> tag
     document.body.insertAdjacentHTML("afterbegin", navbarHTML);
 });
+
+/* INJECT BRANDING HEADER */
+document.addEventListener("DOMContentLoaded", function() {
+    // Top Bar HTML
+    const navHTML = `
+    <nav class="lesson-nav">
+        <div style="font-weight:700; font-size:1.2rem; color:#1f2937; display:flex; align-items:center; gap:10px;">
+            <span style="color:#276DC3; font-size:1.4rem;">R</span>
+            <span>Dersleri - Ali Onur Gitmez</span>
+        </div>
+        <div style="margin-left:auto;">
+           <a href="https://gitmez.com" style="color:#276DC3; font-weight:600; text-decoration:none;">Home</a>
+        </div>
+    </nav>`;
+
+    document.body.insertAdjacentHTML("afterbegin", navHTML);
+});
