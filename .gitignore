@@ -1,2 +1,19 @@
-_site/
+# Mac System Files (Clutter)
+.DS_Store
+.AppleDouble
+.LSOverride
 
+# Windows System Files (Just in case)
+Thumbs.db
+ehthumbs.db
+
+# Logs and Databases
+*.log
+
+# Dependencies (If you ever use npm later)
+node_modules/
+package-lock.json
+
+# Text Editor Settings (Optional but good practice)
+.vscode/
+.idea/
