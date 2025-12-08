@@ -2,7 +2,6 @@
 
 /* --- 1. FONTS & BASICS --- */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-/* Ensure FontAwesome is available for icons */
 @import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css');
 
 body {
@@ -96,23 +95,23 @@ h1.title { margin-top: 0; font-size: 2.5rem; }
     cursor: pointer;
     min-width: 160px;
     display: flex;
-    justify-content: space-between; /* Pushes text left, arrow right */
+    justify-content: space-between;
     align-items: center;
     transition: all 0.2s;
 }
 .dropdown-btn:hover { border-color: #276DC3; color: #276DC3; }
 
 /* --- 5. GRID MENU (MODERN LAYOUT) --- */
+/* FIX: Removed 'display: grid' from here so 'display: none' actually works */
 .dropdown-menu-custom {
-    display: none;
+    display: none; 
     position: absolute;
-    top: 115%; /* Slight gap */
+    top: 115%;
     right: 0;
     
-    /* Grid Settings */
+    /* Layout properties used ONLY when visible */
     width: 320px; 
-    display: grid; 
-    grid-template-columns: repeat(3, 1fr); /* 3 Columns */
+    grid-template-columns: repeat(3, 1fr); 
     gap: 8px;
     
     background: white;
@@ -123,10 +122,9 @@ h1.title { margin-top: 0; font-size: 2.5rem; }
     z-index: 100;
 }
 
-/* Ensure 'show' forces grid display (overriding display:none) */
+/* FIX: 'display: grid' is now ONLY applied when the 'show' class is added by JS */
 .dropdown-menu-custom.show { display: grid !important; }
 
-/* The Grid Items (Links) */
 .dropdown-menu-custom a {
     display: flex;
     align-items: center;
@@ -154,7 +152,7 @@ h1.title { margin-top: 0; font-size: 2.5rem; }
 #backToTopBtn {
     display: none;
     position: fixed;
-    bottom: 100px; /* Moved UP to avoid hitting Next button */
+    bottom: 100px;
     right: 30px;
     z-index: 9999;
     border: none;
@@ -181,7 +179,7 @@ h1.title { margin-top: 0; font-size: 2.5rem; }
 .bottom-nav-container {
     margin-top: 60px;
     padding-top: 30px;
-    padding-bottom: 60px; /* Added extra space at the very bottom */
+    padding-bottom: 60px;
     border-top: 1px solid #e5e7eb;
     display: flex;
     justify-content: space-between;
@@ -195,7 +193,7 @@ h1.title { margin-top: 0; font-size: 2.5rem; }
     padding: 12px 24px;
     background-color: white;
     border: 1px solid #e5e7eb;
-    border-radius: 50px; /* Pill shape */
+    border-radius: 50px;
     color: #374151;
     text-decoration: none;
     font-weight: 500;
