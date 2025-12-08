@@ -226,3 +226,13 @@ tbody td {
     color: var(--r-blue);
     text-decoration: none;
 }
+
+/* HIDE THE OLD RMARKDOWN MENU */
+.navbar {
+    display: none !important;
+}
+
+/* Adjust top padding since the old menu is gone */
+body {
+    padding-top: 70px !important; /* Just enough for our new white bar */
+}
