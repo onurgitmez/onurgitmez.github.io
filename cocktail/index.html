@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bento Bar Pro</title>
+    <style>
+        :root {
+            --bg-color: #0f0f0f;
+            --card-bg: #1c1c1e;
+            --card-border: #2c2c2e;
+            --text-main: #ffffff;
+            --text-muted: #86868b;
+            --accent: #0a84ff;
+            --success: #30d158;
+            --danger: #ff453a;
+            --warning: #ffd60a;
+            --radius: 24px;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        /* --- LAYOUT --- */
+        .bento-grid {
+            display: grid;
+            grid-template-columns: 280px 300px 1fr;
+            grid-template-rows: auto auto 1fr;
+            gap: 16px;
+            width: 100%;
+            max-width: 1300px;
+            height: 90vh;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: var(--radius);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+        }
+
+        h3 { margin: 0 0 15px 0; font-size: 0.9rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; }
+
+        /* --- INPUTS & CONTROLS --- */
+        select, input {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 12px;
+            background: #2c2c2e;
+            border: 1px solid transparent;
+            color: white;
+            border-radius: 12px;
+            font-size: 1rem;
+            outline: none;
+            box-sizing: border-box;
+            transition: 0.2s;
+        }
+        
+        select:focus, input:focus { border-color: var(--accent); background: #3a3a3c; }
+
+        .btn-group { display: flex; gap: 10px; margin-top: auto; }
+        
+        button {
+            flex: 1;
+            padding: 12px;
+            border-radius: 12px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.1s, filter 0.2s;
+        }
+        button:hover { filter: brightness(1.1); }
+        button:active { transform: scale(0.96); }
+        
+        .btn-primary { background: var(--accent); color: white; }
+        .btn-danger { background: rgba(255, 69, 58, 0.2); color: var(--danger); }
+        .btn-success { background: rgba(48, 209, 88, 0.2); color: var(--success); }
+        
+        .toggle-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .toggle-label { font-size: 0.9rem; font-weight: bold; }
+        
+        /* Switch Slider */
+        .switch { position: relative; display: inline-block; width: 50px; height: 26px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #3a3a3c; transition: .4s; border-radius: 34px; }
+        .slider:before { position: absolute; content: ""; height: 20px; width: 20px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
+        input:checked + .slider { background-color: var(--accent); }
+        input:checked + .slider:before { transform: translateX(24px); }
+
+        /* --- GRID AREAS --- */
+        .area-glass { grid-column: 1 / 2; grid-row: 1 / 2; }
+        .area-stats { grid-column: 1 / 2; grid-row: 2 / 4; }
+        .area-controls { grid-column: 2 / 3; grid-row: 1 / 4; }
+        .area-visual { grid-column: 3 / 4; grid-row: 1 / 4; background: radial-gradient(circle at center, #2c2c2e 0%, #000000 100%); align-items: center; justify-content: center; }
+
+        /* --- STATS DISPLAY --- */
+        .stat-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #2c2c2e; }
+        .stat-val { font-weight: bold; font-family: 'Courier New', monospace; }
+        .stat-val.high { color: var(--danger); }
+        .stat-val.mid { color: var(--warning); }
+        .stat-val.low { color: var(--success); }
+
+        /* --- LISTS --- */
+        .mix-list { flex-grow: 1; overflow-y: auto; margin-top: 10px; max-height: 400px; }
+        .mix-item { display: flex; justify-content: space-between; font-size: 0.85rem; padding: 8px; background: #252527; margin-bottom: 6px; border-radius: 8px; border-left: 3px solid transparent; }
+        
+        /* --- VISUALIZER --- */
+        canvas { max-width: 100%; max-height: 100%; filter: drop-shadow(0 0 30px rgba(0,0,0,0.6)); }
+
+        @media (max-width: 1000px) {
+            .bento-grid { grid-template-columns: 1fr 1fr; grid-template-rows: auto; height: auto; }
+            .area-visual { grid-column: 1 / 3; height: 500px; order: -1; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="bento-grid">
+    
+    <div class="card area-glass">
+        <h3>Vessel & Presentation</h3>
+        <select id="glassType" onchange="renderApp()">
+            <option value="highball">Highball</option>
+            <option value="rocks">Rocks / Old Fashioned</option>
+            <option value="martini">Martini</option>
+            <option value="coupe">Coupe</option>
+            <option value="hurricane">Hurricane</option>
+            <option value="glencairn">Glencairn (Whiskey)</option>
+        </select>
+
+        <div class="toggle-row">
+            <span class="toggle-label">🧊 Add Ice</span>
+            <label class="switch">
+                <input type="checkbox" id="iceToggle" onchange="renderApp()">
+                <span class="slider"></span>
+            </label>
+        </div>
+
+        <label style="font-size:0.8rem; margin-top:10px; display:block;">Garnish</label>
+        <select id="garnishType" onchange="renderApp()">
+            <option value="">None</option>
+            <option value="🍋">Lemon Wheel</option>
+            <option value="🥒">Cucumber Slice</option>
+            <option value="🍒">Maraschino Cherry</option>
+            <option value="🌿">Mint Sprig</option>
+            <option value="🍊">Orange Peel</option>
+            <option value="🫒">Olive</option>
+        </select>
+    </div>
+
+    <div class="card area-stats">
+        <h3>Drink Analytics</h3>
+        <div class="stat-row">
+            <span>Volume</span>
+            <span class="stat-val" style="color:white"><span id="statVol">0</span> ml</span>
+        </div>
+        <div class="stat-row">
+            <span>Strength (ABV)</span>
+            <span class="stat-val" id="statABV">0%</span>
+        </div>
+        <div class="stat-row">
+            <span>Calories</span>
+            <span class="stat-val" id="statCal">0 kcal</span>
+        </div>
+        <div class="stat-row">
+            <span>Est. Cost</span>
+            <span class="stat-val" style="color:var(--success)" id="statCost">$0.00</span>
+        </div>
+
+        <div style="margin-top:20px;">
+            <h3>Preset Menu</h3>
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px;">
+                <button style="font-size:0.8rem; background:#333;" onclick="loadPreset('mojito')">Mojito</button>
+                <button style="font-size:0.8rem; background:#333;" onclick="loadPreset('negroni')">Negroni</button>
+                <button style="font-size:0.8rem; background:#333;" onclick="loadPreset('martini')">Martini</button>
+                <button style="font-size:0.8rem; background:#333;" onclick="loadPreset('zombie')">Zombie</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="card area-controls">
+        <h3>Mixer Station</h3>
+        
+        <select id="catFilter" onchange="populateIngredients()">
+            <option value="all">All Categories</option>
+            <option value="spirit">Spirits</option>
+            <option value="liqueur">Liqueurs</option>
+            <option value="mixer">Juices & Mixers</option>
+            <option value="syrup">Syrups</option>
+        </select>
+
+        <select id="ingSelect"></select>
+
+        <div style="display:flex; gap:10px;">
+            <input type="number" id="ingAmount" placeholder="Qty" value="30" style="flex:1;">
+            <select id="ingUnit" style="flex:1;">
+                <option value="ml">ml</option>
+                <option value="oz">oz</option>
+                <option value="cl">cl</option>
+            </select>
+        </div>
+
+        <div class="btn-group">
+            <button class="btn-primary" onclick="addIngredient()">Pour</button>
+        </div>
+
+        <div class="mix-list" id="mixList"></div>
+
+        <div class="btn-group">
+            <button class="btn-success" id="shakeBtn" onclick="toggleShake()">Shake Mix</button>
+            <button class="btn-danger" onclick="resetGlass()">Dump</button>
+        </div>
+    </div>
+
+    <div class="card area-visual">
+        <canvas id="canvas" width="450" height="600"></canvas>
+    </div>
+
+</div>
+
+<script>
+    // --- 1. DATA DATABASE (JSON Config) ---
+    const DB = {
+        // Spirits
+        'vodka': { name: 'Vodka', type: 'spirit', color: '#dceeff', abv: 40, cal: 231, cost: 0.03, bubble: false },
+        'gin': { name: 'Dry Gin', type: 'spirit', color: '#eef9ff', abv: 40, cal: 263, cost: 0.04, bubble: false },
+        'white_rum': { name: 'White Rum', type: 'spirit', color: '#e8f4f8', abv: 40, cal: 231, cost: 0.03, bubble: false },
+        'dark_rum': { name: 'Dark Rum', type: 'spirit', color: '#5C2C0C', abv: 40, cal: 231, cost: 0.04, bubble: false },
+        'tequila': { name: 'Tequila Blanco', type: 'spirit', color: '#f4ebd0', abv: 40, cal: 231, cost: 0.05, bubble: false },
+        'whiskey': { name: 'Bourbon Whiskey', type: 'spirit', color: '#e3a040', abv: 40, cal: 250, cost: 0.05, bubble: false },
+        'scotch': { name: 'Scotch', type: 'spirit', color: '#d4af37', abv: 40, cal: 250, cost: 0.06, bubble: false },
+        
+        // Liqueurs
+        'triplesec': { name: 'Triple Sec', type: 'liqueur', color: '#ffffff', abv: 30, cal: 300, cost: 0.03, bubble: false },
+        'coffee': { name: 'Coffee Liqueur', type: 'liqueur', color: '#26130b', abv: 20, cal: 350, cost: 0.04, bubble: false },
+        'baileys': { name: 'Irish Cream', type: 'liqueur', color: '#dabba0', abv: 17, cal: 327, cost: 0.04, bubble: false },
+        'campari': { name: 'Campari', type: 'liqueur', color: '#b5121b', abv: 24, cal: 260, cost: 0.04, bubble: false },
+        'vermouth_sweet': { name: 'Sweet Vermouth', type: 'liqueur', color: '#6e1d1d', abv: 16, cal: 160, cost: 0.02, bubble: false },
+        'vermouth_dry': { name: 'Dry Vermouth', type: 'liqueur', color: '#f0f5f5', abv: 16, cal: 120, cost: 0.02, bubble: false },
+        'blue_curacao': { name: 'Blue Curacao', type: 'liqueur', color: '#0055ff', abv: 20, cal: 240, cost: 0.02, bubble: false },
+
+        // Mixers & Juices
+        'lime': { name: 'Lime Juice', type: 'mixer', color: '#d8e8b5', abv: 0, cal: 25, cost: 0.01, bubble: false },
+        'lemon': { name: 'Lemon Juice', type: 'mixer', color: '#fffacd', abv: 0, cal: 25, cost: 0.01, bubble: false },
+        'orange': { name: 'Orange Juice', type: 'mixer', color: '#ffa500', abv: 0, cal: 45, cost: 0.01, bubble: false },
+        'pineapple': { name: 'Pineapple Juice', type: 'mixer', color: '#ffe135', abv: 0, cal: 50, cost: 0.01, bubble: false },
+        'cola': { name: 'Cola', type: 'mixer', color: '#2a1c17', abv: 0, cal: 42, cost: 0.01, bubble: true },
+        'tonic': { name: 'Tonic Water', type: 'mixer', color: '#f0f8ff', abv: 0, cal: 34, cost: 0.01, bubble: true },
+        'soda': { name: 'Soda Water', type: 'mixer', color: '#ffffff', abv: 0, cal: 0, cost: 0.005, bubble: true },
+        'grenadine': { name: 'Grenadine', type: 'syrup', color: '#c20000', abv: 0, cal: 260, cost: 0.01, bubble: false },
+        'simple': { name: 'Simple Syrup', type: 'syrup', color: '#ffffff', abv: 0, cal: 200, cost: 0.005, bubble: false }
+    };
+
+    // --- 2. STATE ---
+    let mix = []; // Array of { id, volume, ...DB data }
+    let isShaken = false;
+
+    // --- 3. CANVAS ENGINE ---
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    let animationId;
+
+    // Glass Paths
+    const glasses = {
+        highball: (x, y) => { ctx.beginPath(); ctx.moveTo(x-45, y); ctx.lineTo(x-40, y+350); ctx.lineTo(x+40, y+350); ctx.lineTo(x+45, y); ctx.closePath(); return {top: y, bottom: y+350, w: 90}; },
+        rocks: (x, y) => { ctx.beginPath(); ctx.moveTo(x-60, y+150); ctx.lineTo(x-50, y+350); ctx.lineTo(x+50, y+350); ctx.lineTo(x+60, y+150); ctx.closePath(); return {top: y+150, bottom: y+350, w: 120}; },
+        martini: (x, y) => { ctx.beginPath(); ctx.moveTo(x-110, y+100); ctx.lineTo(x, y+250); ctx.lineTo(x+110, y+100); ctx.closePath(); return {top: y+100, bottom: y+250, w: 220}; },
+        coupe: (x, y) => { ctx.beginPath(); ctx.arc(x, y+150, 90, 0, Math.PI, false); ctx.lineTo(x-90, y+150); ctx.closePath(); return {top: y+150, bottom: y+240, w: 180}; },
+        hurricane: (x, y) => { ctx.beginPath(); ctx.moveTo(x-40, y); ctx.bezierCurveTo(x-60, y+100, x-60, y+200, x-25, y+280); ctx.lineTo(x-30, y+350); ctx.lineTo(x+30, y+350); ctx.lineTo(x+25, y+280); ctx.bezierCurveTo(x+60, y+200, x+60, y+100, x+40, y); ctx.closePath(); return {top: y, bottom: y+350, w: 100}; },
+        glencairn: (x, y) => { ctx.beginPath(); ctx.moveTo(x-25, y+100); ctx.bezierCurveTo(x-10, y+150, x-50, y+250, x-30, y+350); ctx.lineTo(x+30, y+350); ctx.bezierCurveTo(x+50, y+250, x+10, y+150, x+25, y+100); ctx.closePath(); return {top: y+100, bottom: y+350, w: 80}; }
+    };
+
+    // Helper: Darken Hex for 3D effect
+    function adjustColor(hex, amt) {
+        let usePound = false;
+        if (hex[0] === "#") { hex = hex.slice(1); usePound = true; }
+        let num = parseInt(hex, 16);
+        let r = (num >> 16) + amt; if (r > 255) r = 255; else if (r < 0) r = 0;
+        let b = ((num >> 8) & 0x00FF) + amt; if (b > 255) b = 255; else if (b < 0) b = 0;
+        let g = (num & 0x0000FF) + amt; if (g > 255) g = 255; else if (g < 0) g = 0;
+        return (usePound ? "#" : "") + (g | (b << 8) | (r << 16)).toString(16).padStart(6,0);
+    }
+
+    // Helper: Blend Colors for Shaking
+    function blendColors(ingredients) {
+        let r=0, g=0, b=0, totalVol=0;
+        ingredients.forEach(ing => {
+            let hex = ing.color.replace('#','');
+            let bigint = parseInt(hex, 16);
+            r += ((bigint >> 16) & 255) * ing.volume;
+            g += ((bigint >> 8) & 255) * ing.volume;
+            b += (bigint & 255) * ing.volume;
+            totalVol += ing.volume;
+        });
+        if(totalVol === 0) return '#ffffff';
+        r = Math.round(r/totalVol); g = Math.round(g/totalVol); b = Math.round(b/totalVol);
+        return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+    }
+
+    function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        const glassType = document.getElementById('glassType').value;
+        const hasIce = document.getElementById('iceToggle').checked;
+        const garnish = document.getElementById('garnishType').value;
+        const centerX = canvas.width / 2;
+        const topY = 100;
+        
+        // 1. Draw Background Glass (Ghost)
+        ctx.save();
+        const dims = glasses[glassType](centerX, topY);
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.05)';
+        ctx.fill();
+        ctx.restore();
+
+        // 2. Liquid Logic
+        ctx.save();
+        glasses[glassType](centerX, topY);
+        ctx.clip(); // Masking
+
+        let currentY = dims.bottom;
+        let glassScale = 0.8; // px per ml default
+        if(glassType === 'martini') glassScale = 1.2;
+        if(glassType === 'coupe') glassScale = 1.1;
+
+        // Ice Displacement Logic
+        let displayIngredients = [...mix];
+        if (hasIce && mix.length > 0) {
+            // Ice "lifts" the liquid visually by displacing it
+            // We simulate this by drawing liquid higher up
+            // Simplified: Start Y is higher
+        }
+
+        if (isShaken && mix.length > 0) {
+            // SHAKEN: Single block
+            const totalVol = mix.reduce((a,b)=>a+b.volume, 0);
+            const blendedColor = blendColors(mix);
+            const height = totalVol * glassScale * (hasIce ? 1.2 : 1); // Ice expands volume visually
+
+            const grad = ctx.createLinearGradient(centerX - 50, 0, centerX + 50, 0);
+            grad.addColorStop(0, adjustColor(blendedColor, -60));
+            grad.addColorStop(0.5, blendedColor);
+            grad.addColorStop(1, adjustColor(blendedColor, -60));
+
+            ctx.fillStyle = grad;
+            ctx.fillRect(0, currentY - height, canvas.width, height);
+            
+            // Draw Foam on top if shaken
+            ctx.fillStyle = 'rgba(255,255,255,0.3)';
+            ctx.fillRect(0, currentY - height, canvas.width, 5);
+
+            currentY -= height;
+        } else {
+            // LAYERED: Stacked blocks
+            displayIngredients.forEach(ing => {
+                let h = ing.volume * glassScale;
+                if(hasIce) h *= 1.2; // Displace
+
+                const grad = ctx.createLinearGradient(centerX - 50, 0, centerX + 50, 0);
+                grad.addColorStop(0, adjustColor(ing.color, -50));
+                grad.addColorStop(0.5, ing.color);
+                grad.addColorStop(1, adjustColor(ing.color, -50));
+
+                ctx.fillStyle = grad;
+                ctx.fillRect(0, currentY - h, canvas.width, h);
+                
+                // Bubbles?
+                if(ing.bubble) {
+                    ctx.fillStyle = 'rgba(255,255,255,0.4)';
+                    for(let i=0; i<5; i++) {
+                        let bx = centerX - 20 + Math.random()*40;
+                        let by = currentY - (Math.random()*h);
+                        ctx.beginPath(); ctx.arc(bx, by, 1 + Math.random()*2, 0, Math.PI*2); ctx.fill();
+                    }
+                }
+
+                currentY -= h;
+            });
+        }
+
+        // 3. Ice Cubes (Drawn ON TOP of liquid, inside clip)
+        if(hasIce) {
+            ctx.fillStyle = 'rgba(255,255,255,0.3)';
+            ctx.strokeStyle = 'rgba(255,255,255,0.5)';
+            // Draw random cubes in the filled area
+            const fillHeight = dims.bottom - currentY;
+            if (fillHeight > 0) {
+                for(let i=0; i<5; i++) {
+                    let size = 30;
+                    let ix = centerX - 30 + (Math.random()*60 - 30);
+                    let iy = dims.bottom - (Math.random() * fillHeight);
+                    if(iy > dims.bottom - 20) iy = dims.bottom - 40; // constrain to bottom
+                    
+                    ctx.fillRect(ix, iy, size, size);
+                    ctx.strokeRect(ix, iy, size, size);
+                }
+            }
+        }
+
+        ctx.restore();
+
+        // 4. Glass Outline & Highlights
+        ctx.save();
+        glasses[glassType](centerX, topY);
+        ctx.lineWidth = 3;
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
+        ctx.stroke();
+
+        // Specular Highlight (Shiny glass look)
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(centerX + 35, topY + 50);
+        ctx.lineTo(centerX + 35, dims.bottom - 50);
+        ctx.stroke();
+
+        // Draw Stem if needed
+        if(['martini', 'coupe', 'hurricane', 'glencairn'].includes(glassType)) {
+            ctx.beginPath();
+            ctx.moveTo(centerX, dims.bottom);
+            ctx.lineTo(centerX, dims.bottom + 60); // Stem
+            
+            // Base
+            ctx.moveTo(centerX - 30, dims.bottom + 60);
+            ctx.lineTo(centerX + 30, dims.bottom + 60);
+            
+            ctx.lineWidth = 4;
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
+            ctx.stroke();
+        }
+        ctx.restore();
+
+        // 5. Garnish (On top of everything)
+        if(garnish) {
+            ctx.font = "40px Arial";
+            ctx.fillText(garnish, centerX + 30, dims.top - 10);
+        }
+    }
+
+    function renderApp() {
+        // Continuous animation loop not strictly needed unless we do rising bubbles
+        // For efficiency, we just redraw on state change
+        draw();
+        updateStats();
+    }
+
+    // --- 4. LOGIC & MATH ---
+
+    function populateIngredients() {
+        const cat = document.getElementById('catFilter').value;
+        const select = document.getElementById('ingSelect');
+        select.innerHTML = '';
+        
+        Object.keys(DB).forEach(key => {
+            const item = DB[key];
+            if(cat === 'all' || item.type === cat) {
+                const opt = document.createElement('option');
+                opt.value = key;
+                opt.innerText = item.name;
+                select.appendChild(opt);
+            }
+        });
+    }
+
+    function addIngredient(id, amount) {
+        // Handle Manual Add vs Preset Add
+        if(!id) {
+            id = document.getElementById('ingSelect').value;
+            const unit = document.getElementById('ingUnit').value;
+            let val = parseFloat(document.getElementById('ingAmount').value);
+            if(unit === 'oz') val *= 29.57;
+            if(unit === 'cl') val *= 10;
+            amount = val;
+        }
+        
+        if(!amount || amount <= 0) return;
+
+        const dbItem = DB[id];
+        mix.push({ ...dbItem, volume: amount, id: id });
+        isShaken = false; // Adding new item resets shake status (layering resumes)
+        renderApp();
+        updateMixList();
+    }
+
+    function toggleShake() {
+        if(mix.length === 0) return;
+        isShaken = !isShaken;
+        const btn = document.getElementById('shakeBtn');
+        btn.innerText = isShaken ? "Un-Mix (Layer)" : "Shake Mix";
+        renderApp();
+    }
+
+    function resetGlass() {
+        mix = [];
+        isShaken = false;
+        document.getElementById('shakeBtn').innerText = "Shake Mix";
+        renderApp();
+        updateMixList();
+    }
+
+    function updateStats() {
+        let totalVol = 0;
+        let totalAlc = 0;
+        let totalCal = 0;
+        let totalCost = 0;
+
+        mix.forEach(m => {
+            totalVol += m.volume;
+            totalAlc += m.volume * (m.abv / 100);
+            // Cal is per 100ml in DB
+            totalCal += (m.volume / 100) * m.cal;
+            // Cost is per ml approx (DB has cost per ml)
+            totalCost += m.volume * m.cost;
+        });
+
+        const abv = totalVol > 0 ? (totalAlc / totalVol) * 100 : 0;
+
+        document.getElementById('statVol').innerText = Math.round(totalVol);
+        
+        const abvEl = document.getElementById('statABV');
+        abvEl.innerText = abv.toFixed(1) + "%";
+        abvEl.className = "stat-val " + (abv > 25 ? 'high' : (abv > 10 ? 'mid' : 'low'));
+
+        document.getElementById('statCal').innerText = Math.round(totalCal) + " kcal";
+        document.getElementById('statCost').innerText = "$" + totalCost.toFixed(2);
+    }
+
+    function updateMixList() {
+        const list = document.getElementById('mixList');
+        list.innerHTML = [...mix].reverse().map(m => `
+            <div class="mix-item" style="border-left-color: ${m.color}">
+                <span>${m.name}</span>
+                <span>${Math.round(m.volume)} ml</span>
+            </div>
+        `).join('');
+    }
+
+    // --- 5. PRESETS ---
+    const RECIPES = {
+        mojito: { g:'highball', ice:true, gar:'🌿', ings:[['lime',30],['simple',20],['white_rum',60],['soda',100]] },
+        negroni: { g:'rocks', ice:true, gar:'🍊', ings:[['gin',30],['campari',30],['vermouth_sweet',30]] },
+        martini: { g:'martini', ice:false, gar:'🫒', ings:[['vermouth_dry',15],['gin',75]] },
+        zombie: { g:'hurricane', ice:true, gar:'🍒', ings:[['white_rum',30],['dark_rum',30],['lime',20],['pineapple',30],['grenadine',15]] }
+    };
+
+    function loadPreset(key) {
+        resetGlass();
+        const r = RECIPES[key];
+        document.getElementById('glassType').value = r.g;
+        document.getElementById('iceToggle').checked = r.ice;
+        document.getElementById('garnishType').value = r.gar;
+        
+        // Add sequentially for visual effect
+        let delay = 0;
+        r.ings.forEach(([id, vol]) => {
+            setTimeout(() => addIngredient(id, vol), delay);
+            delay += 100;
+        });
+    }
+
+    // --- INIT ---
+    populateIngredients();
+    renderApp();
+    
+    // Responsive Canvas
+    window.addEventListener('resize', () => {
+        // Optional: logic to resize canvas pixel density if needed
+        renderApp();
+    });
+
+</script>
+
+</body>
+</html>
