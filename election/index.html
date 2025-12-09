@@ -4,10 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>2025 Seçim Simülatörü</title>
+    <meta name="description" content="Türkiye genel seçimleri için interaktif D'Hondt simülatörü.">
+    <meta name="color-scheme" content="dark">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <script>
         tailwind.config = {
+          darkMode: 'class',
           theme: {
             extend: {
               fontFamily: { sans: ['system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'] },
@@ -28,122 +31,200 @@
         }
     </script>
     <style>
+        /* GLOBAL DARK MODE FIXES */
+        :root {
+            color-scheme: dark; /* Forces browser form controls to use light text */
+        }
         body { background-color: #050505; color: white; }
         
+        /* FIX: Force Select Text to be White */
+        select {
+            color: #ffffff !important;
+            background-color: #18181b !important; /* zinc-900 */
+            -webkit-text-fill-color: #ffffff !important;
+            opacity: 1 !important;
+        }
+        
+        /* Style the dropdown options (the list that pops up) */
+        select option {
+            background-color: #18181b;
+            color: #ffffff;
+        }
+
         .bento-card {
             background-color: #121212;
-            border: 1px solid rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.08);
             border-radius: 1.5rem;
             overflow: hidden;
             transition: border-color 0.2s ease;
         }
-        .bento-card:hover { border-color: rgba(255, 255, 255, 0.1); }
+        .bento-card:hover { border-color: rgba(255, 255, 255, 0.15); }
 
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .seat-dot { transition: fill 0.4s ease; }
         
-        /* Accordion Animation */
+        *:focus-visible {
+            outline: 2px solid #ef4444; 
+            outline-offset: 2px;
+        }
+
+        /* White spinners for number inputs */
+        input[type=number]::-webkit-inner-spin-button, 
+        input[type=number]::-webkit-outer-spin-button { 
+            -webkit-appearance: none; 
+            margin: 0; 
+            -webkit-filter: invert(1);
+            filter: invert(1);
+            opacity: 1;
+            cursor: pointer;
+        }
+        input[type=number] {
+            -moz-appearance: textfield; 
+        }
+
         #missingDistrictsList { transition: max-height 0.4s ease-in-out, opacity 0.4s ease-in-out; }
-        .max-h-0 { max-height: 0; opacity: 0; pointer-events: none; }
-        .max-h-open { max-height: 1000px; opacity: 1; pointer-events: auto; }
+        .max-h-0 { max-height: 0; opacity: 0; pointer-events: none; visibility: hidden; }
+        .max-h-open { max-height: 1000px; opacity: 1; pointer-events: auto; visibility: visible; }
+
+        @media (max-width: 768px) {
+            #parliamentChart svg { max-height: 220px; }
+        }
     </style>
 </head>
 <body class="antialiased min-h-screen flex flex-col p-4 md:p-8 selection:bg-red-500 selection:text-white">
 
-    <a href="../index.html" class="fixed top-5 left-5 z-50 flex items-center gap-2 px-4 py-2 bg-zinc-900/90 backdrop-blur-md border border-white/10 rounded-full text-zinc-300 text-sm font-medium hover:bg-zinc-800 hover:text-white transition shadow-lg">
-        <i class="ph ph-arrow-left"></i> Ana Sayfa
+    <a href="#main-content" class="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 bg-red-600 text-white px-4 py-2 rounded z-50">
+        Ana içeriğe geç
     </a>
+
+    <nav aria-label="Ana Navigasyon">
+        <a href="index.html" class="fixed top-5 left-5 z-50 flex items-center gap-2 px-4 py-2 bg-zinc-900/90 backdrop-blur-md border border-white/10 rounded-full text-zinc-300 text-sm font-medium hover:bg-zinc-800 hover:text-white transition shadow-lg" aria-label="Ana Sayfaya Dön">
+            <i class="ph ph-arrow-left" aria-hidden="true"></i> Ana Sayfa
+        </a>
+    </nav>
 
     <header class="w-full max-w-7xl mx-auto mt-12 mb-8 flex flex-col md:flex-row justify-between items-end border-b border-white/10 pb-6 animate-fade-in">
         <div>
-            <h1 class="text-3xl md:text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-red-500 to-zinc-200 mb-2 tracking-tight">
-                Seçim Simülatörü
-            </h1>
-            <p class="text-zinc-400 text-sm md:text-base">D'Hondt Sistemi ile İller ve Genel Meclis Dağılımı</p>
+            <div class="flex items-center gap-3 mb-2">
+                <h1 class="text-3xl md:text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-red-500 to-zinc-200 tracking-tight">
+                    Seçim Simülatörü
+                </h1>
+                <span class="bg-zinc-800 text-zinc-400 text-[10px] px-2 py-1 rounded border border-white/5 uppercase tracking-widest font-bold">Pro</span>
+            </div>
+            <p class="text-zinc-400 text-sm md:text-base">D'Hondt Sistemi &bullet; İçe/Dışa Aktar &bullet; Erişilebilir</p>
         </div>
         
-        <div class="text-right mt-4 md:mt-0 bg-white/5 px-4 py-2 rounded-xl border border-white/5">
-            <div class="text-[10px] text-zinc-500 uppercase tracking-widest font-bold">Toplam Sandalye</div>
-            <div class="text-2xl font-mono font-bold text-white"><span id="totalAllocated">0</span> / 600</div>
+        <div class="flex items-center gap-3 mt-4 md:mt-0">
+            <input type="file" id="importFile" accept=".json" class="hidden" onchange="importData(this)">
+            <button onclick="document.getElementById('importFile').click()" class="text-xs flex items-center gap-2 bg-zinc-900 hover:bg-zinc-800 border border-white/10 px-3 py-2 rounded-lg text-zinc-300 transition" aria-label="JSON dosyasından veri yükle">
+                <i class="ph ph-upload-simple" aria-hidden="true"></i> İçe Aktar
+            </button>
+            <button onclick="exportData()" class="text-xs flex items-center gap-2 bg-zinc-900 hover:bg-zinc-800 border border-white/10 px-3 py-2 rounded-lg text-zinc-300 transition" aria-label="Verileri JSON dosyası olarak indir">
+                <i class="ph ph-download-simple" aria-hidden="true"></i> Dışa Aktar
+            </button>
         </div>
     </header>
 
-    <main class="w-full max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6 pb-20">
+    <main id="main-content" class="w-full max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6 pb-20">
 
-        <div class="lg:col-span-4 space-y-6">
+        <section class="lg:col-span-4 space-y-6" aria-label="Veri Giriş Alanı">
             
             <div class="bento-card p-6">
                 <div class="flex justify-between items-center mb-4">
-                    <label class="text-xs font-bold uppercase tracking-wider text-zinc-500">Seçim Bölgesi</label>
-                    <span class="text-xs bg-red-500/20 text-red-300 px-2 py-1 rounded font-bold" id="districtSeatCount">-- MV</span>
+                    <label for="districtSelect" class="text-xs font-bold uppercase tracking-wider text-zinc-400">Seçim Bölgesi</label>
+                    <span class="text-xs bg-red-500/20 text-red-300 px-2 py-1 rounded font-bold" id="districtSeatCount" aria-label="Bu bölgenin milletvekili sayısı">-- MV</span>
                 </div>
-                <div class="relative">
-                    <select id="districtSelect" onchange="loadDistrictData()" class="w-full bg-zinc-900 border border-white/10 rounded-xl p-3 text-white appearance-none focus:outline-none focus:border-red-500 transition cursor-pointer font-medium">
+                
+                <div class="flex gap-2 h-12">
+                    <button onclick="changeDistrict(-1)" class="w-12 h-full flex items-center justify-center bg-zinc-900 hover:bg-zinc-800 border border-white/10 rounded-xl text-zinc-400 hover:text-white transition focus:ring-2 focus:ring-red-500 group" aria-label="Önceki Bölgeye Git">
+                        <i class="ph ph-caret-left font-bold group-hover:-translate-x-0.5 transition-transform"></i>
+                    </button>
+                    
+                    <div class="relative flex-1 h-full">
+                        <select id="districtSelect" onchange="loadDistrictData()" class="w-full h-full bg-zinc-900 border border-white/10 rounded-xl pl-4 pr-10 text-white font-medium appearance-none focus:outline-none focus:border-red-500 transition cursor-pointer text-sm md:text-base shadow-sm" style="color: white !important;">
                         </select>
-                    <i class="ph ph-caret-down absolute right-4 top-1/2 -translate-y-1/2 text-zinc-500 pointer-events-none"></i>
+                        <i class="ph ph-caret-down absolute right-4 top-1/2 -translate-y-1/2 text-zinc-400 pointer-events-none" aria-hidden="true"></i>
+                    </div>
+
+                    <button onclick="changeDistrict(1)" class="w-12 h-full flex items-center justify-center bg-zinc-900 hover:bg-zinc-800 border border-white/10 rounded-xl text-zinc-400 hover:text-white transition focus:ring-2 focus:ring-red-500 group" aria-label="Sonraki Bölgeye Git">
+                        <i class="ph ph-caret-right font-bold group-hover:translate-x-0.5 transition-transform"></i>
+                    </button>
                 </div>
             </div>
 
             <div class="bento-card p-6 relative">
                 
                 <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-sm font-bold text-zinc-300 flex items-center gap-2">
-                        <i class="ph ph-pencil-simple-line"></i> Oy Girişi
-                    </h3>
-                    <div class="text-xs font-mono px-2 py-1 rounded bg-zinc-800 text-zinc-400 border border-white/5" title="Toplam Girilen Oy">
-                        Toplam: <span id="liveVoteSum" class="text-white font-bold">0</span>
+                    <h2 class="text-sm font-bold text-zinc-300 flex items-center gap-2">
+                        <i class="ph ph-pencil-simple-line" aria-hidden="true"></i> Oy Girişi
+                    </h2>
+                    <div class="flex items-center gap-2">
+                        <button onclick="randomFill()" class="text-xs flex items-center gap-1 bg-zinc-800 hover:bg-white hover:text-black text-zinc-400 px-2 py-1 rounded border border-white/5 transition" aria-label="Rastgele oy verileri ata">
+                            <i class="ph ph-magic-wand" aria-hidden="true"></i> Rastgele
+                        </button>
+                        <div class="text-xs font-mono px-2 py-1 rounded bg-zinc-800 text-zinc-300 border border-white/5" role="status" aria-live="off">
+                            Toplam: <span id="liveVoteSum" class="text-white font-bold">0</span>
+                        </div>
                     </div>
                 </div>
                 
-                <div id="partyInputs" class="space-y-3 max-h-[450px] overflow-y-auto no-scrollbar pb-4">
+                <div id="partyInputs" class="space-y-3 max-h-[450px] overflow-y-auto no-scrollbar pb-4" role="group" aria-label="Parti Oy Girişleri">
                     </div>
 
-                <button onclick="calculateDistrict()" class="w-full mt-4 py-4 bg-white text-black rounded-xl font-bold hover:bg-zinc-200 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2 shadow-lg shadow-white/5">
-                    <i class="ph ph-calculator text-lg"></i> Hesapla
-                </button>
+                <div class="flex gap-3 mt-4">
+                    <button onclick="resetDistrict()" class="w-1/3 py-4 bg-zinc-800/50 text-zinc-400 rounded-xl font-bold hover:bg-red-900/20 hover:text-red-400 border border-transparent hover:border-red-500/20 transition flex items-center justify-center gap-2" aria-label="Bu bölgeyi temizle">
+                        <i class="ph ph-eraser text-lg" aria-hidden="true"></i> Temizle
+                    </button>
+                    <button onclick="calculateDistrict()" class="w-2/3 py-4 bg-white text-black rounded-xl font-bold hover:bg-zinc-200 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2 shadow-lg shadow-white/5" aria-label="Sonuçları Hesapla">
+                        <i class="ph ph-calculator text-lg" aria-hidden="true"></i> Hesapla
+                    </button>
+                </div>
+                <p id="saveStatus" class="text-[10px] text-zinc-500 text-center mt-2 h-4 transition-opacity duration-500 opacity-0" role="status">Otomatik kaydedildi</p>
             </div>
-        </div>
+        </section>
 
-        <div class="lg:col-span-8 space-y-6">
+        <section class="lg:col-span-8 space-y-6" aria-label="Simülasyon Sonuçları">
             
             <div class="bento-card p-6 flex flex-col items-center justify-between relative bg-gradient-to-b from-[#151515] to-[#121212]">
                 
-                <div class="w-full flex justify-between items-start mb-2">
-                    <h3 class="text-sm font-bold text-zinc-300 flex items-center gap-2">
-                        <i class="ph ph-buildings"></i> TBMM Genel Dağılım
-                    </h3>
-                    <button onclick="resetAll()" class="text-xs text-zinc-600 hover:text-red-400 transition flex items-center gap-1 group">
-                        <i class="ph ph-trash group-hover:animate-bounce"></i> Sıfırla
+                <div class="w-full flex justify-between items-start mb-2 z-10">
+                    <h2 class="text-sm font-bold text-zinc-300 flex items-center gap-2">
+                        <i class="ph ph-buildings" aria-hidden="true"></i> TBMM Genel Dağılım
+                    </h2>
+                    <button onclick="resetAll()" class="text-xs text-zinc-500 hover:text-red-400 transition flex items-center gap-1 group px-2 py-1 rounded hover:bg-white/5" aria-label="Tüm simülasyonu sıfırla">
+                        <i class="ph ph-trash group-hover:animate-bounce" aria-hidden="true"></i> Tümünü Sıfırla
                     </button>
                 </div>
                 
-                <div id="parliamentChart" class="w-full max-w-2xl min-h-[300px] flex items-end justify-center"></div>
-
-                <div id="globalScoreboard" class="w-full grid grid-cols-2 sm:grid-cols-4 gap-3 mt-6 pt-6 border-t border-white/5">
+                <div class="relative w-full max-w-2xl flex justify-center">
+                    <div id="parliamentChart" class="w-full min-h-[220px] md:min-h-[300px] flex items-end justify-center" aria-hidden="true"></div>
+                    <div class="absolute bottom-4 left-0 right-0 flex flex-col items-center justify-end pointer-events-none">
+                        <div class="text-[10px] text-zinc-600 uppercase tracking-widest font-bold mb-1">Toplam Sandalye</div>
+                        <div class="text-3xl font-mono font-bold text-white tracking-tighter leading-none" id="totalAllocated">0</div>
+                        <div class="text-xs text-zinc-600 font-medium">/ 600</div>
                     </div>
+                </div>
+
+                <div id="globalScoreboard" class="w-full grid grid-cols-2 sm:grid-cols-4 gap-3 mt-4 pt-6 border-t border-white/5" role="list" aria-label="Parti Sandalye Sayıları"></div>
 
                 <div class="w-full mt-6 pt-6 border-t border-white/5">
-                    <button onclick="toggleMissing()" id="missingToggleBtn" class="w-full flex items-center justify-between text-xs font-bold text-zinc-500 hover:text-white transition uppercase tracking-wider bg-zinc-900/50 p-3 rounded-xl border border-white/5">
+                    <button onclick="toggleMissing()" id="missingToggleBtn" class="w-full flex items-center justify-between text-xs font-bold text-zinc-400 hover:text-white transition uppercase tracking-wider bg-zinc-900/50 p-3 rounded-xl border border-white/5" aria-expanded="false" aria-controls="missingDistrictsList">
                         <span>Veri Girilmeyen Bölgeler</span>
                         <div class="flex items-center gap-2">
                             <span id="missingCountBadge" class="bg-red-500/20 text-red-300 px-2 py-0.5 rounded">--</span>
-                            <i id="missingIcon" class="ph ph-caret-down transition-transform duration-300"></i>
+                            <i id="missingIcon" class="ph ph-caret-down transition-transform duration-300" aria-hidden="true"></i>
                         </div>
                     </button>
-
-                    <div id="missingDistrictsList" class="max-h-0">
-                        <div class="pt-4 flex flex-wrap gap-2" id="missingTags">
-                            </div>
+                    <div id="missingDistrictsList" class="max-h-0 overflow-hidden">
+                        <div class="pt-4 flex flex-wrap gap-2" id="missingTags" role="list"></div>
                     </div>
                 </div>
-
             </div>
 
-            <div class="bento-card p-6">
-                <h3 class="text-sm font-bold text-zinc-300 mb-6 flex items-center gap-2">
-                    <i class="ph ph-chart-bar-horizontal"></i> <span id="currentDistrictTitle">Bölge Sonuçları</span>
-                </h3>
-                
+            <div class="bento-card p-6" aria-live="polite">
+                <h2 class="text-sm font-bold text-zinc-300 mb-6 flex items-center gap-2">
+                    <i class="ph ph-chart-bar-horizontal" aria-hidden="true"></i> <span id="currentDistrictTitle">Bölge Sonuçları</span>
+                </h2>
                 <div id="districtChart" class="space-y-4">
                     <div class="text-center py-10 text-zinc-600 text-sm bg-zinc-900/30 rounded-xl border border-dashed border-white/5">
                         Hesaplama yapmak için bir bölge seçip oyları girin.
@@ -151,12 +232,11 @@
                 </div>
             </div>
 
-        </div>
+        </section>
 
     </main>
 
     <script>
-        // --- 1. DATA CONFIGURATION ---
         const districtsData = {
             "Adana": 15, "Adıyaman": 5, "Afyon": 6, "Ağrı": 4, "Amasya": 3, "Ankara-1": 13, "Ankara-2": 11, "Ankara-3": 12,
             "Antalya": 17, "Artvin": 2, "Aydın": 8, "Balıkesir": 9, "Bilecik": 2, "Bingöl": 3, "Bitlis": 3, "Bolu": 3, "Burdur": 3, 
@@ -183,10 +263,9 @@
         ];
 
         let simulationState = {}; 
+        const STORAGE_KEY = 'electionSim2025_v2_accessible';
 
-        // --- 2. INITIALIZATION ---
         function init() {
-            // Populate Dropdown
             const select = document.getElementById('districtSelect');
             Object.keys(districtsData).sort().forEach(d => {
                 const option = document.createElement('option');
@@ -195,37 +274,145 @@
                 select.appendChild(option);
             });
 
-            // Populate Inputs
             const inputsDiv = document.getElementById('partyInputs');
             parties.forEach(p => {
                 const row = document.createElement('div');
                 row.className = "flex items-center gap-3 group";
                 row.innerHTML = `
-                    <div class="w-1.5 h-8 rounded-full transition group-hover:scale-y-110 shrink-0" style="background-color: ${p.color}"></div>
-                    <span class="text-sm font-bold text-zinc-400 w-24 shrink-0">${p.name}</span>
-                    <input type="number" id="vote-${p.id}" oninput="updateLiveSum()" placeholder="0" class="party-input flex-1 bg-zinc-900 border border-white/10 rounded-lg py-2.5 px-3 text-white text-right font-mono focus:border-white/40 outline-none transition text-sm">
+                    <div class="w-1.5 h-8 rounded-full transition group-hover:scale-y-110 shrink-0" style="background-color: ${p.color}" aria-hidden="true"></div>
+                    <label for="vote-${p.id}" class="text-sm font-bold text-zinc-300 w-24 shrink-0 cursor-pointer">${p.name}</label>
+                    <input type="number" id="vote-${p.id}" oninput="updateLiveSum()" placeholder="0" aria-label="${p.name} için oy sayısı" class="party-input flex-1 bg-zinc-900 border border-white/10 rounded-lg py-2.5 px-3 text-white text-right font-mono focus:border-red-500 focus:ring-1 focus:ring-red-500 outline-none transition text-sm">
                 `;
                 inputsDiv.appendChild(row);
             });
 
             renderParliamentSVG(); 
+            
+            const savedData = localStorage.getItem(STORAGE_KEY);
+            if (savedData) {
+                try {
+                    simulationState = JSON.parse(savedData);
+                } catch (e) {
+                    console.error("Save file corrupted, resetting.");
+                    localStorage.removeItem(STORAGE_KEY);
+                }
+            }
+
             loadDistrictData(); 
             updateGlobalParliament();
         }
 
-        // --- 3. MISSING DISTRICTS LOGIC ---
+        function saveToStorage() {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(simulationState));
+            const status = document.getElementById('saveStatus');
+            status.style.opacity = '1';
+            setTimeout(() => { status.style.opacity = '0'; }, 2000);
+        }
+
+        function exportData() {
+            const dataStr = JSON.stringify(simulationState, null, 2);
+            const blob = new Blob([dataStr], {type: "application/json"});
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `secim_simulasyonu_${new Date().toISOString().slice(0,10)}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        function importData(inputElement) {
+            const file = inputElement.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const json = JSON.parse(e.target.result);
+                    if (confirm('Bu dosya mevcut verilerinizin üzerine yazılacak. Onaylıyor musunuz?')) {
+                        simulationState = json;
+                        saveToStorage();
+                        loadDistrictData();
+                        updateGlobalParliament();
+                        alert('Veriler başarıyla yüklendi.');
+                    }
+                } catch (err) {
+                    alert('Hata: Geçersiz JSON dosyası.');
+                }
+                inputElement.value = ''; 
+            };
+            reader.readAsText(file);
+        }
+
+        function changeDistrict(offset) {
+            const select = document.getElementById('districtSelect');
+            const newIndex = select.selectedIndex + offset;
+            
+            if (newIndex >= 0 && newIndex < select.options.length) {
+                select.selectedIndex = newIndex;
+                loadDistrictData();
+            }
+        }
+
+        function randomFill() {
+            parties.forEach(p => {
+                let randomVote = Math.floor(Math.random() * 80000);
+                if (Math.random() > 0.8) randomVote = Math.floor(Math.random() * 5000); 
+                document.getElementById(`vote-${p.id}`).value = randomVote;
+            });
+            updateLiveSum();
+        }
+
+        function resetDistrict() {
+            const districtName = document.getElementById('districtSelect').value;
+            parties.forEach(p => document.getElementById(`vote-${p.id}`).value = '');
+            updateLiveSum();
+            
+            if (simulationState[districtName]) {
+                delete simulationState[districtName];
+                saveToStorage();
+                document.getElementById('districtChart').innerHTML = `
+                <div class="text-center py-10 text-zinc-600 text-sm bg-zinc-900/30 rounded-xl border border-dashed border-white/5">
+                    Veriler temizlendi.
+                </div>`;
+                updateGlobalParliament();
+            }
+        }
+
+        function resetAll() {
+            if(confirm('Tüm simülasyon verileri ve kayıtlı dosya silinecek. Emin misiniz?')) {
+                simulationState = {};
+                localStorage.removeItem(STORAGE_KEY);
+                
+                parties.forEach(p => document.getElementById(`vote-${p.id}`).value = '');
+                updateLiveSum();
+                document.getElementById('districtChart').innerHTML = '';
+                updateGlobalParliament();
+                
+                const status = document.getElementById('saveStatus');
+                status.innerText = 'Tümü silindi';
+                status.style.opacity = '1';
+                setTimeout(() => { status.style.opacity = '0'; status.innerText = 'Otomatik kaydedildi'; }, 2000);
+            }
+        }
+
         function toggleMissing() {
             const list = document.getElementById('missingDistrictsList');
             const icon = document.getElementById('missingIcon');
+            const btn = document.getElementById('missingToggleBtn');
             
             if (list.classList.contains('max-h-0')) {
                 list.classList.remove('max-h-0');
                 list.classList.add('max-h-open');
                 icon.style.transform = "rotate(180deg)";
+                btn.setAttribute("aria-expanded", "true");
             } else {
                 list.classList.remove('max-h-open');
                 list.classList.add('max-h-0');
                 icon.style.transform = "rotate(0deg)";
+                btn.setAttribute("aria-expanded", "false");
             }
         }
 
@@ -248,17 +435,16 @@
                     tag.onclick = () => {
                         document.getElementById('districtSelect').value = d;
                         loadDistrictData();
-                        // Scroll top
                         window.scrollTo({ top: 0, behavior: 'smooth' });
                     };
-                    tag.className = "text-[10px] bg-zinc-800 hover:bg-white hover:text-black border border-white/10 px-2 py-1 rounded transition cursor-pointer";
+                    tag.className = "text-xs font-medium bg-zinc-800 text-zinc-300 hover:bg-white hover:text-black border border-white/10 px-2.5 py-1.5 rounded transition cursor-pointer";
                     tag.innerText = d;
+                    tag.setAttribute("aria-label", `${d} bölgesine git`);
                     container.appendChild(tag);
                 });
             }
         }
 
-        // --- 4. CORE LOGIC ---
         function updateLiveSum() {
             let sum = 0;
             document.querySelectorAll('.party-input').forEach(input => sum += parseFloat(input.value) || 0);
@@ -332,12 +518,12 @@
             });
 
             simulationState[districtName] = { votes: voteObj, results: resultObj };
+            saveToStorage();
 
             renderDistrictChart(currentVotes, seatsAvailable);
             updateGlobalParliament();
         }
 
-        // --- 5. RENDER FUNCTIONS ---
         function renderDistrictChart(results, totalSeats) {
             const container = document.getElementById('districtChart');
             container.innerHTML = '';
@@ -353,7 +539,7 @@
             winners.forEach(p => {
                 const percent = ((p.seatsWon / totalSeats) * 100).toFixed(0);
                 const html = `
-                    <div class="relative group animate-fade-in">
+                    <div class="relative group animate-fade-in" role="img" aria-label="${p.name}: ${p.seatsWon} sandalye">
                         <div class="flex justify-between items-end mb-1">
                             <div class="flex items-center gap-2">
                                 <span class="font-bold text-white text-lg">${p.seatsWon}</span>
@@ -371,7 +557,6 @@
         }
 
         function updateGlobalParliament() {
-            // 1. Calculate Global Totals
             let globalTotals = {};
             parties.forEach(p => globalTotals[p.id] = 0);
             let totalAllocated = 0;
@@ -385,10 +570,8 @@
 
             document.getElementById('totalAllocated').innerText = totalAllocated;
 
-            // 2. Scoreboard - Sort by Total Seats (High to Low)
             const sortedParties = [...parties].sort((a,b) => globalTotals[b.id] - globalTotals[a.id]);
 
-            // Update SVG Dots
             let seatColors = [];
             sortedParties.forEach(p => {
                 const count = globalTotals[p.id];
@@ -397,27 +580,26 @@
 
             for(let i=0; i<600; i++) {
                 const dot = document.getElementById(`seat-${i}`);
-                if(i < seatColors.length) {
-                    dot.style.fill = seatColors[i];
-                    dot.style.opacity = '1';
-                } else {
-                    dot.style.fill = '#333';
-                    dot.style.opacity = '0.3';
+                if(dot) {
+                    if(i < seatColors.length) {
+                        dot.style.fill = seatColors[i];
+                        dot.style.opacity = '1';
+                    } else {
+                        dot.style.fill = '#333';
+                        dot.style.opacity = '0.3';
+                    }
                 }
             }
 
-            // Update Numerical Scoreboard (ALWAYS SHOW ALL)
             const board = document.getElementById('globalScoreboard');
             board.innerHTML = '';
             
             sortedParties.forEach(p => {
-                // If total > 0, bright text. If 0, dimmed text.
                 const opacityClass = globalTotals[p.id] > 0 ? 'opacity-100' : 'opacity-50';
-                
                 board.innerHTML += `
-                    <div class="flex flex-col p-3 rounded-xl bg-zinc-900 border border-white/5 items-center justify-center ${opacityClass} transition">
-                        <div class="text-2xl font-bold text-white mb-1">${globalTotals[p.id]}</div>
-                        <div class="flex items-center gap-1.5">
+                    <div class="flex flex-col p-3 rounded-xl bg-zinc-900 border border-white/5 items-center justify-center ${opacityClass} transition" role="listitem" aria-label="${p.name}: ${globalTotals[p.id]} toplam sandalye">
+                        <div class="text-2xl font-bold text-white mb-1" aria-hidden="true">${globalTotals[p.id]}</div>
+                        <div class="flex items-center gap-1.5" aria-hidden="true">
                             <div class="w-2 h-2 rounded-full" style="background-color: ${p.color}"></div>
                             <span class="text-[10px] text-zinc-400 font-bold uppercase">${p.name}</span>
                         </div>
@@ -428,24 +610,13 @@
             updateMissingDistricts();
         }
 
-        function resetAll() {
-            if(confirm('Tüm simülasyon verileri silinecek. Emin misiniz?')) {
-                simulationState = {};
-                parties.forEach(p => document.getElementById(`vote-${p.id}`).value = '');
-                updateLiveSum();
-                document.getElementById('districtChart').innerHTML = '';
-                updateGlobalParliament();
-            }
-        }
-
         function renderParliamentSVG() {
             const container = document.getElementById('parliamentChart');
-            // FIX: Increased height from 260 to 320 to ensure top dots aren't cut
-            let svgContent = `<svg viewBox="0 0 500 320" class="w-full h-full drop-shadow-2xl">`;
+            let svgContent = `<svg viewBox="0 0 500 320" class="w-full h-full drop-shadow-2xl" aria-hidden="true">`;
             
             let seatIndex = 0;
             const cx = 250;
-            const cy = 300; // Moved center down to allow more headroom
+            const cy = 300; 
             
             for (let row = 1; row <= 13; row++) {
                 const radius = 90 + (row * 13);
