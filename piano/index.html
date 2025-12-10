@@ -3,67 +3,228 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ali Onur Gitmez | Piano Simulator</title>
+    <title>Piano Simulator</title>
     <link rel="stylesheet" href="style.css">
     
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
     
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
 </head>
 <body>
 
+    <!-- Start Overlay -->
     <div id="start-overlay" class="overlay">
-        <button id="start-btn">Tap to Start Piano</button>
-    </div>
-
-    <a href="../index.html" class="glass-btn">
-        <i class="ph-bold ph-arrow-left"></i>
-        <span>Back to Portfolio</span>
-    </a>
-
-    <div class="piano-container">
-        <h2>JS Piano Simulator</h2>
-        <p class="status">Loading sounds...</p>
-        
-        <div class="piano">
-            <div class="key white" data-note="C3" data-key="z">Z</div>
-            <div class="key black" data-note="C#3" data-key="s">S</div>
-            <div class="key white" data-note="D3" data-key="x">X</div>
-            <div class="key black" data-note="D#3" data-key="d">D</div>
-            <div class="key white" data-note="E3" data-key="c">C</div>
-            <div class="key white" data-note="F3" data-key="v">V</div>
-            <div class="key black" data-note="F#3" data-key="g">G</div>
-            <div class="key white" data-note="G3" data-key="b">B</div>
-            <div class="key black" data-note="G#3" data-key="h">H</div>
-            <div class="key white" data-note="A3" data-key="n">N</div>
-            <div class="key black" data-note="A#3" data-key="j">J</div>
-            <div class="key white" data-note="B3" data-key="m">M</div>
-
-            <div class="key white" data-note="C4" data-key="q">Q</div>
-            <div class="key black" data-note="C#4" data-key="2">2</div>
-            <div class="key white" data-note="D4" data-key="w">W</div>
-            <div class="key black" data-note="D#4" data-key="3">3</div>
-            <div class="key white" data-note="E4" data-key="e">E</div>
-            <div class="key white" data-note="F4" data-key="r">R</div>
-            <div class="key black" data-note="F#4" data-key="5">5</div>
-            <div class="key white" data-note="G4" data-key="t">T</div>
-            <div class="key black" data-note="G#4" data-key="6">6</div>
-            <div class="key white" data-note="A4" data-key="y">Y</div>
-            <div class="key black" data-note="A#4" data-key="7">7</div>
-            <div class="key white" data-note="B4" data-key="u">U</div>
-            
-            <div class="key white" data-note="C5" data-key="i">I</div>
-            <div class="key black" data-note="C#5" data-key="9">9</div>
-            <div class="key white" data-note="D5" data-key="o">O</div>
-            <div class="key black" data-note="D#5" data-key="0">0</div>
-            <div class="key white" data-note="E5" data-key="p">P</div>
+        <div class="start-content">
+            <div class="piano-icon">
+                <i class="ph-fill ph-piano-keys"></i>
+            </div>
+            <h1>Piano Simulator</h1>
+            <p>Experience the sound of a real piano</p>
+            <button id="start-btn">
+                <span>Begin Playing</span>
+                <i class="ph-bold ph-play"></i>
+            </button>
         </div>
-        
-        <p class="instructions">
-            <strong>Desktop:</strong> Use Keyboard &nbsp;|&nbsp; 
-            <strong>Mobile:</strong> Tap & Slide
-        </p>
     </div>
+
+    <!-- Navigation -->
+    <nav class="top-nav">
+        <a href="../index.html" class="back-btn">
+            <i class="ph-bold ph-arrow-left"></i>
+            <span>Portfolio</span>
+        </a>
+        
+        <div class="nav-title">
+            <span class="composer-name">Piano Simulator</span>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <div class="piano-wrapper">
+        <!-- Control Panel -->
+        <div class="control-panel">
+            <div class="control-group">
+                <div class="control-item">
+                    <label for="volume-slider">
+                        <i class="ph-fill ph-speaker-high"></i>
+                        <span>Volume</span>
+                    </label>
+                    <input type="range" id="volume-slider" min="0" max="100" value="70">
+                    <span class="volume-value">70%</span>
+                </div>
+                
+                <div class="control-item">
+                    <label for="reverb-slider">
+                        <i class="ph-fill ph-waves"></i>
+                        <span>Reverb</span>
+                    </label>
+                    <input type="range" id="reverb-slider" min="0" max="100" value="30">
+                    <span class="reverb-value">30%</span>
+                </div>
+            </div>
+            
+            <div class="octave-controls">
+                <button class="octave-btn" id="octave-down">
+                    <i class="ph-bold ph-caret-down"></i>
+                    <span>Oct -</span>
+                </button>
+                <span class="octave-display">Octave: <strong id="current-octave">0</strong></span>
+                <button class="octave-btn" id="octave-up">
+                    <i class="ph-bold ph-caret-up"></i>
+                    <span>Oct +</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Piano Container -->
+        <div class="piano-container">
+            <div class="status-bar">
+                <div class="status-indicator">
+                    <span class="pulse"></span>
+                    <span class="status-text">Loading sounds...</span>
+                </div>
+                <div class="note-display" id="note-display">-</div>
+            </div>
+            
+            <div class="piano-stage">
+                <div class="piano" id="piano">
+                    <!-- C3 Octave -->
+                    <div class="key white" data-note="C3" data-key="z">
+                        <span class="key-label">C3</span>
+                        <span class="key-hint">Z</span>
+                    </div>
+                    <div class="key black" data-note="C#3" data-key="s">
+                        <span class="key-hint">S</span>
+                    </div>
+                    <div class="key white" data-note="D3" data-key="x">
+                        <span class="key-label">D3</span>
+                        <span class="key-hint">X</span>
+                    </div>
+                    <div class="key black" data-note="D#3" data-key="d">
+                        <span class="key-hint">D</span>
+                    </div>
+                    <div class="key white" data-note="E3" data-key="c">
+                        <span class="key-label">E3</span>
+                        <span class="key-hint">C</span>
+                    </div>
+                    <div class="key white" data-note="F3" data-key="v">
+                        <span class="key-label">F3</span>
+                        <span class="key-hint">V</span>
+                    </div>
+                    <div class="key black" data-note="F#3" data-key="g">
+                        <span class="key-hint">G</span>
+                    </div>
+                    <div class="key white" data-note="G3" data-key="b">
+                        <span class="key-label">G3</span>
+                        <span class="key-hint">B</span>
+                    </div>
+                    <div class="key black" data-note="G#3" data-key="h">
+                        <span class="key-hint">H</span>
+                    </div>
+                    <div class="key white" data-note="A3" data-key="n">
+                        <span class="key-label">A3</span>
+                        <span class="key-hint">N</span>
+                    </div>
+                    <div class="key black" data-note="A#3" data-key="j">
+                        <span class="key-hint">J</span>
+                    </div>
+                    <div class="key white" data-note="B3" data-key="m">
+                        <span class="key-label">B3</span>
+                        <span class="key-hint">M</span>
+                    </div>
+
+                    <!-- C4 Octave -->
+                    <div class="key white" data-note="C4" data-key="q">
+                        <span class="key-label">C4</span>
+                        <span class="key-hint">Q</span>
+                    </div>
+                    <div class="key black" data-note="C#4" data-key="2">
+                        <span class="key-hint">2</span>
+                    </div>
+                    <div class="key white" data-note="D4" data-key="w">
+                        <span class="key-label">D4</span>
+                        <span class="key-hint">W</span>
+                    </div>
+                    <div class="key black" data-note="D#4" data-key="3">
+                        <span class="key-hint">3</span>
+                    </div>
+                    <div class="key white" data-note="E4" data-key="e">
+                        <span class="key-label">E4</span>
+                        <span class="key-hint">E</span>
+                    </div>
+                    <div class="key white" data-note="F4" data-key="r">
+                        <span class="key-label">F4</span>
+                        <span class="key-hint">R</span>
+                    </div>
+                    <div class="key black" data-note="F#4" data-key="5">
+                        <span class="key-hint">5</span>
+                    </div>
+                    <div class="key white" data-note="G4" data-key="t">
+                        <span class="key-label">G4</span>
+                        <span class="key-hint">T</span>
+                    </div>
+                    <div class="key black" data-note="G#4" data-key="6">
+                        <span class="key-hint">6</span>
+                    </div>
+                    <div class="key white" data-note="A4" data-key="y">
+                        <span class="key-label">A4</span>
+                        <span class="key-hint">Y</span>
+                    </div>
+                    <div class="key black" data-note="A#4" data-key="7">
+                        <span class="key-hint">7</span>
+                    </div>
+                    <div class="key white" data-note="B4" data-key="u">
+                        <span class="key-label">B4</span>
+                        <span class="key-hint">U</span>
+                    </div>
+                    
+                    <!-- C5 Octave -->
+                    <div class="key white" data-note="C5" data-key="i">
+                        <span class="key-label">C5</span>
+                        <span class="key-hint">I</span>
+                    </div>
+                    <div class="key black" data-note="C#5" data-key="9">
+                        <span class="key-hint">9</span>
+                    </div>
+                    <div class="key white" data-note="D5" data-key="o">
+                        <span class="key-label">D5</span>
+                        <span class="key-hint">O</span>
+                    </div>
+                    <div class="key black" data-note="D#5" data-key="0">
+                        <span class="key-hint">0</span>
+                    </div>
+                    <div class="key white" data-note="E5" data-key="p">
+                        <span class="key-label">E5</span>
+                        <span class="key-hint">P</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="piano-footer">
+                <div class="instructions">
+                    <div class="instruction-item">
+                        <i class="ph-fill ph-keyboard"></i>
+                        <span>Use keyboard keys to play</span>
+                    </div>
+                    <div class="instruction-item">
+                        <i class="ph-fill ph-hand-tap"></i>
+                        <span>Tap or slide on mobile</span>
+                    </div>
+                    <div class="instruction-item">
+                        <i class="ph-fill ph-arrow-up-down"></i>
+                        <span>Change octaves with buttons above</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Floating particles effect -->
+    <div class="particles" id="particles"></div>
 
     <script src="script.js"></script>
 </body>
