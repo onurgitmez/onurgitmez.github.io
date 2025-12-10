@@ -6,38 +6,61 @@ createApp({
             step: 0,
             isLoading: false,
             showResults: false,
+            showBrowse: false,
+            showHelpModal: false,
+            selectedPerfume: null,
+            resultFilter: 'all',
+            searchQuery: '',
+            browseSeasonFilter: '',
+            browseVibeFilter: '',
+            browsePerfumes: [],
+            favorites: [],
+            toasts: [],
+            toastId: 0,
+            currentLoadingMessage: 0,
+            loadingMessages: [
+                'Analyzing your preferences...',
+                'Matching fragrance notes...',
+                'Calculating compatibility...',
+                'Finding perfect matches...'
+            ],
             userAnswers: {
                 season: '',
                 vibe: '',
                 occasion: ''
             },
-            // THE QUESTIONS
             questions: [
                 {
-                    text: "What season is it mostly?",
+                    text: "What's your season?",
+                    subtitle: "Choose the weather you'll be wearing this fragrance in",
+                    emoji: "🌤️",
                     options: [
-                        { text: "Summer / Hot", value: "summer", icon: "☀️" },
-                        { text: "Winter / Cold", value: "winter", icon: "❄️" },
-                        { text: "Spring / Fresh", value: "spring", icon: "🌱" },
-                        { text: "Autumn / Mild", value: "autumn", icon: "🍂" }
+                        { text: "Summer", value: "summer", icon: "☀️", desc: "Hot & Sunny" },
+                        { text: "Winter", value: "winter", icon: "❄️", desc: "Cold & Cozy" },
+                        { text: "Spring", value: "spring", icon: "🌸", desc: "Fresh & Mild" },
+                        { text: "Autumn", value: "autumn", icon: "🍂", desc: "Cool & Crisp" }
                     ]
                 },
                 {
-                    text: "What vibe are you going for?",
+                    text: "What's your vibe?",
+                    subtitle: "The energy and personality you want to project",
+                    emoji: "✨",
                     options: [
-                        { text: "Fresh & Clean", value: "fresh", icon: "🧼" },
-                        { text: "Sweet & Sexy", value: "sweet", icon: "🍭" },
-                        { text: "Dark & Mysterious", value: "dark", icon: "🌚" },
-                        { text: "Professional", value: "woody", icon: "💼" }
+                        { text: "Fresh & Clean", value: "fresh", icon: "🧼", desc: "Bright & Airy" },
+                        { text: "Sweet & Alluring", value: "sweet", icon: "🍭", desc: "Warm & Inviting" },
+                        { text: "Dark & Mysterious", value: "dark", icon: "🌚", desc: "Bold & Complex" },
+                        { text: "Professional", value: "woody", icon: "💼", desc: "Refined & Mature" }
                     ]
                 },
                 {
-                    text: "Where are you going?",
+                    text: "What's the occasion?",
+                    subtitle: "Where will you be wearing this fragrance?",
+                    emoji: "📍",
                     options: [
-                        { text: "Date Night", value: "date", icon: "🍷" },
-                        { text: "Office / Work", value: "office", icon: "💻" },
-                        { text: "Gym / Sport", value: "sport", icon: "💪" },
-                        { text: "Daily Wear", value: "daily", icon: "👕" }
+                        { text: "Date Night", value: "date", icon: "🍷", desc: "Romance" },
+                        { text: "Office", value: "office", icon: "💻", desc: "Work" },
+                        { text: "Gym / Sport", value: "sport", icon: "💪", desc: "Active" },
+                        { text: "Everyday", value: "daily", icon: "👕", desc: "Casual" }
                     ]
                 }
             ],
@@ -1387,14 +1410,57 @@ createApp({
     computed: {
         currentQuestion() {
             return this.questions[this.step - 1];
+        },
+        uniqueBrands() {
+            const brands = [...new Set(this.database.map(p => p.brand))];
+            return brands.length;
+        },
+        filteredResults() {
+            let results = this.topMatches;
+            
+            if (this.resultFilter === 'high') {
+                results = results.filter(p => p.score >= 90);
+            } else if (this.resultFilter === 'favorites') {
+                results = results.filter(p => this.isFavorite(p));
+            }
+            
+            return results;
         }
     },
+    mounted() {
+        this.loadFavorites();
+        this.browsePerfumes = [...this.database];
+    },
     methods: {
-        nextStep() {
-            this.step++;
+        // Navigation
+        startQuiz() {
+            this.step = 1;
+            this.showBrowse = false;
         },
+        
+        goHome() {
+            if (this.step > 0 && this.step <= this.questions.length) {
+                if (this.step > 1) {
+                    this.step--;
+                } else {
+                    this.resetQuiz();
+                }
+            } else {
+                this.resetQuiz();
+            }
+        },
+        
+        browseAll() {
+            this.showBrowse = true;
+            this.browsePerfumes = [...this.database];
+        },
+        
+        toggleHelp() {
+            this.showHelpModal = !this.showHelpModal;
+        },
+        
+        // Question Flow
         selectOption(value) {
-            // Save answer based on current step
             if (this.step === 1) this.userAnswers.season = value;
             if (this.step === 2) this.userAnswers.vibe = value;
             if (this.step === 3) this.userAnswers.occasion = value;
@@ -1405,53 +1471,257 @@ createApp({
                 this.calculateResults();
             }
         },
+        
+        jumpToQuestion(questionNum) {
+            if (questionNum <= this.step && questionNum > 0) {
+                this.step = questionNum;
+            }
+        },
+        
+        // Results Calculation
         calculateResults() {
-            this.step++; // Move to loading state
+            this.step++;
             this.isLoading = true;
+            this.currentLoadingMessage = 0;
+            
+            // Cycle through loading messages
+            const messageInterval = setInterval(() => {
+                this.currentLoadingMessage = (this.currentLoadingMessage + 1) % this.loadingMessages.length;
+            }, 500);
 
-            // Simulate calculation delay for cool effect
             setTimeout(() => {
+                clearInterval(messageInterval);
                 this.runAlgorithm();
                 this.isLoading = false;
                 this.showResults = true;
-            }, 1500);
+            }, 2000);
         },
+        
         runAlgorithm() {
             const scoredPerfumes = this.database.map(perfume => {
                 let score = 0;
-                let maxScore = 3; 
+                let maxScore = 3;
+                let matchedTags = [];
 
-                // Tag Matching Logic
-                if (perfume.tags.includes(this.userAnswers.season)) score++;
-                if (perfume.tags.includes(this.userAnswers.vibe)) score++;
-                if (perfume.tags.includes(this.userAnswers.occasion)) score++;
-                
-                // Vibe Matching Fallbacks (e.g., 'Fresh' vibe also matches 'sport' tags)
-                if (this.userAnswers.vibe === 'fresh' && perfume.tags.includes('sport')) score += 0.5;
-                if (this.userAnswers.vibe === 'dark' && perfume.tags.includes('woody')) score += 0.5;
-
-                // Calculate %
-                let percentage = Math.round((score / maxScore) * 100);
-                
-                // Versatility Bonus for Daily drivers
-                if (percentage < 100 && perfume.tags.includes('daily') && this.userAnswers.occasion === 'daily') {
-                    percentage += 10; 
+                // Direct tag matching
+                if (perfume.tags.includes(this.userAnswers.season)) {
+                    score++;
+                    matchedTags.push(this.userAnswers.season);
+                }
+                if (perfume.tags.includes(this.userAnswers.vibe)) {
+                    score++;
+                    matchedTags.push(this.userAnswers.vibe);
+                }
+                if (perfume.tags.includes(this.userAnswers.occasion)) {
+                    score++;
+                    matchedTags.push(this.userAnswers.occasion);
                 }
                 
-                if (percentage > 100) percentage = 100;
+                // Smart matching logic
+                if (this.userAnswers.vibe === 'fresh') {
+                    if (perfume.tags.includes('sport')) score += 0.5;
+                    if (perfume.type.toLowerCase().includes('aquatic')) score += 0.3;
+                    if (perfume.type.toLowerCase().includes('citrus')) score += 0.3;
+                }
+                
+                if (this.userAnswers.vibe === 'dark') {
+                    if (perfume.tags.includes('woody')) score += 0.5;
+                    if (perfume.type.toLowerCase().includes('oriental')) score += 0.3;
+                    if (perfume.type.toLowerCase().includes('leather')) score += 0.3;
+                }
+                
+                if (this.userAnswers.vibe === 'sweet') {
+                    if (perfume.type.toLowerCase().includes('vanilla')) score += 0.3;
+                    if (perfume.type.toLowerCase().includes('gourmand')) score += 0.3;
+                }
 
-                return { ...perfume, score: percentage };
+                // Calculate percentage
+                let percentage = Math.round((score / maxScore) * 100);
+                
+                // Bonus for versatile daily fragrances
+                if (percentage < 100 && perfume.tags.includes('daily') && this.userAnswers.occasion === 'daily') {
+                    percentage = Math.min(100, percentage + 10);
+                }
+                
+                // Add season to perfume object for display
+                const season = perfume.tags.find(tag => ['summer', 'winter', 'spring', 'autumn'].includes(tag));
+                
+                return { 
+                    ...perfume, 
+                    score: percentage,
+                    season: season,
+                    matchedTags 
+                };
             });
 
-            // Sort by score (Highest first) and take top 5
+            // Sort and get top 10 matches
             this.topMatches = scoredPerfumes
                 .sort((a, b) => b.score - a.score)
-                .slice(0, 5);
+                .slice(0, 10);
         },
+        
+        // Display helpers
+        getMatchClass(score) {
+            if (score >= 90) return 'perfect';
+            if (score >= 75) return 'great';
+            return 'good';
+        },
+        
+        getPreferenceSummary() {
+            const parts = [];
+            if (this.userAnswers.season) parts.push(this.capitalizeFirst(this.userAnswers.season));
+            if (this.userAnswers.vibe) {
+                const vibeMap = {
+                    'fresh': 'Fresh',
+                    'sweet': 'Sweet',
+                    'dark': 'Dark',
+                    'woody': 'Professional'
+                };
+                parts.push(vibeMap[this.userAnswers.vibe]);
+            }
+            if (this.userAnswers.occasion) {
+                const occasionMap = {
+                    'date': 'Date Night',
+                    'office': 'Office',
+                    'sport': 'Sport',
+                    'daily': 'Everyday'
+                };
+                parts.push(occasionMap[this.userAnswers.occasion]);
+            }
+            return parts.join(', ');
+        },
+        
+        capitalizeFirst(str) {
+            return str.charAt(0).toUpperCase() + str.slice(1);
+        },
+        
+        // Favorites
+        toggleFavorite(perfume) {
+            const index = this.favorites.findIndex(f => f.name === perfume.name);
+            if (index > -1) {
+                this.favorites.splice(index, 1);
+                this.showToast('Removed from favorites', 'success');
+            } else {
+                this.favorites.push(perfume);
+                this.showToast('Added to favorites!', 'success');
+            }
+            this.saveFavorites();
+        },
+        
+        isFavorite(perfume) {
+            return this.favorites.some(f => f.name === perfume.name);
+        },
+        
+        saveFavorites() {
+            try {
+                localStorage.setItem('scentAlgoFavorites', JSON.stringify(this.favorites));
+            } catch (e) {
+                console.error('Failed to save favorites:', e);
+            }
+        },
+        
+        loadFavorites() {
+            try {
+                const saved = localStorage.getItem('scentAlgoFavorites');
+                if (saved) {
+                    this.favorites = JSON.parse(saved);
+                }
+            } catch (e) {
+                console.error('Failed to load favorites:', e);
+            }
+        },
+        
+        // Detail Modal
+        showDetails(perfume) {
+            this.selectedPerfume = perfume;
+        },
+        
+        closeDetails() {
+            this.selectedPerfume = null;
+        },
+        
+        // Browse & Search
+        filterBrowse() {
+            let results = [...this.database];
+            
+            // Filter by search query
+            if (this.searchQuery.trim()) {
+                const query = this.searchQuery.toLowerCase();
+                results = results.filter(p => 
+                    p.name.toLowerCase().includes(query) ||
+                    p.brand.toLowerCase().includes(query) ||
+                    p.description.toLowerCase().includes(query) ||
+                    p.type.toLowerCase().includes(query)
+                );
+            }
+            
+            // Filter by season
+            if (this.browseSeasonFilter) {
+                results = results.filter(p => p.tags.includes(this.browseSeasonFilter));
+            }
+            
+            // Filter by vibe
+            if (this.browseVibeFilter) {
+                results = results.filter(p => p.tags.includes(this.browseVibeFilter));
+            }
+            
+            this.browsePerfumes = results;
+        },
+        
+        // Share
+        shareResults() {
+            const text = `I found my perfect fragrances on Scent Algorithm! My top match: ${this.topMatches[0].name} by ${this.topMatches[0].brand}`;
+            
+            if (navigator.share) {
+                navigator.share({
+                    title: 'My Scent Algorithm Results',
+                    text: text
+                }).catch(err => console.log('Share cancelled'));
+            } else {
+                // Fallback: copy to clipboard
+                navigator.clipboard.writeText(text).then(() => {
+                    this.showToast('Results copied to clipboard!', 'success');
+                }).catch(() => {
+                    this.showToast('Could not share results', 'error');
+                });
+            }
+        },
+        
+        // Toast Notifications
+        showToast(message, type = 'success') {
+            const id = this.toastId++;
+            const toast = { id, message, type };
+            this.toasts.push(toast);
+            
+            setTimeout(() => {
+                const index = this.toasts.findIndex(t => t.id === id);
+                if (index > -1) {
+                    this.toasts.splice(index, 1);
+                }
+            }, 3000);
+        },
+        
+        getToastIcon(type) {
+            const icons = {
+                success: 'ph-fill ph-check-circle',
+                error: 'ph-fill ph-x-circle',
+                info: 'ph-fill ph-info'
+            };
+            return icons[type] || icons.info;
+        },
+        
+        // Reset
         resetQuiz() {
             this.step = 0;
             this.showResults = false;
-            this.userAnswers = {};
+            this.showBrowse = false;
+            this.userAnswers = {
+                season: '',
+                vibe: '',
+                occasion: ''
+            };
+            this.topMatches = [];
+            this.resultFilter = 'all';
         }
     }
 }).mount('#app');

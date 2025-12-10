@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Scent Algorithm</title>
+    <title>Scent Algorithm - Find Your Perfect Fragrance</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
@@ -12,84 +12,418 @@
 
     <div id="app" v-cloak>
         
-        <a href="../index.html" class="back-btn">
-            <i class="ph-bold ph-arrow-left"></i> Portfolio
-        </a>
+        <!-- Background Effects -->
+        <div class="bg-gradient"></div>
+        <div class="bg-particles"></div>
+
+        <!-- Navigation -->
+        <nav class="top-nav">
+            <button @click="goHome" class="nav-btn" v-if="step > 0">
+                <i class="ph-bold ph-arrow-left"></i>
+                <span v-if="step > 0 && step <= questions.length">Back</span>
+                <span v-else>Home</span>
+            </button>
+            <div class="nav-spacer"></div>
+            <button @click="toggleHelp" class="nav-btn icon-only">
+                <i class="ph-bold ph-question"></i>
+            </button>
+        </nav>
 
         <div class="app-container">
             
-            <header>
-                <i class="ph-duotone ph-drop text-accent"></i>
-                <h1>Scent Algo</h1>
-                <p>AI-Powered Fragrance Discovery</p>
-            </header>
+            <!-- Welcome Screen -->
+            <transition name="fade">
+                <div v-if="step === 0" class="welcome-screen">
+                    <div class="hero-section">
+                        <div class="icon-wrapper">
+                            <i class="ph-duotone ph-drop"></i>
+                            <div class="icon-glow"></div>
+                        </div>
+                        <h1 class="hero-title">Scent Algorithm</h1>
+                        <p class="hero-subtitle">Discover your perfect fragrance match</p>
+                    </div>
 
-            <div v-if="step === 0" class="card start-card">
-                <div class="icon-circle">✨</div>
-                <h2>Find Your Signature</h2>
-                <p>Answer 3 quick questions to find the perfect fragrance match from our database.</p>
-                <button @click="nextStep" class="primary-btn">Start Analysis</button>
-            </div>
+                    <div class="card feature-card">
+                        <div class="feature-grid">
+                            <div class="feature-item">
+                                <i class="ph-duotone ph-sparkle"></i>
+                                <span>AI-Powered</span>
+                            </div>
+                            <div class="feature-item">
+                                <i class="ph-duotone ph-database"></i>
+                                <span>200+ Fragrances</span>
+                            </div>
+                            <div class="feature-item">
+                                <i class="ph-duotone ph-clock"></i>
+                                <span>30 Seconds</span>
+                            </div>
+                        </div>
+                    </div>
 
-            <div v-if="step > 0 && step <= questions.length" class="card question-card">
-                <div class="progress-bar">
-                    <div class="fill" :style="{ width: (step / questions.length) * 100 + '%' }"></div>
+                    <div class="cta-section">
+                        <button @click="startQuiz" class="primary-btn large">
+                            <span>Start Your Journey</span>
+                            <i class="ph-bold ph-arrow-right"></i>
+                        </button>
+                        <button @click="browseAll" class="secondary-btn">
+                            <i class="ph ph-list-bullets"></i>
+                            Browse All Fragrances
+                        </button>
+                    </div>
+
+                    <div class="stats">
+                        <div class="stat-item">
+                            <div class="stat-number">{{ database.length }}</div>
+                            <div class="stat-label">Perfumes</div>
+                        </div>
+                        <div class="stat-divider"></div>
+                        <div class="stat-item">
+                            <div class="stat-number">{{ uniqueBrands }}</div>
+                            <div class="stat-label">Brands</div>
+                        </div>
+                        <div class="stat-divider"></div>
+                        <div class="stat-item">
+                            <div class="stat-number">3</div>
+                            <div class="stat-label">Questions</div>
+                        </div>
+                    </div>
                 </div>
-                
-                <h3>{{ currentQuestion.text }}</h3>
-                
-                <div class="options-grid">
-                    <button 
-                        v-for="option in currentQuestion.options" 
-                        :key="option.text"
-                        @click="selectOption(option.value)"
-                        class="option-btn"
-                    >
-                        <span class="opt-icon">{{ option.icon }}</span>
-                        <span class="opt-text">{{ option.text }}</span>
-                    </button>
-                </div>
-            </div>
+            </transition>
 
-            <div v-if="isLoading" class="card loading-card">
-                <div class="spinner"></div>
-                <p>Calculating Notes...</p>
-            </div>
+            <!-- Question Screen -->
+            <transition name="slide">
+                <div v-if="step > 0 && step <= questions.length" class="question-screen">
+                    
+                    <!-- Progress -->
+                    <div class="progress-section">
+                        <div class="progress-info">
+                            <span class="progress-label">Question {{ step }} of {{ questions.length }}</span>
+                            <span class="progress-percent">{{ Math.round((step / questions.length) * 100) }}%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" :style="{ width: (step / questions.length) * 100 + '%' }"></div>
+                        </div>
+                    </div>
 
-            <div v-if="showResults" class="results-container">
-                <h2>Top Matches</h2>
-                
-                <div class="perfume-list">
-                    <div v-for="(perfume, index) in topMatches" :key="perfume.name" class="perfume-card" :style="{ animationDelay: index * 0.1 + 's' }">
-                        <div class="match-badge">{{ perfume.score }}% Match</div>
+                    <!-- Question Card -->
+                    <div class="card question-card">
+                        <div class="question-icon">{{ currentQuestion.emoji }}</div>
+                        <h2 class="question-title">{{ currentQuestion.text }}</h2>
+                        <p class="question-subtitle">{{ currentQuestion.subtitle }}</p>
                         
-                        <div class="card-layout">
+                        <div class="options-grid" :class="'grid-' + currentQuestion.options.length">
+                            <button 
+                                v-for="option in currentQuestion.options" 
+                                :key="option.value"
+                                @click="selectOption(option.value)"
+                                class="option-btn"
+                            >
+                                <span class="option-icon">{{ option.icon }}</span>
+                                <span class="option-text">{{ option.text }}</span>
+                                <span class="option-desc" v-if="option.desc">{{ option.desc }}</span>
+                                <div class="option-ripple"></div>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Navigation Dots -->
+                    <div class="question-nav">
+                        <button 
+                            v-for="(q, index) in questions" 
+                            :key="index"
+                            @click="jumpToQuestion(index + 1)"
+                            class="nav-dot"
+                            :class="{ active: step === index + 1, completed: step > index + 1 }"
+                        >
+                            <i v-if="step > index + 1" class="ph-fill ph-check"></i>
+                        </button>
+                    </div>
+                </div>
+            </transition>
+
+            <!-- Loading Screen -->
+            <transition name="fade">
+                <div v-if="isLoading" class="loading-screen">
+                    <div class="card loading-card">
+                        <div class="loading-animation">
+                            <div class="spinner-ring"></div>
+                            <div class="spinner-ring delay-1"></div>
+                            <div class="spinner-ring delay-2"></div>
+                        </div>
+                        <h3>{{ loadingMessages[currentLoadingMessage] }}</h3>
+                        <div class="loading-dots">
+                            <span></span><span></span><span></span>
+                        </div>
+                    </div>
+                </div>
+            </transition>
+
+            <!-- Results Screen -->
+            <transition name="fade">
+                <div v-if="showResults" class="results-screen">
+                    
+                    <div class="results-header">
+                        <h2 class="results-title">Your Perfect Matches</h2>
+                        <p class="results-subtitle">Based on your preferences: <strong>{{ getPreferenceSummary() }}</strong></p>
+                    </div>
+
+                    <!-- Filters -->
+                    <div class="results-filters">
+                        <div class="filter-chips">
+                            <button 
+                                @click="resultFilter = 'all'" 
+                                class="filter-chip"
+                                :class="{ active: resultFilter === 'all' }"
+                            >
+                                All Results
+                            </button>
+                            <button 
+                                @click="resultFilter = 'high'" 
+                                class="filter-chip"
+                                :class="{ active: resultFilter === 'high' }"
+                            >
+                                90%+ Match
+                            </button>
+                            <button 
+                                @click="resultFilter = 'favorites'" 
+                                class="filter-chip"
+                                :class="{ active: resultFilter === 'favorites' }"
+                                v-if="favorites.length > 0"
+                            >
+                                <i class="ph-fill ph-heart"></i> Favorites
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Results List -->
+                    <div class="perfume-list">
+                        <div 
+                            v-for="(perfume, index) in filteredResults" 
+                            :key="perfume.name" 
+                            class="perfume-card"
+                            :style="{ animationDelay: (index * 0.05) + 's' }"
+                            @click="showDetails(perfume)"
+                        >
+                            <div class="perfume-rank">{{ index + 1 }}</div>
+                            
+                            <div class="match-badge" :class="getMatchClass(perfume.score)">
+                                <i class="ph-fill ph-star"></i>
+                                {{ perfume.score }}%
+                            </div>
+
+                            <button 
+                                @click.stop="toggleFavorite(perfume)"
+                                class="favorite-btn"
+                                :class="{ active: isFavorite(perfume) }"
+                            >
+                                <i class="ph-fill ph-heart"></i>
+                            </button>
+                            
+                            <div class="card-content">
+                                <div class="img-section">
+                                    <div class="img-container">
+                                        <img v-if="perfume.image" :src="perfume.image" :alt="perfume.name">
+                                        <div v-else class="placeholder-img">
+                                            <i class="ph-duotone ph-drop"></i>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="perfume-info">
+                                    <div class="brand-name">{{ perfume.brand }}</div>
+                                    <h3 class="perfume-name">{{ perfume.name }}</h3>
+                                    
+                                    <div class="tags">
+                                        <span class="tag primary">{{ perfume.type }}</span>
+                                        <span class="tag" v-if="perfume.season">{{ capitalizeFirst(perfume.season) }}</span>
+                                    </div>
+                                    
+                                    <p class="description">{{ perfume.description }}</p>
+
+                                    <div class="card-footer">
+                                        <button class="view-details-btn">
+                                            View Details
+                                            <i class="ph ph-arrow-right"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div v-if="filteredResults.length === 0" class="no-results">
+                            <i class="ph-duotone ph-magnifying-glass"></i>
+                            <h3>No matches found</h3>
+                            <p>Try adjusting your filters</p>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="results-actions">
+                        <button @click="resetQuiz" class="secondary-btn">
+                            <i class="ph ph-arrow-counter-clockwise"></i>
+                            Start Over
+                        </button>
+                        <button @click="shareResults" class="secondary-btn">
+                            <i class="ph ph-share-network"></i>
+                            Share Results
+                        </button>
+                    </div>
+                </div>
+            </transition>
+
+            <!-- Browse All Screen -->
+            <transition name="fade">
+                <div v-if="showBrowse" class="browse-screen">
+                    <div class="browse-header">
+                        <h2>All Fragrances</h2>
+                        <div class="search-box">
+                            <i class="ph ph-magnifying-glass"></i>
+                            <input 
+                                v-model="searchQuery" 
+                                type="text" 
+                                placeholder="Search by name, brand, or notes..."
+                                @input="filterBrowse"
+                            >
+                        </div>
+                    </div>
+
+                    <div class="browse-filters">
+                        <select v-model="browseSeasonFilter" @change="filterBrowse" class="filter-select">
+                            <option value="">All Seasons</option>
+                            <option value="summer">Summer</option>
+                            <option value="winter">Winter</option>
+                            <option value="spring">Spring</option>
+                            <option value="autumn">Autumn</option>
+                        </select>
+                        <select v-model="browseVibeFilter" @change="filterBrowse" class="filter-select">
+                            <option value="">All Vibes</option>
+                            <option value="fresh">Fresh</option>
+                            <option value="sweet">Sweet</option>
+                            <option value="dark">Dark</option>
+                            <option value="woody">Woody</option>
+                        </select>
+                    </div>
+
+                    <div class="perfume-count">{{ browsePerfumes.length }} fragrances</div>
+
+                    <div class="perfume-grid">
+                        <div 
+                            v-for="perfume in browsePerfumes" 
+                            :key="perfume.name"
+                            class="perfume-card-small"
+                            @click="showDetails(perfume)"
+                        >
                             <div class="img-container">
                                 <img v-if="perfume.image" :src="perfume.image" :alt="perfume.name">
                                 <div v-else class="placeholder-img">
-                                    <i class="ph ph-spray-bottle"></i>
+                                    <i class="ph-duotone ph-drop"></i>
                                 </div>
                             </div>
-
-                            <div class="perfume-info">
-                                <h3>{{ perfume.name }}</h3>
-                                <span class="brand">{{ perfume.brand }}</span>
-                                
-                                <div class="tags">
-                                    <span class="tag">{{ perfume.type }}</span>
-                                    <span class="tag">{{ perfume.season }}</span>
-                                </div>
-                                
-                                <p class="desc">{{ perfume.description }}</p>
+                            <div class="card-info">
+                                <div class="brand-name">{{ perfume.brand }}</div>
+                                <h4>{{ perfume.name }}</h4>
+                                <div class="tag">{{ perfume.type }}</div>
                             </div>
                         </div>
                     </div>
                 </div>
-
-                <button @click="resetQuiz" class="secondary-btn">Try Again</button>
-            </div>
-
+            </transition>
         </div>
+
+        <!-- Detail Modal -->
+        <transition name="modal">
+            <div v-if="selectedPerfume" class="modal-overlay" @click="closeDetails">
+                <div class="modal-content" @click.stop>
+                    <button @click="closeDetails" class="modal-close">
+                        <i class="ph-bold ph-x"></i>
+                    </button>
+
+                    <div class="modal-header">
+                        <div class="modal-img">
+                            <img v-if="selectedPerfume.image" :src="selectedPerfume.image" :alt="selectedPerfume.name">
+                            <div v-else class="placeholder-img">
+                                <i class="ph-duotone ph-drop"></i>
+                            </div>
+                        </div>
+                        <div class="modal-info">
+                            <div class="brand-name">{{ selectedPerfume.brand }}</div>
+                            <h2>{{ selectedPerfume.name }}</h2>
+                            <div class="tags">
+                                <span class="tag primary">{{ selectedPerfume.type }}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="modal-body">
+                        <div class="detail-section">
+                            <h3>Description</h3>
+                            <p>{{ selectedPerfume.description }}</p>
+                        </div>
+
+                        <div class="detail-section">
+                            <h3>Best For</h3>
+                            <div class="tags">
+                                <span v-for="tag in selectedPerfume.tags" :key="tag" class="tag">
+                                    {{ capitalizeFirst(tag) }}
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="modal-actions">
+                            <button @click="toggleFavorite(selectedPerfume)" class="modal-btn" :class="{ active: isFavorite(selectedPerfume) }">
+                                <i class="ph-fill ph-heart"></i>
+                                {{ isFavorite(selectedPerfume) ? 'Remove from' : 'Add to' }} Favorites
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </transition>
+
+        <!-- Help Modal -->
+        <transition name="modal">
+            <div v-if="showHelpModal" class="modal-overlay" @click="toggleHelp">
+                <div class="modal-content small" @click.stop>
+                    <button @click="toggleHelp" class="modal-close">
+                        <i class="ph-bold ph-x"></i>
+                    </button>
+                    <div class="modal-body">
+                        <h2>How It Works</h2>
+                        <div class="help-content">
+                            <div class="help-item">
+                                <i class="ph-duotone ph-number-circle-one"></i>
+                                <div>
+                                    <h4>Answer 3 Questions</h4>
+                                    <p>Tell us about your preferences and the occasion</p>
+                                </div>
+                            </div>
+                            <div class="help-item">
+                                <i class="ph-duotone ph-number-circle-two"></i>
+                                <div>
+                                    <h4>AI Analysis</h4>
+                                    <p>Our algorithm matches you with perfect fragrances</p>
+                                </div>
+                            </div>
+                            <div class="help-item">
+                                <i class="ph-duotone ph-number-circle-three"></i>
+                                <div>
+                                    <h4>Discover</h4>
+                                    <p>Explore your personalized recommendations</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </transition>
+
+        <!-- Toast Notifications -->
+        <transition-group name="toast" tag="div" class="toast-container">
+            <div v-for="toast in toasts" :key="toast.id" class="toast" :class="toast.type">
+                <i :class="getToastIcon(toast.type)"></i>
+                <span>{{ toast.message }}</span>
+            </div>
+        </transition-group>
     </div>
 
     <script src="script.js"></script>
