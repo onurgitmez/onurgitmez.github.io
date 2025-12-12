@@ -41,10 +41,6 @@ const upgrades = businesses.map((b, i) => ({
     { id: 'gall', name: 'Empire Synergy', desc: 'All +10%', cost: 100000000, level: 0, max: 10, biz: -1, tier: -1, mult: 1.1 }
 ]);
 
-const synergies = [
-    [0,4,0.1], [4,8,0.15], [8,12,0.2], [1,5,0.1], [16,17,0.25]
-];
-
 const prestigeUnlocksList = [
     { level: 1, title: 'Starter Boost', desc: 'Begin new runs with $1,000' },
     { level: 2, title: 'Quick Start', desc: 'First 5 businesses unlocked' },
@@ -86,6 +82,5 @@ const researchData = [
     { id: 'res_cheaper', name: 'Efficient Logistics', desc: 'Reduce business cost scaling from 1.15x to 1.14x (Huge impact!)', cost: 1 },
     { id: 'res_offline', name: 'Time Management', desc: 'Increase Offline Production cap from 1 hour to 24 hours', cost: 2 },
     { id: 'res_events', name: 'Market Analysis', desc: 'Events spawn 2x more frequently', cost: 3 },
-    { id: 'res_synergy', name: 'Corporate Synergy', desc: 'All Synergy bonuses are 50% stronger', cost: 5 },
     { id: 'res_prestige', name: 'Legacy Planning', desc: 'Retain 5% of your money after Prestige', cost: 10 }
 ];
