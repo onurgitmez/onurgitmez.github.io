@@ -350,3 +350,10 @@ setInterval(() => {
         });
     }
 }, 30000);
+
+// --- Add this to the very bottom of main.js ---
+
+// Save automatically when the user closes the tab or refreshes
+window.addEventListener('beforeunload', () => {
+    saveGame();
+});
