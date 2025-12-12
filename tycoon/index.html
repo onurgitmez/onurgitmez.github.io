@@ -1,1 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mega Tycoon Empire - Ultimate Edition</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <div>
+                <h1>⚡ MEGA TYCOON EMPIRE</h1>
+                <div id="prestige-display" style="display:none;">
+                    ⭐ Level <span id="prestige-level">0</span> (+<span id="prestige-bonus">0</span>% Income)
+                </div>
+            </div>
+            <div>
+                <div class="money-display">
+                    <div class="money-icon">💰</div>
+                    $<span id="money">0</span>
+                </div>
+                <div class="income-display">
+                    Income: <span class="income-value">$<span id="income">0</span>/sec</span>
+                </div>
+                <div class="combo-display" id="combo-display">
+                    🔥 COMBO x<span id="combo-mult">1.0</span> (<span id="combo-count">0</span>)
+                </div>
+            </div>
+            <div class="controls">
+                <button class="btn-control" onclick="openModal('achievements')" style="background:linear-gradient(135deg,rgba(0,255,136,0.2),rgba(0,212,255,0.2));border:1px solid var(--success);color:var(--success)">
+                    🏆 Achievements
+                    <span class="notification-badge" id="achievement-badge" style="display:none;">0</span>
+                </button>
+                
+                <button class="btn-control" onclick="openModal('research')" style="background:linear-gradient(135deg,var(--accent-secondary),var(--accent-tertiary));border:1px solid var(--accent-secondary);color:white">
+                    🧪 Research
+                </button>
 
+                <button class="btn-control" onclick="openModal('upgrades')" style="background:linear-gradient(135deg,rgba(123,44,191,0.2),rgba(255,0,110,0.2));border:1px solid var(--accent-secondary);color:var(--accent-secondary)">⚡ Upgrades</button>
+                <button class="btn-control" onclick="openModal('stats')" style="background:linear-gradient(135deg,rgba(255,184,0,0.2),rgba(255,0,110,0.2));border:1px solid var(--warning);color:var(--warning)">📊 Stats</button>
+                <button class="btn-control" onclick="openModal('prestige')" style="background:linear-gradient(135deg,rgba(255,184,0,0.2),rgba(255,0,110,0.2));border:1px solid var(--warning);color:var(--warning);animation:prestigePulse 2s ease-in-out infinite">⭐ Prestige</button>
+                <button class="btn-control" onclick="openModal('backup')" style="background:linear-gradient(135deg,rgba(0,212,255,0.2),rgba(123,44,191,0.2));border:1px solid var(--accent-primary);color:var(--accent-primary)">💾 Backup</button>
+                <button class="btn-control" onclick="resetGame()" style="background:linear-gradient(135deg,rgba(255,71,87,0.2),rgba(255,0,110,0.2));border:1px solid var(--danger);color:var(--danger)">🔄 Reset</button>
+            </div>
+        </div>
+    </header>
+
+    <div class="game-wrapper">
+        <div class="event-banner" id="event-banner">
+            <div class="event-icon" id="event-icon">📈</div>
+            <div class="event-text">
+                <div class="event-title" id="event-title">Market Boom!</div>
+                <div class="event-desc" id="event-desc">All income doubled for 30 seconds!</div>
+            </div>
+            <div class="event-timer" id="event-timer">30s</div>
+        </div>
+        <div class="top-bar">
+            <div class="view-toggle">
+                <button class="toggle-btn active" onclick="setView('all', event)">All</button>
+                <button class="toggle-btn" onclick="setView('affordable', event)">Affordable</button>
+                <button class="toggle-btn" onclick="setView('owned', event)">Owned</button>
+            </div>
+            <div class="buy-mode-selector">
+                <button class="toggle-btn active" onclick="setBuyMode(1, event)">x1</button>
+                <button class="toggle-btn" onclick="setBuyMode(10, event)">x10</button>
+                <button class="toggle-btn" onclick="setBuyMode(100, event)">x100</button>
+            </div>
+            <div class="sound-toggle-btn" onclick="toggleSound()" id="sound-toggle">🔊</div>
+        </div>
+        <div class="grid" id="game-board"></div>
+    </div>
+
+    <div class="modal" id="research-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">🧪 Research Lab</h2>
+                <button class="modal-close" onclick="closeModal('research')">×</button>
+            </div>
+            <div style="background:var(--glass-bg);padding:1rem;border-radius:12px;margin-bottom:1.5rem;text-align:center;border:1px solid var(--accent-secondary)">
+                <span style="color:var(--text-secondary)">Available Knowledge:</span>
+                <div style="font-size:2rem;font-weight:700;color:var(--accent-secondary)">
+                    <span id="kp-display">0</span> KP
+                </div>
+                <div style="font-size:0.85rem;margin-top:0.5rem;color:var(--text-secondary)">Earn KP by Prestiging!</div>
+            </div>
+            <div id="research-list"></div>
+        </div>
+    </div>
+
+    <div class="modal" id="stats-modal">
+        <div class="modal-content">
+            <div class="modal-header"><h2 class="modal-title">📊 Statistics</h2><button class="modal-close" onclick="closeModal('stats')">×</button></div>
+            <div class="stats-grid">
+                <div class="stat-card"><div class="stat-card-value" id="stat-earned">$0</div><div class="stat-card-label">Total Earned</div></div>
+                <div class="stat-card"><div class="stat-card-value" id="stat-spent">$0</div><div class="stat-card-label">Total Spent</div></div>
+                <div class="stat-card"><div class="stat-card-value" id="stat-businesses">0</div><div class="stat-card-label">Businesses Owned</div></div>
+                <div class="stat-card"><div class="stat-card-value" id="stat-time">0h 0m</div><div class="stat-card-label">Time Played</div></div>
+                <div class="stat-card"><div class="stat-card-value" id="stat-clicks">0</div><div class="stat-card-label">Total Clicks</div></div>
+                <div class="stat-card"><div class="stat-card-value" id="stat-profitable">None</div><div class="stat-card-label">Most Profitable</div></div>
+                <div class="stat-card"><div class="stat-card-value" id="stat-achievements">0/0</div><div class="stat-card-label">Achievements</div></div>
+                <div class="stat-card"><div class="stat-card-value" id="stat-events">0</div><div class="stat-card-label">Events Witnessed</div></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="upgrades-modal">
+        <div class="modal-content">
+            <div class="modal-header"><h2 class="modal-title">⚡ Upgrades</h2><button class="modal-close" onclick="closeModal('upgrades')">×</button></div>
+            <button class="bulk-btn" onclick="buyAllUpgrades()" id="bulk-btn">🚀 Buy All Affordable (0)</button>
+            <div id="upgrades-list"></div>
+        </div>
+    </div>
+
+    <div class="modal" id="prestige-modal">
+        <div class="modal-content">
+            <div class="modal-header"><h2 class="modal-title">⭐ Prestige</h2><button class="modal-close" onclick="closeModal('prestige')">×</button></div>
+            <div class="prestige-info-box">
+                <h3 style="color:var(--warning);margin-bottom:1rem">Reset for Permanent Bonuses</h3>
+                <p style="color:var(--text-secondary);margin-bottom:1rem">Prestige resets progress but grants permanent income multiplier & Knowledge Points.</p>
+                <div style="font-size:1.5rem;font-weight:700;color:var(--warning);margin:1rem 0">Next: +<span id="prestige-reward">0</span>% Income</div>
+                <p style="color:var(--text-secondary);font-size:0.9rem">Minimum $10M total earned required.</p>
+            </div>
+            <button class="bulk-btn" onclick="doPrestige()" id="prestige-btn" style="background:linear-gradient(135deg,var(--warning),var(--accent-tertiary))">🌟 PRESTIGE NOW 🌟</button>
+        </div>
+    </div>
+
+    <div class="modal" id="achievements-modal">
+        <div class="modal-content">
+            <div class="modal-header"><h2 class="modal-title">🏆 Achievements</h2><button class="modal-close" onclick="closeModal('achievements')">×</button></div>
+            <div id="achievements-list"></div>
+        </div>
+    </div>
+
+    <div class="modal" id="backup-modal">
+        <div class="modal-content">
+            <div class="modal-header"><h2 class="modal-title">💾 Backup & Restore</h2><button class="modal-close" onclick="closeModal('backup')">×</button></div>
+            <h3 style="margin-bottom:1rem">Export Save</h3>
+            <textarea id="export-data" readonly onclick="this.select()"></textarea>
+            <div class="save-controls"><button class="export-btn" onclick="exportSave()">📋 Copy to Clipboard</button></div>
+            <h3 style="margin:2rem 0 1rem">Import Save</h3>
+            <textarea id="import-data" placeholder="Paste your save code here..."></textarea>
+            <div class="save-controls"><button class="import-btn" onclick="importSave()">📥 Restore Save</button></div>
+        </div>
+    </div>
+
+    <div class="toast" id="toast"><span id="toast-text">Saved!</span></div>
+
+    <script src="utils.js"></script>
+    <script src="data.js"></script>
+    <script src="state.js"></script>
+    <script src="ui.js"></script>
+    <script src="main.js"></script>
+</body>
+</html>
