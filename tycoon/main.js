@@ -4,7 +4,7 @@ function getMultiplier(i) {
     let m = 1;
     const b = businesses[i];
     
-    // Upgrade Multipliers
+    // 1. Upgrade Multipliers
     upgrades.forEach(u => {
         if (u.level > 0) {
             if (u.biz === i || u.tier === b.tier || u.tier === -1) {
@@ -13,19 +13,20 @@ function getMultiplier(i) {
         }
     });
     
-    // Synergy Multipliers
-    synergies.forEach(([b1, b2, bonus]) => {
-        if (b2 === i && businesses[b1].count > 0) {
-            const researchBonus = game.researchUnlocked.includes('res_synergy') ? 1.5 : 1;
-            m *= (1 + (bonus * researchBonus));
-        }
-    });
+    // (REMOVED: Synergy Multipliers logic deleted here)
     
-    // NERF: Milestone Bonus reduced from 1.25 to 1.1
-    // NERF: Prestige Bonus reduced from 1.3 to 1.2
-    const milestoneBonus = game.prestigeLevel >= 10 ? 1.2 : 1.1;
+    // 2. Milestone Bonuses (Reduced to 1.1x per milestone to prevent explosion)
+    // If Prestige Level is high (>10), we give a slight bump to 1.15x
+    const milestoneBonus = game.prestigeLevel >= 10 ? 1.15 : 1.1; 
     const milestones = [25, 50, 75, 100, 150, 200, 250, 300, 400, 500, 600, 700, 800, 900, 1000];
     milestones.forEach(ms => { if (b.count >= ms) m *= milestoneBonus; });
+    
+    // 3. HARD CAP: Prevent Game Breaking
+    // This ensures no individual business multiplier ever exceeds 2048x
+    // (Prestige and Events will still multiply ON TOP of this, allowing growth, but preventing bugs)
+    if (m > 2048) {
+        m = 2048; 
+    }
     
     return m;
 }
