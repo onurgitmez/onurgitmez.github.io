@@ -7,23 +7,30 @@ function getMultiplier(i) {
     // 1. Upgrade Multipliers
     upgrades.forEach(u => {
         if (u.level > 0) {
-            if (u.biz === i || u.tier === b.tier || u.tier === -1) {
-                m *= Math.pow(u.mult, u.level);
+            // LOGIC CHANGE: 
+            // If the upgrade targets a specific business (biz !== -1), ONLY apply if IDs match.
+            // If the upgrade is generic (biz === -1), THEN check for Tier match or Global match.
+            
+            if (u.biz !== -1) {
+                // Specific Business Upgrade (e.g., Lemonade Boost)
+                if (u.biz === i) {
+                    m *= Math.pow(u.mult, u.level);
+                }
+            } else {
+                // General Upgrade (e.g., "Street Power" or "Empire Synergy")
+                if (u.tier === -1 || u.tier === b.tier) {
+                    m *= Math.pow(u.mult, u.level);
+                }
             }
         }
     });
     
-    // (REMOVED: Synergy Multipliers logic deleted here)
-    
-    // 2. Milestone Bonuses (Reduced to 1.1x per milestone to prevent explosion)
-    // If Prestige Level is high (>10), we give a slight bump to 1.15x
+    // 2. Milestone Bonuses
     const milestoneBonus = game.prestigeLevel >= 10 ? 1.15 : 1.1; 
     const milestones = [25, 50, 75, 100, 150, 200, 250, 300, 400, 500, 600, 700, 800, 900, 1000];
     milestones.forEach(ms => { if (b.count >= ms) m *= milestoneBonus; });
     
-    // 3. HARD CAP: Prevent Game Breaking
-    // This ensures no individual business multiplier ever exceeds 2048x
-    // (Prestige and Events will still multiply ON TOP of this, allowing growth, but preventing bugs)
+    // 3. HARD CAP (Kept from previous request)
     if (m > 2048) {
         m = 2048; 
     }
