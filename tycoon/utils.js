@@ -15,33 +15,43 @@ function fmt(n) {
     return v + s[i];
 }
 
-function cost(base, count) {
-    // 1. Calculate Standard Geometric Cost (Base * 1.15^count)
-    let val = base * Math.pow(1.15, count);
-    
-    // 2. Apply "Efficient Logistics" Research Discount
+function getResearchDiscount() {
+    // Calculate research discount once
     if (typeof game !== 'undefined' && game.researchLevels) {
         const lvl = game.researchLevels['res_cost'] || 0;
         if (lvl > 0) {
-            // 2% discount per level
-            const discount = Math.max(0.1, 1 - (lvl * 0.02)); 
-            val *= discount;
+            // 2% discount per level, minimum 10% of original cost
+            return Math.max(0.1, 1 - (lvl * 0.02)); 
         }
     }
+    return 1;
+}
+
+function cost(base, count) {
+    // Calculate Standard Geometric Cost (Base * 1.15^count)
+    let val = base * Math.pow(1.15, count);
+    
+    // Apply Research Discount
+    val *= getResearchDiscount();
+    
     return val;
 }
 
 function totalCost(base, count, amt, prestigeLevel, buyModeSetting) {
     const scaling = 1.15;
-    // NOTE: cost() already applies the Research discount to the first item
-    const firstCost = cost(base, count);
+    const discount = getResearchDiscount();
     
-    // Standard Geometric Sum Formula
+    // Apply research discount to base, then calculate geometric sum
+    const discountedBase = base * discount;
+    const firstCost = discountedBase * Math.pow(scaling, count);
+    
+    // Standard Geometric Sum Formula with discount already applied
     const total = firstCost * (Math.pow(scaling, amt) - 1) / (scaling - 1);
     
-    const discount = prestigeLevel >= 5 && buyModeSetting === 10 ? 0.95 : 1;
+    // Prestige Level 5+ gets 5% discount on x10 purchases
+    const prestigeDiscount = prestigeLevel >= 5 && buyModeSetting === 10 ? 0.95 : 1;
     
-    return total * discount;
+    return total * prestigeDiscount;
 }
 
 function maxBuy(base, count, money) {

@@ -16,7 +16,10 @@ function getMultiplier(i) {
                 if (u.biz === i) m *= Math.pow(u.mult, u.level);
             } else {
                 // Tier or Global Upgrade
-                if (u.tier === -1 || u.tier === b.tier) m *= Math.pow(u.mult, u.level);
+                if (u.tier === -1 || u.tier === b.tier || (u.tier === 7 && b.tier === 8)) {
+                    // Fixed: Tier 7 upgrade now applies to both Tier 7 and Tier 8
+                    m *= Math.pow(u.mult, u.level);
+                }
             }
         }
     });
@@ -82,6 +85,9 @@ function buyBiz(i, e) {
         const now = Date.now();
         if (now - game.lastPurchase < 2000) {
             game.comboCount++;
+            // Cap combo count at 44 (which gives 2.0x multiplier)
+            if (game.comboCount > 44) game.comboCount = 44;
+            
             if (game.comboCount >= 5) {
                 let mult = 1 + (game.comboCount - 4) * 0.05;
                 const maxCombo = 2.0; 
@@ -109,6 +115,7 @@ function buyMax(i, e) {
         
         if (game.money >= c) {
             game.money -= c;
+            game.totalSpent += c;
             b.count += amt;
             updateIncome();
             updateUIDisplay(getMultiplier, getMultiplierBreakdown);
@@ -122,6 +129,7 @@ function buyUpgrade(id) {
     const c = u.cost * Math.pow(3, u.level);
     if (game.money >= c) {
         game.money -= c;
+        game.totalSpent += c;
         u.level++;
         updateIncome();
         renderUpgrades();
@@ -136,6 +144,7 @@ function buyAllUpgrades() {
             const c = u.cost * Math.pow(3, u.level);
             if (game.money >= c) {
                 game.money -= c;
+                game.totalSpent += c;
                 u.level++;
                 count++;
             }
@@ -175,14 +184,16 @@ function doPrestige() {
     const difficultyMult = Math.pow(3, game.prestigeLevel); 
     const minRequired = baseReq * difficultyMult;
 
-    if (game.totalEarned < minRequired) {
-        showToast(`Need $${fmt(minRequired)} total earned!`);
+    // FIXED: Use lifetimeEarned instead of totalEarned
+    if (game.lifetimeEarned < minRequired) {
+        showToast(`Need $${fmt(minRequired)} lifetime earnings!`);
         return;
     }
     
     // 2. KP REWARD CALCULATION
-    // KP based on how much you exceeded the requirement (logarithmic)
-    let kpBase = Math.floor(Math.log10(game.totalEarned / (baseReq/10))) + 1; 
+    // FIXED: Use lifetimeEarned and proper logarithmic scaling
+    let kpBase = Math.floor(Math.log10(game.lifetimeEarned / baseReq)) + 1; 
+    if (kpBase < 1) kpBase = 1; // Minimum 1 KP
     
     // Apply "Ancient Wisdom" Research
     const kpResLvl = getResearchLevel('res_kp');
@@ -204,7 +215,8 @@ function doPrestige() {
     game.money = 1000;
     
     game.totalIncome = 0;
-    game.totalEarned = 0; 
+    game.totalEarned = 0; // Reset current run earnings
+    // FIXED: lifetimeEarned is NOT reset - it persists forever
     game.totalSpent = 0;
     game.startTime = Date.now();
     
@@ -331,7 +343,7 @@ if(soundBtn) soundBtn.textContent = settings.soundEnabled ? '🔊' : '🔇';
 requestAnimationFrame(gameLoop);
 setInterval(saveGame, 15000);
 
-// Event Loop with Research Bonus
+// Event Loop with Research Bonus - FIXED: Capped at 100% chance
 setInterval(() => {
     // Base 10% chance
     let chance = 0.1;
@@ -340,6 +352,9 @@ setInterval(() => {
     if (evtLvl > 0) {
         chance += (evtLvl * 0.1); // +10% per level
     }
+    
+    // FIXED: Cap at 100% (1.0) probability
+    chance = Math.min(chance, 1.0);
 
     if (!game.currentEvent && Math.random() < chance && game.totalIncome > 0) {
         const event = events[Math.floor(Math.random() * events.length)];

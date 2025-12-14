@@ -10,7 +10,7 @@ let game = {
     prestigeLevel: 0, 
     prestigeBonus: 0,
     knowledgePoints: 0,
-    researchLevels: {}, // CHANGED: Now an object mapping ID -> Level
+    researchLevels: {},
     eventMultiplier: 1, 
     lastPurchase: 0, 
     comboCount: 0, 
@@ -35,7 +35,7 @@ function saveGame() {
         prestigeLevel: game.prestigeLevel, 
         prestigeBonus: game.prestigeBonus,
         knowledgePoints: game.knowledgePoints,
-        researchLevels: game.researchLevels, // Save Levels
+        researchLevels: game.researchLevels,
         eventsWitnessed: game.eventsWitnessed, 
         unlockedAchievements: game.unlockedAchievements,
         
@@ -64,7 +64,10 @@ function loadGame() {
             }
             if (!game.researchLevels) game.researchLevels = {};
 
-            if (game.lifetimeEarned === undefined) game.lifetimeEarned = game.totalEarned;
+            // Ensure lifetimeEarned exists (migration for old saves)
+            if (game.lifetimeEarned === undefined) {
+                game.lifetimeEarned = game.totalEarned || 0;
+            }
 
             if (data.businesses) {
                 data.businesses.forEach((savedBiz, i) => {
@@ -80,11 +83,12 @@ function loadGame() {
             });
             if (data.settings) Object.assign(settings, data.settings);
             
-            // Standard 24h cap (Removed specific offline research)
+            // Standard 24h cap for offline earnings
             const offlineCap = 86400; 
             const realOfflineTime = Math.min((Date.now() - game.lastSave) / 1000, offlineCap);
 
-            if (realOfflineTime > 60 && game.totalIncome > 0) {
+            // Give offline earnings for any time away (removed 60s threshold)
+            if (realOfflineTime > 0 && game.totalIncome > 0) {
                 const earnings = game.totalIncome * realOfflineTime;
                 game.money += earnings;
                 game.totalEarned += earnings;

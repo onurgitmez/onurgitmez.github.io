@@ -213,6 +213,22 @@ function renderResearch() {
         const canAfford = game.knowledgePoints >= currentCost;
         const isMax = level >= r.max;
 
+        // FIXED: Better description formatting based on research type
+        let currentEffect = '';
+        if (r.type === 'cost_reduction') {
+            const discount = level * r.val * 100;
+            currentEffect = `Current: ${discount}% cost reduction`;
+        } else if (r.type === 'income_boost') {
+            const boost = level * r.val * 100;
+            currentEffect = `Current: +${boost}% income`;
+        } else if (r.type === 'event_freq') {
+            const freq = level * r.val * 100;
+            currentEffect = `Current: +${freq}% spawn rate`;
+        } else if (r.type === 'kp_boost') {
+            const kpBoost = level * r.val * 100;
+            currentEffect = `Current: +${kpBoost}% KP`;
+        }
+
         const item = document.createElement('div');
         item.className = `upgrade-item ${level > 0 ? 'unlocked' : ''}`;
         if (level > 0) {
@@ -224,7 +240,7 @@ function renderResearch() {
                 <div class="upgrade-name">${r.name}</div>
                 <div class="upgrade-level">${isMax ? 'MAX' : 'Lvl ' + level + '/' + r.max}</div>
             </div>
-            <div class="upgrade-description">${r.desc.replace('per level', `(Current: ${Math.round(level * r.val * 100)}%)`)}</div>
+            <div class="upgrade-description">${r.desc}${level > 0 ? ' (' + currentEffect + ')' : ''}</div>
             ${!isMax ? `
                 <button type="button" class="upgrade-button" 
                     style="background: linear-gradient(135deg, var(--accent-secondary), var(--accent-tertiary))"
@@ -304,7 +320,8 @@ function updatePrestigeModal() {
     // Display NEXT level bonus (+5% on top of current)
     pRewardEl.textContent = (game.prestigeLevel + 1) * 5;
 
-    if (game.totalEarned < minRequired) {
+    // FIXED: Use lifetimeEarned instead of totalEarned
+    if (game.lifetimeEarned < minRequired) {
         pBtn.disabled = true;
         pBtn.textContent = `Need $${fmt(minRequired)} Lifetime Earnings`;
         pBtn.style.opacity = "0.5";
