@@ -23,7 +23,6 @@ const businesses = [
     { name: "Social Network", cost: 85000000000000, income: 100000000000, count: 0, tier: 6 },
     { name: "Media Empire", cost: 500000000000000, income: 550000000000, count: 0, tier: 6 },
     { name: "Pharma Giant", cost: 3500000000000000, income: 3200000000000, count: 0, tier: 6 },
-    // --- NEW ENDGAME BUSINESSES ---
     { name: "AI Data Center", cost: 25000000000000000, income: 18000000000000, count: 0, tier: 7 },
     { name: "Space Station", cost: 200000000000000000, income: 120000000000000, count: 0, tier: 7 },
     { name: "Dyson Sphere", cost: 5000000000000000000, income: 950000000000000, count: 0, tier: 8 },
@@ -32,7 +31,6 @@ const businesses = [
 
 const emojis = ["🍋","📰","🌸","🌮","☕","🏪","👔","🍺","🍽️","💇","🎳","💪","🎉","⛳","🎰","🏨","🎬","💻","✈️","🛢️","🏦","📱","📺","💊", "🤖", "🛰️", "☀️", "⚛️"];
 
-// REBALANCED: Multiplier increased to 2.5x per level (was 1.5x) to fix bad ROI
 const upgrades = businesses.map((b, i) => ({
     id: `u${i}`, name: `${b.name} Boost`, desc: `+150% ${b.name} income`, 
     cost: b.cost * 10, level: 0, max: 10, biz: i, mult: 2.5, tier: b.tier
@@ -84,14 +82,14 @@ const achievementList = [
     { id: 'quick_million', name: 'Speed Tycoon', desc: 'Reach $1M in one run within 5 mins', icon: '⚡', check: (g) => g.totalEarned >= 1000000 && (Date.now() - g.startTime) < 300000, reward: 250000 }
 ];
 
-// --- NEW LEVELED RESEARCH ---
+// FIX: Lowered cost scales to prevent mathematical soft-lock
 const researchData = [
     { 
         id: 'res_cost', 
         name: 'Efficient Logistics', 
         desc: 'Reduce all business costs by 2% per level.', 
         baseCost: 1, 
-        costScale: 1.5, 
+        costScale: 1.2, // Was 1.5
         max: 25,
         type: 'cost_reduction',
         val: 0.02 
@@ -101,7 +99,7 @@ const researchData = [
         name: 'Empire Synergy', 
         desc: 'Increase ALL income by 10% per level.', 
         baseCost: 2, 
-        costScale: 1.8, 
+        costScale: 1.3, // Was 1.8
         max: 50,
         type: 'income_boost',
         val: 0.10
@@ -111,7 +109,7 @@ const researchData = [
         name: 'Market Analysis', 
         desc: 'Events spawn 10% more frequently per level.', 
         baseCost: 5, 
-        costScale: 2, 
+        costScale: 1.4, // Was 2.0
         max: 10,
         type: 'event_freq',
         val: 0.10
@@ -121,7 +119,7 @@ const researchData = [
         name: 'Ancient Wisdom', 
         desc: 'Gain 5% more Knowledge Points from Prestige.', 
         baseCost: 10, 
-        costScale: 2.5, 
+        costScale: 1.5, // Was 2.5
         max: 20,
         type: 'kp_boost',
         val: 0.05

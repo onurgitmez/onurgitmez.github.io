@@ -24,6 +24,12 @@ let game = {
 let settings = { soundEnabled: true, viewMode: 'all', buyMode: 1 };
 
 function saveGame() {
+    // FIX: Save upgrades as an Object map { "id": level }, not an Array
+    const upgradeMap = {};
+    upgrades.forEach(u => {
+        if (u.level > 0) upgradeMap[u.id] = u.level;
+    });
+
     const data = {
         money: game.money, 
         totalEarned: game.totalEarned, 
@@ -38,10 +44,9 @@ function saveGame() {
         researchLevels: game.researchLevels,
         eventsWitnessed: game.eventsWitnessed, 
         unlockedAchievements: game.unlockedAchievements,
-        
         businesses: businesses.map((b, i) => ({ id: i, count: b.count, level: b.level })),
         
-        upgrades: upgrades.map(u => u.level), 
+        upgrades: upgradeMap, // NEW FORMAT
         settings
     };
     localStorage.setItem('tycoonV5', JSON.stringify(data));
@@ -54,7 +59,6 @@ function loadGame() {
             const data = JSON.parse(saved);
             Object.assign(game, data);
             
-            // Migration for old saves (Array to Object)
             if (Array.isArray(game.researchUnlocked)) {
                 game.researchLevels = {}; 
                 game.researchUnlocked.forEach(id => {
@@ -64,7 +68,6 @@ function loadGame() {
             }
             if (!game.researchLevels) game.researchLevels = {};
 
-            // Ensure lifetimeEarned exists (migration for old saves)
             if (game.lifetimeEarned === undefined) {
                 game.lifetimeEarned = game.totalEarned || 0;
             }
@@ -78,14 +81,24 @@ function loadGame() {
                 });
             }
             
-            upgrades.forEach((u, i) => {
-                if (data.upgrades && data.upgrades[i] !== undefined) u.level = data.upgrades[i];
-            });
+            // FIX: Handle both Legacy (Array) and New (Object) upgrade saves
+            if (data.upgrades) {
+                if (Array.isArray(data.upgrades)) {
+                    // Legacy: Load by Index
+                    upgrades.forEach((u, i) => {
+                        if (data.upgrades[i] !== undefined) u.level = data.upgrades[i];
+                    });
+                } else {
+                    // New: Load by ID
+                    for (const [id, lvl] of Object.entries(data.upgrades)) {
+                        const u = upgrades.find(x => x.id === id);
+                        if (u) u.level = lvl;
+                    }
+                }
+            }
+            
             if (data.settings) Object.assign(settings, data.settings);
             
-            // LOGIC FIX: Do NOT calculate offline earnings here.
-            // We return the lastSave time to main.js so it can calculate using
-            // the corrected income formula (excluding events).
             return game.lastSave;
         } catch (e) {
             console.error('Load failed:', e);

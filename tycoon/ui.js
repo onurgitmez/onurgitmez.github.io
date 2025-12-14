@@ -83,10 +83,11 @@ function updateUIDisplay(getMultiplierFn, getMultiplierBreakdownFn) {
         const c = cost(b.cost, b.count);
         const canBuy = game.money >= c;
         const bcost = settings.buyMode === 1 ? c : totalCost(b.cost, b.count, settings.buyMode, game.prestigeLevel, settings.buyMode);
-        const maxA = maxBuy(b.cost, b.count, game.money);
+        
+        // FIX: Passed game.prestigeLevel to maxBuy to ensure UI reflects bulk discount availability
+        const maxA = maxBuy(b.cost, b.count, game.money, game.prestigeLevel);
         
         const mult = getMultiplierFn(i); 
-        // Rebalanced Prestige: 0.10 per level
         const income = b.income * mult * (1 + (game.prestigeLevel * 0.10)) * game.eventMultiplier * game.comboMult;
         const totalIncome = income * b.count;
         const aff = Math.min(100, (game.money / c) * 100);
@@ -309,16 +310,13 @@ function renderStats() {
 }
 
 function updatePrestigeModal() {
-    // BALANCE FIX: Re-calculating next KP
     const baseReq = 10000000;
-    // Difficulty 2.5x
     const difficultyMult = Math.pow(2.5, game.prestigeLevel); 
     const minRequired = baseReq * difficultyMult;
 
     const pRewardEl = getEl('prestige-reward');
     const pBtn = getEl('prestige-btn');
 
-    // Display NEXT level bonus (+10% on top of current)
     pRewardEl.textContent = (game.prestigeLevel + 1) * 10;
 
     if (game.lifetimeEarned < minRequired) {
@@ -327,7 +325,6 @@ function updatePrestigeModal() {
         pBtn.style.opacity = "0.5";
         pBtn.style.cursor = "not-allowed";
     } else {
-        // Calculate Potential KP
         let kpBase = Math.floor(Math.sqrt(game.lifetimeEarned / baseReq));
         if (kpBase < 1) kpBase = 1;
         
