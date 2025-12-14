@@ -217,16 +217,16 @@ function renderResearch() {
 
         let currentEffect = '';
         if (r.type === 'cost_reduction') {
-            const discount = level * r.val * 100;
+            const discount = Math.round(level * r.val * 100);
             currentEffect = `Current: ${discount}% cost reduction`;
         } else if (r.type === 'income_boost') {
-            const boost = level * r.val * 100;
+            const boost = Math.round(level * r.val * 100);
             currentEffect = `Current: +${boost}% income`;
         } else if (r.type === 'event_freq') {
-            const freq = level * r.val * 100;
+            const freq = Math.round(level * r.val * 100);
             currentEffect = `Current: +${freq}% spawn rate`;
         } else if (r.type === 'kp_boost') {
-            const kpBoost = level * r.val * 100;
+            const kpBoost = Math.round(level * r.val * 100);
             currentEffect = `Current: +${kpBoost}% KP`;
         }
 
