@@ -83,18 +83,10 @@ function loadGame() {
             });
             if (data.settings) Object.assign(settings, data.settings);
             
-            // Standard 24h cap for offline earnings
-            const offlineCap = 86400; 
-            const realOfflineTime = Math.min((Date.now() - game.lastSave) / 1000, offlineCap);
-
-            // Give offline earnings for any time away (removed 60s threshold)
-            if (realOfflineTime > 0 && game.totalIncome > 0) {
-                const earnings = game.totalIncome * realOfflineTime;
-                game.money += earnings;
-                game.totalEarned += earnings;
-                game.lifetimeEarned += earnings;
-                return earnings;
-            }
+            // LOGIC FIX: Do NOT calculate offline earnings here.
+            // We return the lastSave time to main.js so it can calculate using
+            // the corrected income formula (excluding events).
+            return game.lastSave;
         } catch (e) {
             console.error('Load failed:', e);
         }

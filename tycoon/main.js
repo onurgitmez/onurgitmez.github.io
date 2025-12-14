@@ -17,7 +17,6 @@ function getMultiplier(i) {
             } else {
                 // Tier or Global Upgrade
                 if (u.tier === -1 || u.tier === b.tier || (u.tier === 7 && b.tier === 8)) {
-                    // Fixed: Tier 7 upgrade now applies to both Tier 7 and Tier 8
                     m *= Math.pow(u.mult, u.level);
                 }
             }
@@ -36,7 +35,7 @@ function getMultiplier(i) {
         m *= (1 + (resLvl * rData.val));
     }
     
-    // 4. HARD CAP (Significantly Increased for new endgame)
+    // 4. HARD CAP
     if (m > 1e15) m = 1e15; 
     
     return m;
@@ -46,15 +45,28 @@ function getMultiplierBreakdown(i) {
     return "Total Multiplier"; 
 }
 
+// LOGIC FIX: Helper for Offline/Prestige calcs that excludes temporary buffs
+function getPermanentIncome() {
+    let inc = 0;
+    businesses.forEach((b, i) => {
+        inc += b.income * b.count * getMultiplier(i);
+    });
+    // Apply ONLY Prestige
+    // BALANCE FIX: 10% per prestige level (was 5%) to match difficulty
+    const prestigeMult = 1 + (game.prestigeLevel * 0.10);
+    return inc * prestigeMult;
+}
+
 function updateIncome() {
     let inc = 0;
     businesses.forEach((b, i) => {
         inc += b.income * b.count * getMultiplier(i);
     });
     
-    // PRESTIGE: Exactly 5% per level
-    const prestigeMult = 1 + (game.prestigeLevel * 0.05);
+    // PRESTIGE: 10% per level (Rebalanced)
+    const prestigeMult = 1 + (game.prestigeLevel * 0.10);
     
+    // Events and Combo are strictly temporary
     inc *= prestigeMult * game.eventMultiplier * game.comboMult;
     game.totalIncome = inc;
 }
@@ -85,8 +97,9 @@ function buyBiz(i, e) {
         const now = Date.now();
         if (now - game.lastPurchase < 2000) {
             game.comboCount++;
-            // Cap combo count at 44 (which gives 2.0x multiplier)
-            if (game.comboCount > 44) game.comboCount = 44;
+            // LOGIC FIX: Cap at 24. Math: 1 + (24-4)*0.05 = 2.0x.
+            // Any clicks beyond 24 are useless, so we cap the counter there.
+            if (game.comboCount > 24) game.comboCount = 24;
             
             if (game.comboCount >= 5) {
                 let mult = 1 + (game.comboCount - 4) * 0.05;
@@ -113,8 +126,10 @@ function buyMax(i, e) {
     if (amt > 0) {
         const c = totalCost(b.cost, b.count, amt, game.prestigeLevel, settings.buyMode);
         
-        if (game.money >= c) {
+        // FLOAT FIX: Epsilon check
+        if (game.money >= c - 0.000001) {
             game.money -= c;
+            if (game.money < 0) game.money = 0; // Prevent negative money
             game.totalSpent += c;
             b.count += amt;
             updateIncome();
@@ -179,21 +194,20 @@ function buyResearch(id) {
 }
 
 function doPrestige() {
-    // 1. SCALING DIFFICULTY: Base 10M * (3 ^ PrestigeLevel)
+    // BALANCE FIX: Lowered difficulty scaling to 2.5x (was 3x)
     const baseReq = 10000000;
-    const difficultyMult = Math.pow(3, game.prestigeLevel); 
+    const difficultyMult = Math.pow(2.5, game.prestigeLevel); 
     const minRequired = baseReq * difficultyMult;
 
-    // FIXED: Use lifetimeEarned instead of totalEarned
     if (game.lifetimeEarned < minRequired) {
         showToast(`Need $${fmt(minRequired)} lifetime earnings!`);
         return;
     }
     
-    // 2. KP REWARD CALCULATION
-    // FIXED: Use lifetimeEarned and proper logarithmic scaling
-    let kpBase = Math.floor(Math.log10(game.lifetimeEarned / baseReq)) + 1; 
-    if (kpBase < 1) kpBase = 1; // Minimum 1 KP
+    // ECONOMY FIX: Changed Logarithmic reward to Square Root.
+    // This scales appropriately with exponential research costs.
+    let kpBase = Math.floor(Math.sqrt(game.lifetimeEarned / baseReq));
+    if (kpBase < 1) kpBase = 1;
     
     // Apply "Ancient Wisdom" Research
     const kpResLvl = getResearchLevel('res_kp');
@@ -201,11 +215,11 @@ function doPrestige() {
         kpBase = Math.floor(kpBase * (1 + (kpResLvl * 0.05)));
     }
     
-    // Calculate new income bonus
     const newLevel = game.prestigeLevel + 1;
-    const totalBonus = newLevel * 5;
+    // Rebalanced Bonus: 10% per level
+    const totalBonus = newLevel * 10;
 
-    if (!confirm(`Reset for +5% Income (Total: ${totalBonus}%) and ${kpBase} Knowledge Points?`)) return;
+    if (!confirm(`Reset for +10% Income (Total: ${totalBonus}%) and ${kpBase} Knowledge Points?`)) return;
     
     game.prestigeLevel++;
     game.prestigeBonus = totalBonus;
@@ -216,7 +230,6 @@ function doPrestige() {
     
     game.totalIncome = 0;
     game.totalEarned = 0; // Reset current run earnings
-    // FIXED: lifetimeEarned is NOT reset - it persists forever
     game.totalSpent = 0;
     game.startTime = Date.now();
     
@@ -322,8 +335,26 @@ function gameLoop() {
 
 // --- Initialization ---
 
-const offlineEarnings = loadGame();
-if (offlineEarnings > 0) setTimeout(() => showToast(`💰 Offline: $${fmt(offlineEarnings)}`), 1000);
+// LOGIC FIX: Offline earnings calculation moved here.
+const lastSaveTime = loadGame();
+
+if (lastSaveTime > 0) {
+    const offlineSeconds = (Date.now() - lastSaveTime) / 1000;
+    // Max 24h offline
+    const validSeconds = Math.min(offlineSeconds, 86400);
+    
+    if (validSeconds > 10) {
+        // Calculate earnings using ONLY permanent stats (no events/combos)
+        const perSecond = getPermanentIncome();
+        if (perSecond > 0) {
+            const earned = perSecond * validSeconds;
+            game.money += earned;
+            game.totalEarned += earned;
+            game.lifetimeEarned += earned;
+            setTimeout(() => showToast(`💰 Offline: $${fmt(earned)}`), 1000);
+        }
+    }
+}
 
 createUI();
 updateIncome();
@@ -343,17 +374,14 @@ if(soundBtn) soundBtn.textContent = settings.soundEnabled ? '🔊' : '🔇';
 requestAnimationFrame(gameLoop);
 setInterval(saveGame, 15000);
 
-// Event Loop with Research Bonus - FIXED: Capped at 100% chance
+// Event Loop
 setInterval(() => {
-    // Base 10% chance
     let chance = 0.1;
-    // Add Research Bonus
     const evtLvl = getResearchLevel('res_events');
     if (evtLvl > 0) {
-        chance += (evtLvl * 0.1); // +10% per level
+        chance += (evtLvl * 0.1); 
     }
     
-    // FIXED: Cap at 100% (1.0) probability
     chance = Math.min(chance, 1.0);
 
     if (!game.currentEvent && Math.random() < chance && game.totalIncome > 0) {

@@ -86,7 +86,8 @@ function updateUIDisplay(getMultiplierFn, getMultiplierBreakdownFn) {
         const maxA = maxBuy(b.cost, b.count, game.money);
         
         const mult = getMultiplierFn(i); 
-        const income = b.income * mult * (1 + (game.prestigeLevel * 0.05)) * game.eventMultiplier * game.comboMult;
+        // Rebalanced Prestige: 0.10 per level
+        const income = b.income * mult * (1 + (game.prestigeLevel * 0.10)) * game.eventMultiplier * game.comboMult;
         const totalIncome = income * b.count;
         const aff = Math.min(100, (game.money / c) * 100);
         
@@ -213,7 +214,6 @@ function renderResearch() {
         const canAfford = game.knowledgePoints >= currentCost;
         const isMax = level >= r.max;
 
-        // FIXED: Better description formatting based on research type
         let currentEffect = '';
         if (r.type === 'cost_reduction') {
             const discount = level * r.val * 100;
@@ -309,26 +309,30 @@ function renderStats() {
 }
 
 function updatePrestigeModal() {
-    // SCALING DIFFICULTY: Base 10M * (3 ^ Level)
+    // BALANCE FIX: Re-calculating next KP
     const baseReq = 10000000;
-    const difficultyMult = Math.pow(3, game.prestigeLevel); 
+    // Difficulty 2.5x
+    const difficultyMult = Math.pow(2.5, game.prestigeLevel); 
     const minRequired = baseReq * difficultyMult;
 
     const pRewardEl = getEl('prestige-reward');
     const pBtn = getEl('prestige-btn');
 
-    // Display NEXT level bonus (+5% on top of current)
-    pRewardEl.textContent = (game.prestigeLevel + 1) * 5;
+    // Display NEXT level bonus (+10% on top of current)
+    pRewardEl.textContent = (game.prestigeLevel + 1) * 10;
 
-    // FIXED: Use lifetimeEarned instead of totalEarned
     if (game.lifetimeEarned < minRequired) {
         pBtn.disabled = true;
         pBtn.textContent = `Need $${fmt(minRequired)} Lifetime Earnings`;
         pBtn.style.opacity = "0.5";
         pBtn.style.cursor = "not-allowed";
     } else {
+        // Calculate Potential KP
+        let kpBase = Math.floor(Math.sqrt(game.lifetimeEarned / baseReq));
+        if (kpBase < 1) kpBase = 1;
+        
         pBtn.disabled = false;
-        pBtn.textContent = "🌟 PRESTIGE NOW 🌟";
+        pBtn.textContent = `🌟 ASCEND (+${kpBase} KP) 🌟`;
         pBtn.style.opacity = "1";
         pBtn.style.cursor = "pointer";
     }

@@ -48,8 +48,10 @@ function totalCost(base, count, amt, prestigeLevel, buyModeSetting) {
     // Standard Geometric Sum Formula with discount already applied
     const total = firstCost * (Math.pow(scaling, amt) - 1) / (scaling - 1);
     
-    // Prestige Level 5+ gets 5% discount on x10 purchases
-    const prestigeDiscount = prestigeLevel >= 5 && buyModeSetting === 10 ? 0.95 : 1;
+    // LOGIC FIX: Apply discount if amt is >= 10 (covers both Buy x10 and Buy Max >= 10)
+    // This prevents Buy Max from being more expensive than manual x10 buying
+    const useDiscount = prestigeLevel >= 5 && amt >= 10;
+    const prestigeDiscount = useDiscount ? 0.95 : 1;
     
     return total * prestigeDiscount;
 }
@@ -58,7 +60,9 @@ function maxBuy(base, count, money) {
     const scaling = 1.15;
     const currentCost = cost(base, count);
     
-    if (money < currentCost) return 0;
+    // FLOAT FIX: Use a small epsilon to prevent floating point lockout
+    // if money is exactly equal to cost
+    if ((money + 0.000001) < currentCost) return 0;
     
     const n = Math.floor(
         Math.log(1 + (money * (scaling - 1)) / currentCost) / Math.log(scaling)
