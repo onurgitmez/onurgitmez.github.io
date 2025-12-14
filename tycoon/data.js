@@ -22,15 +22,20 @@ const businesses = [
     { name: "Bank Chain", cost: 15000000000000, income: 20000000000, count: 0, tier: 6 },
     { name: "Social Network", cost: 85000000000000, income: 100000000000, count: 0, tier: 6 },
     { name: "Media Empire", cost: 500000000000000, income: 550000000000, count: 0, tier: 6 },
-    { name: "Pharma Giant", cost: 3500000000000000, income: 3200000000000, count: 0, tier: 6 }
+    { name: "Pharma Giant", cost: 3500000000000000, income: 3200000000000, count: 0, tier: 6 },
+    // --- NEW ENDGAME BUSINESSES ---
+    { name: "AI Data Center", cost: 25000000000000000, income: 18000000000000, count: 0, tier: 7 },
+    { name: "Space Station", cost: 200000000000000000, income: 120000000000000, count: 0, tier: 7 },
+    { name: "Dyson Sphere", cost: 5000000000000000000, income: 950000000000000, count: 0, tier: 8 },
+    { name: "Universal Fabricator", cost: 99000000000000000000, income: 8800000000000000, count: 0, tier: 8 }
 ];
 
-const emojis = ["🍋","📰","🌸","🌮","☕","🏪","👔","🍺","🍽️","💇","🎳","💪","🎉","⛳","🎰","🏨","🎬","💻","✈️","🛢️","🏦","📱","📺","💊"];
+const emojis = ["🍋","📰","🌸","🌮","☕","🏪","👔","🍺","🍽️","💇","🎳","💪","🎉","⛳","🎰","🏨","🎬","💻","✈️","🛢️","🏦","📱","📺","💊", "🤖", "🛰️", "☀️", "⚛️"];
 
-// NERF: Multiplier reduced from 2 to 1.5
+// REBALANCED: Multiplier increased to 2.5x per level (was 1.5x) to fix bad ROI
 const upgrades = businesses.map((b, i) => ({
-    id: `u${i}`, name: `${b.name} Boost`, desc: `+50% ${b.name} income`, 
-    cost: b.cost * 10, level: 0, max: 10, biz: i, mult: 1.5, tier: b.tier
+    id: `u${i}`, name: `${b.name} Boost`, desc: `+150% ${b.name} income`, 
+    cost: b.cost * 10, level: 0, max: 10, biz: i, mult: 2.5, tier: b.tier
 })).concat([
     { id: 'gt1', name: 'Street Power', desc: 'Tier 1 +25%', cost: 50000, level: 0, max: 5, biz: -1, tier: 1, mult: 1.25 },
     { id: 'gt2', name: 'Retail Master', desc: 'Tier 2 +25%', cost: 500000, level: 0, max: 5, biz: -1, tier: 2, mult: 1.25 },
@@ -38,6 +43,7 @@ const upgrades = businesses.map((b, i) => ({
     { id: 'gt4', name: 'Luxury Brand', desc: 'Tier 4 +25%', cost: 500000000, level: 0, max: 5, biz: -1, tier: 4, mult: 1.25 },
     { id: 'gt5', name: 'Corporate Elite', desc: 'Tier 5 +25%', cost: 50000000000, level: 0, max: 5, biz: -1, tier: 5, mult: 1.25 },
     { id: 'gt6', name: 'Global Power', desc: 'Tier 6 +25%', cost: 5000000000000, level: 0, max: 5, biz: -1, tier: 6, mult: 1.25 },
+    { id: 'gt7', name: 'Future Tech', desc: 'Tier 7/8 +50%', cost: 1000000000000000, level: 0, max: 5, biz: -1, tier: 7, mult: 1.5 },
     { id: 'gall', name: 'Empire Synergy', desc: 'All +10%', cost: 100000000, level: 0, max: 10, biz: -1, tier: -1, mult: 1.1 }
 ]);
 
@@ -78,9 +84,46 @@ const achievementList = [
     { id: 'quick_million', name: 'Speed Tycoon', desc: 'Reach $1M in one run within 5 mins', icon: '⚡', check: (g) => g.totalEarned >= 1000000 && (Date.now() - g.startTime) < 300000, reward: 250000 }
 ];
 
+// --- NEW LEVELED RESEARCH ---
 const researchData = [
-    { id: 'res_cheaper', name: 'Efficient Logistics', desc: 'Reduce business cost scaling from 1.15x to 1.14x (Huge impact!)', cost: 1 },
-    { id: 'res_offline', name: 'Time Management', desc: 'Increase Offline Production cap from 1 hour to 24 hours', cost: 2 },
-    { id: 'res_events', name: 'Market Analysis', desc: 'Events spawn 2x more frequently', cost: 3 },
-    { id: 'res_prestige', name: 'Legacy Planning', desc: 'Retain 5% of your money after Prestige', cost: 10 }
+    { 
+        id: 'res_cost', 
+        name: 'Efficient Logistics', 
+        desc: 'Reduce all business costs by 2% per level.', 
+        baseCost: 1, 
+        costScale: 1.5, 
+        max: 25,
+        type: 'cost_reduction',
+        val: 0.02 
+    },
+    { 
+        id: 'res_global', 
+        name: 'Empire Synergy', 
+        desc: 'Increase ALL income by 10% per level.', 
+        baseCost: 2, 
+        costScale: 1.8, 
+        max: 50,
+        type: 'income_boost',
+        val: 0.10
+    },
+    { 
+        id: 'res_events', 
+        name: 'Market Analysis', 
+        desc: 'Events spawn 10% more frequently per level.', 
+        baseCost: 5, 
+        costScale: 2, 
+        max: 10,
+        type: 'event_freq',
+        val: 0.10
+    },
+    { 
+        id: 'res_kp', 
+        name: 'Ancient Wisdom', 
+        desc: 'Gain 5% more Knowledge Points from Prestige.', 
+        baseCost: 10, 
+        costScale: 2.5, 
+        max: 20,
+        type: 'kp_boost',
+        val: 0.05
+    }
 ];

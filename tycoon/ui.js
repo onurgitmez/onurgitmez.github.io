@@ -13,7 +13,6 @@ function createUI() {
         card.className = 'business-card';
         card.setAttribute('data-index', i);
         
-        // --- CLEANER UI: REMOVED "Level" TEXT ---
         card.innerHTML = `
             <div class="tier-indicator tier-${b.tier}"></div>
             <div class="card-header">
@@ -87,7 +86,7 @@ function updateUIDisplay(getMultiplierFn, getMultiplierBreakdownFn) {
         const maxA = maxBuy(b.cost, b.count, game.money);
         
         const mult = getMultiplierFn(i); 
-        const income = b.income * mult * (1 + game.prestigeBonus / 100) * game.eventMultiplier * game.comboMult;
+        const income = b.income * mult * (1 + (game.prestigeLevel * 0.05)) * game.eventMultiplier * game.comboMult;
         const totalIncome = income * b.count;
         const aff = Math.min(100, (game.money / c) * 100);
         
@@ -209,28 +208,31 @@ function renderResearch() {
     if(kpDisplay) kpDisplay.textContent = game.knowledgePoints;
     
     researchData.forEach(r => {
-        const unlocked = game.researchUnlocked.includes(r.id);
-        const canAfford = game.knowledgePoints >= r.cost;
+        const level = game.researchLevels[r.id] || 0;
+        const currentCost = Math.floor(r.baseCost * Math.pow(r.costScale, level));
+        const canAfford = game.knowledgePoints >= currentCost;
+        const isMax = level >= r.max;
+
         const item = document.createElement('div');
-        item.className = `upgrade-item ${unlocked ? 'unlocked' : ''}`;
-        if (unlocked) {
+        item.className = `upgrade-item ${level > 0 ? 'unlocked' : ''}`;
+        if (level > 0) {
             item.style.borderColor = 'var(--accent-secondary)';
             item.style.background = 'linear-gradient(135deg, rgba(123, 44, 191, 0.1), rgba(0,0,0,0))';
         }
         item.innerHTML = `
             <div class="upgrade-header">
                 <div class="upgrade-name">${r.name}</div>
-                <div class="upgrade-level">${unlocked ? '✅ OWNED' : r.cost + ' KP'}</div>
+                <div class="upgrade-level">${isMax ? 'MAX' : 'Lvl ' + level + '/' + r.max}</div>
             </div>
-            <div class="upgrade-description">${r.desc}</div>
-            ${!unlocked ? `
+            <div class="upgrade-description">${r.desc.replace('per level', `(Current: ${Math.round(level * r.val * 100)}%)`)}</div>
+            ${!isMax ? `
                 <button type="button" class="upgrade-button" 
                     style="background: linear-gradient(135deg, var(--accent-secondary), var(--accent-tertiary))"
                     onclick="buyResearch('${r.id}')" 
                     ${!canAfford ? 'disabled' : ''}>
-                    Research (Cost: ${r.cost} KP)
+                    Upgrade (Cost: ${currentCost} KP)
                 </button>
-            ` : ''}
+            ` : '<div style="color:var(--success);font-weight:bold;text-align:center">MAXED OUT</div>'}
         `;
         list.appendChild(item);
     });
@@ -255,22 +257,17 @@ function renderAchievements() {
     });
 }
 
-// --- Add to the bottom of ui.js ---
-
 function renderStats() {
-    // Format Time Played
     const seconds = (Date.now() - game.startTime) / 1000;
     const h = Math.floor(seconds / 3600);
     const m = Math.floor((seconds % 3600) / 60);
     getEl('stat-time').textContent = `${h}h ${m}m`;
 
-    // Basic Stats
     getEl('stat-earned').textContent = '$' + fmt(game.totalEarned);
     getEl('stat-spent').textContent = '$' + fmt(game.totalSpent);
     getEl('stat-clicks').textContent = game.totalClicks.toLocaleString();
     getEl('stat-events').textContent = game.eventsWitnessed;
     
-    // Calculated Stats
     const owned = businesses.reduce((acc, b) => acc + b.count, 0);
     getEl('stat-businesses').textContent = owned.toLocaleString();
 
@@ -278,12 +275,10 @@ function renderStats() {
     const totalAch = achievementList.length;
     getEl('stat-achievements').textContent = `${unlockedAch}/${totalAch}`;
 
-    // Most Profitable Business
     let bestBiz = null;
     let maxIncome = -1;
     
     businesses.forEach((b, i) => {
-        // Calculate raw income for this business type
         const mult = getMultiplier(i);
         const income = b.income * b.count * mult;
         if (income > maxIncome) {
@@ -298,20 +293,23 @@ function renderStats() {
 }
 
 function updatePrestigeModal() {
-    const minRequired = 10000000; // Must match the value in doPrestige()
+    // SCALING DIFFICULTY: Base 10M * (3 ^ Level)
+    const baseReq = 10000000;
+    const difficultyMult = Math.pow(3, game.prestigeLevel); 
+    const minRequired = baseReq * difficultyMult;
+
     const pRewardEl = getEl('prestige-reward');
     const pBtn = getEl('prestige-btn');
 
+    // Display NEXT level bonus (+5% on top of current)
+    pRewardEl.textContent = (game.prestigeLevel + 1) * 5;
+
     if (game.totalEarned < minRequired) {
-        pRewardEl.textContent = "0";
         pBtn.disabled = true;
         pBtn.textContent = `Need $${fmt(minRequired)} Lifetime Earnings`;
         pBtn.style.opacity = "0.5";
         pBtn.style.cursor = "not-allowed";
     } else {
-        // Formula matches doPrestige() in main.js
-        const reward = Math.floor(Math.log10(game.totalEarned / minRequired) * 5) + 5;
-        pRewardEl.textContent = reward;
         pBtn.disabled = false;
         pBtn.textContent = "🌟 PRESTIGE NOW 🌟";
         pBtn.style.opacity = "1";

@@ -9,8 +9,8 @@ let game = {
     lastSave: Date.now(), 
     prestigeLevel: 0, 
     prestigeBonus: 0,
-    knowledgePoints: 0, // NEW: Currency for Tier 3
-    researchUnlocked: [], // NEW: Track bought researches
+    knowledgePoints: 0,
+    researchLevels: {}, // CHANGED: Now an object mapping ID -> Level
     eventMultiplier: 1, 
     lastPurchase: 0, 
     comboCount: 0, 
@@ -25,7 +25,6 @@ let settings = { soundEnabled: true, viewMode: 'all', buyMode: 1 };
 
 function saveGame() {
     const data = {
-        // ... (copy all game properties)
         money: game.money, 
         totalEarned: game.totalEarned, 
         lifetimeEarned: game.lifetimeEarned,
@@ -35,12 +34,11 @@ function saveGame() {
         lastSave: Date.now(),
         prestigeLevel: game.prestigeLevel, 
         prestigeBonus: game.prestigeBonus,
-        knowledgePoints: game.knowledgePoints, // Save KP
-        researchUnlocked: game.researchUnlocked, // Save Research
+        knowledgePoints: game.knowledgePoints,
+        researchLevels: game.researchLevels, // Save Levels
         eventsWitnessed: game.eventsWitnessed, 
         unlockedAchievements: game.unlockedAchievements,
         
-        // OPTIMIZATION A: Only save dynamic data (ID, count, level)
         businesses: businesses.map((b, i) => ({ id: i, count: b.count, level: b.level })),
         
         upgrades: upgrades.map(u => u.level), 
@@ -56,11 +54,18 @@ function loadGame() {
             const data = JSON.parse(saved);
             Object.assign(game, data);
             
-            if (game.lifetimeEarned === undefined) game.lifetimeEarned = game.totalEarned;
-            if (game.knowledgePoints === undefined) game.knowledgePoints = 0;
-            if (game.researchUnlocked === undefined) game.researchUnlocked = [];
+            // Migration for old saves (Array to Object)
+            if (Array.isArray(game.researchUnlocked)) {
+                game.researchLevels = {}; 
+                game.researchUnlocked.forEach(id => {
+                   if(researchData.find(r => r.id === id)) game.researchLevels[id] = 1;
+                });
+                delete game.researchUnlocked;
+            }
+            if (!game.researchLevels) game.researchLevels = {};
 
-            // Merge saved business data with static data
+            if (game.lifetimeEarned === undefined) game.lifetimeEarned = game.totalEarned;
+
             if (data.businesses) {
                 data.businesses.forEach((savedBiz, i) => {
                     if (businesses[i]) {
@@ -75,10 +80,8 @@ function loadGame() {
             });
             if (data.settings) Object.assign(settings, data.settings);
             
-            const offlineTime = Math.min((Date.now() - game.lastSave) / 1000, 3600); // 1 hr cap (default)
-            // Tier 3: Check for "Offline Master" research to boost cap
-            const offlineCap = game.researchUnlocked.includes('res_offline') ? 86400 : 3600; // 24hr vs 1hr
-            
+            // Standard 24h cap (Removed specific offline research)
+            const offlineCap = 86400; 
             const realOfflineTime = Math.min((Date.now() - game.lastSave) / 1000, offlineCap);
 
             if (realOfflineTime > 60 && game.totalIncome > 0) {
@@ -102,35 +105,23 @@ function resetGameData() {
     }
 }
 
-// Add to state.js
-
 function exportSave() {
-    saveGame(); // Ensure latest state is saved
+    saveGame(); 
     const data = localStorage.getItem('tycoonV5');
-    // Encode to Base64 to make it look like a "save code" and prevent accidental edits
-    const encoded = btoa(data);
+    const encoded = btoa(data); 
     const textarea = document.getElementById('export-data');
     textarea.value = encoded;
-    
-    // Select text for user
     textarea.select();
-    textarea.setSelectionRange(0, 99999); 
-    
-    // Copy to clipboard
-    navigator.clipboard.writeText(encoded).then(() => {
-        showToast('Save copied to clipboard!');
-    });
+    navigator.clipboard.writeText(encoded).then(() => showToast('Save copied to clipboard!'));
 }
 
 function importSave() {
     const textarea = document.getElementById('import-data');
     const encoded = textarea.value.trim();
-    
     if (!encoded) return;
-
     try {
         const decoded = atob(encoded);
-        JSON.parse(decoded); // Validate JSON
+        JSON.parse(decoded); 
         localStorage.setItem('tycoonV5', decoded);
         location.reload();
     } catch (e) {

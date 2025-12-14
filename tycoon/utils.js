@@ -15,42 +15,41 @@ function fmt(n) {
     return v + s[i];
 }
 
-function getScaling() {
-    // Helper to get current scaling factor safely
-    // Default to 1.15 if game state isn't loaded yet
-    if (typeof game === 'undefined' || !game.researchUnlocked) return 1.15;
-    return game.researchUnlocked.includes('res_cheaper') ? 1.14 : 1.15;
-}
-
 function cost(base, count) {
-    return base * Math.pow(getScaling(), count);
+    // 1. Calculate Standard Geometric Cost (Base * 1.15^count)
+    let val = base * Math.pow(1.15, count);
+    
+    // 2. Apply "Efficient Logistics" Research Discount
+    if (typeof game !== 'undefined' && game.researchLevels) {
+        const lvl = game.researchLevels['res_cost'] || 0;
+        if (lvl > 0) {
+            // 2% discount per level
+            const discount = Math.max(0.1, 1 - (lvl * 0.02)); 
+            val *= discount;
+        }
+    }
+    return val;
 }
 
 function totalCost(base, count, amt, prestigeLevel, buyModeSetting) {
-    const scaling = getScaling();
-    const discount = prestigeLevel >= 5 && buyModeSetting === 10 ? 0.95 : 1;
-    
-    // Geometric Series Sum Formula: Sum = a * (r^n - 1) / (r - 1)
-    // a = cost of first item (current cost)
-    // r = scaling factor
-    // n = amount to buy
+    const scaling = 1.15;
+    // NOTE: cost() already applies the Research discount to the first item
     const firstCost = cost(base, count);
     
-    // Use precise formula instead of loop for performance & accuracy
+    // Standard Geometric Sum Formula
     const total = firstCost * (Math.pow(scaling, amt) - 1) / (scaling - 1);
+    
+    const discount = prestigeLevel >= 5 && buyModeSetting === 10 ? 0.95 : 1;
     
     return total * discount;
 }
 
 function maxBuy(base, count, money) {
-    const scaling = getScaling();
+    const scaling = 1.15;
     const currentCost = cost(base, count);
     
     if (money < currentCost) return 0;
     
-    // Geometric Series Inverse Formula
-    // Derived from: Money = Cost * (r^n - 1) / (r - 1)
-    // Solved for n
     const n = Math.floor(
         Math.log(1 + (money * (scaling - 1)) / currentCost) / Math.log(scaling)
     );

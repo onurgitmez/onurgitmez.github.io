@@ -1,5 +1,9 @@
 // --- Math & Logic ---
 
+function getResearchLevel(id) {
+    return game.researchLevels[id] || 0;
+}
+
 function getMultiplier(i) {
     let m = 1;
     const b = businesses[i];
@@ -7,33 +11,30 @@ function getMultiplier(i) {
     // 1. Upgrade Multipliers
     upgrades.forEach(u => {
         if (u.level > 0) {
-            // LOGIC CHANGE: 
-            // If the upgrade targets a specific business (biz !== -1), ONLY apply if IDs match.
-            // If the upgrade is generic (biz === -1), THEN check for Tier match or Global match.
-            
             if (u.biz !== -1) {
-                // Specific Business Upgrade (e.g., Lemonade Boost)
-                if (u.biz === i) {
-                    m *= Math.pow(u.mult, u.level);
-                }
+                // Specific Business Upgrade
+                if (u.biz === i) m *= Math.pow(u.mult, u.level);
             } else {
-                // General Upgrade (e.g., "Street Power" or "Empire Synergy")
-                if (u.tier === -1 || u.tier === b.tier) {
-                    m *= Math.pow(u.mult, u.level);
-                }
+                // Tier or Global Upgrade
+                if (u.tier === -1 || u.tier === b.tier) m *= Math.pow(u.mult, u.level);
             }
         }
     });
     
     // 2. Milestone Bonuses
-    const milestoneBonus = game.prestigeLevel >= 10 ? 1.15 : 1.1; 
+    const milestoneBonus = 1.25; 
     const milestones = [25, 50, 75, 100, 150, 200, 250, 300, 400, 500, 600, 700, 800, 900, 1000];
     milestones.forEach(ms => { if (b.count >= ms) m *= milestoneBonus; });
     
-    // 3. HARD CAP (Kept from previous request)
-    if (m > 2048) {
-        m = 2048; 
+    // 3. RESEARCH: Global Income Boost
+    const resLvl = getResearchLevel('res_global');
+    if (resLvl > 0) {
+        const rData = researchData.find(r => r.id === 'res_global');
+        m *= (1 + (resLvl * rData.val));
     }
+    
+    // 4. HARD CAP (Significantly Increased for new endgame)
+    if (m > 1e15) m = 1e15; 
     
     return m;
 }
@@ -47,7 +48,11 @@ function updateIncome() {
     businesses.forEach((b, i) => {
         inc += b.income * b.count * getMultiplier(i);
     });
-    inc *= (1 + game.prestigeBonus / 100) * game.eventMultiplier * game.comboMult;
+    
+    // PRESTIGE: Exactly 5% per level
+    const prestigeMult = 1 + (game.prestigeLevel * 0.05);
+    
+    inc *= prestigeMult * game.eventMultiplier * game.comboMult;
     game.totalIncome = inc;
 }
 
@@ -72,17 +77,13 @@ function buyBiz(i, e) {
         game.money -= c;
         game.totalSpent += c;
         b.count += amt;
-        // NOTE: "Level" logic removed here.
         game.totalClicks++;
         
-        // --- FIXED COMBO LOGIC (Capped) ---
         const now = Date.now();
         if (now - game.lastPurchase < 2000) {
             game.comboCount++;
             if (game.comboCount >= 5) {
-                // Balance: Slower growth (0.05 instead of 0.1)
                 let mult = 1 + (game.comboCount - 4) * 0.05;
-                // Balance: Hard Cap at 2.0x
                 const maxCombo = 2.0; 
                 game.comboMult = Math.min(mult, maxCombo);
             }
@@ -149,36 +150,58 @@ function buyAllUpgrades() {
 
 function buyResearch(id) {
     const r = researchData.find(x => x.id === id);
-    if (!r || game.researchUnlocked.includes(id)) return;
+    if (!r) return;
     
-    if (game.knowledgePoints >= r.cost) {
-        game.knowledgePoints -= r.cost;
-        game.researchUnlocked.push(id);
+    const currentLevel = game.researchLevels[id] || 0;
+    if (currentLevel >= r.max) return;
+
+    // Cost Scaling: Base * (Scale ^ Level)
+    const cost = Math.floor(r.baseCost * Math.pow(r.costScale, currentLevel));
+
+    if (game.knowledgePoints >= cost) {
+        game.knowledgePoints -= cost;
+        game.researchLevels[id] = currentLevel + 1;
+        
         renderResearch(); 
         updateIncome();   
-        showToast(`🧪 Researched: ${r.name}`);
+        showToast(`🧪 Upgraded: ${r.name} (Lvl ${currentLevel + 1})`);
         saveGame();
     }
 }
 
 function doPrestige() {
-    const minRequired = 10000000;
+    // 1. SCALING DIFFICULTY: Base 10M * (3 ^ PrestigeLevel)
+    const baseReq = 10000000;
+    const difficultyMult = Math.pow(3, game.prestigeLevel); 
+    const minRequired = baseReq * difficultyMult;
+
     if (game.totalEarned < minRequired) {
         showToast(`Need $${fmt(minRequired)} total earned!`);
         return;
     }
     
-    const reward = Math.floor(Math.log10(game.totalEarned / minRequired) * 5) + 5;
-    const kpEarned = Math.max(1, Math.floor(reward / 5));
+    // 2. KP REWARD CALCULATION
+    // KP based on how much you exceeded the requirement (logarithmic)
+    let kpBase = Math.floor(Math.log10(game.totalEarned / (baseReq/10))) + 1; 
     
-    if (!confirm(`Reset for +${reward}% income and ${kpEarned} Knowledge Points?`)) return;
+    // Apply "Ancient Wisdom" Research
+    const kpResLvl = getResearchLevel('res_kp');
+    if (kpResLvl > 0) {
+        kpBase = Math.floor(kpBase * (1 + (kpResLvl * 0.05)));
+    }
+    
+    // Calculate new income bonus
+    const newLevel = game.prestigeLevel + 1;
+    const totalBonus = newLevel * 5;
+
+    if (!confirm(`Reset for +5% Income (Total: ${totalBonus}%) and ${kpBase} Knowledge Points?`)) return;
     
     game.prestigeLevel++;
-    game.prestigeBonus += reward;
-    game.knowledgePoints += kpEarned;
+    game.prestigeBonus = totalBonus;
+    game.knowledgePoints += kpBase;
     
-    const keepMoney = game.researchUnlocked.includes('res_prestige');
-    game.money = keepMoney ? (game.money * 0.05) : (game.prestigeLevel >= 1 ? 1000 : 20);
+    // Hard reset money to 1000
+    game.money = 1000;
     
     game.totalIncome = 0;
     game.totalEarned = 0; 
@@ -188,7 +211,6 @@ function doPrestige() {
     businesses.forEach((b, i) => { 
         b.count = 0; 
         b.level = 0; 
-        if (game.prestigeLevel >= 2 && i < 5) b.count = 1;
     });
     
     upgrades.forEach(u => { u.level = 0; });
@@ -197,38 +219,13 @@ function doPrestige() {
     updateIncome();
     createUI();
     closeModal('prestige');
-    showToast(`⭐ Ascended! +${kpEarned} KP`);
+    showToast(`⭐ Ascended! +${kpBase} KP`);
     
     const pDisplay = document.getElementById('prestige-display');
     if (pDisplay) {
         pDisplay.style.display = 'flex';
         document.getElementById('prestige-level').textContent = game.prestigeLevel;
         document.getElementById('prestige-bonus').textContent = game.prestigeBonus;
-    }
-}
-
-function exportSave() {
-    saveGame(); 
-    const data = localStorage.getItem('tycoonV5');
-    const encoded = btoa(data); 
-    const textarea = document.getElementById('export-data');
-    textarea.value = encoded;
-    textarea.select();
-    navigator.clipboard.writeText(encoded).then(() => showToast('Save copied to clipboard!'));
-}
-
-function importSave() {
-    const textarea = document.getElementById('import-data');
-    const encoded = textarea.value.trim();
-    if (!encoded) return;
-    try {
-        const decoded = atob(encoded);
-        JSON.parse(decoded); 
-        localStorage.setItem('tycoonV5', decoded);
-        location.reload();
-    } catch (e) {
-        showToast('Invalid Save String!');
-        console.error(e);
     }
 }
 
@@ -266,8 +263,8 @@ function openModal(type) {
     if (type === 'upgrades') renderUpgrades();
     if (type === 'achievements') renderAchievements();
     if (type === 'research') renderResearch();
-    if (type === 'stats') renderStats();          // Updates the stats page
-    if (type === 'prestige') updatePrestigeModal(); // Updates prestige potential
+    if (type === 'stats') renderStats();          
+    if (type === 'prestige') updatePrestigeModal(); 
 }
 
 function closeModal(type) {
@@ -334,8 +331,16 @@ if(soundBtn) soundBtn.textContent = settings.soundEnabled ? '🔊' : '🔇';
 requestAnimationFrame(gameLoop);
 setInterval(saveGame, 15000);
 
+// Event Loop with Research Bonus
 setInterval(() => {
-    const chance = game.researchUnlocked.includes('res_events') ? 0.2 : 0.1;
+    // Base 10% chance
+    let chance = 0.1;
+    // Add Research Bonus
+    const evtLvl = getResearchLevel('res_events');
+    if (evtLvl > 0) {
+        chance += (evtLvl * 0.1); // +10% per level
+    }
+
     if (!game.currentEvent && Math.random() < chance && game.totalIncome > 0) {
         const event = events[Math.floor(Math.random() * events.length)];
         game.currentEvent = event;
@@ -359,9 +364,6 @@ setInterval(() => {
     }
 }, 30000);
 
-// --- Add this to the very bottom of main.js ---
-
-// Save automatically when the user closes the tab or refreshes
 window.addEventListener('beforeunload', () => {
     saveGame();
 });
