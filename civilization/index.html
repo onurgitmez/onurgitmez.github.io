@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Civilization Clicker - Enhanced Edition</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="tooltip" class="tooltip"></div>
+
+    <aside>
+        <div class="brand">👑 Civ Idle</div>
+        
+        <div class="sb-category">Essentials</div>
+        <div class="res-box" id="box-food"><div class="res-header"><span>🍖 Food</span><span id="food-rate" class="rate-neu">+0/s</span></div><div class="res-bar-bg"><div id="food-bar" class="res-bar-fill" style="background: var(--accent-food);"></div></div><div class="res-sub"><span id="food-current">0</span> / <span id="food-max">100</span></div></div>
+        <div class="res-box" id="box-wood"><div class="res-header"><span>🌲 Wood</span><span id="wood-rate" class="rate-neu">+0/s</span></div><div class="res-bar-bg"><div id="wood-bar" class="res-bar-fill" style="background: var(--accent-wood);"></div></div><div class="res-sub"><span id="wood-current">0</span> / <span id="wood-max">50</span></div></div>
+        <div class="res-box" id="box-science"><div class="res-header"><span>🧪 Science</span><span id="science-rate" class="rate-neu">+0/s</span></div><div class="res-bar-bg"><div id="science-bar" class="res-bar-fill" style="background: var(--accent-science);"></div></div><div class="res-sub"><span id="science-current">0</span> / <span id="science-max">200</span></div></div>
+
+        <div id="cat-refined" class="sb-category locked">Refined</div>
+        <div class="res-box locked" id="box-lumber"><div class="res-header"><span>🪵 Lumber</span><span id="lumber-rate" class="rate-neu">+0/s</span></div><div class="res-bar-bg"><div id="lumber-bar" class="res-bar-fill" style="background: var(--accent-lumber);"></div></div><div class="res-sub"><span id="lumber-current">0</span> / <span id="lumber-max">50</span></div></div>
+        <div class="res-box locked" id="box-brick"><div class="res-header"><span>🧱 Brick</span><span id="brick-rate" class="rate-neu">+0/s</span></div><div class="res-bar-bg"><div id="brick-bar" class="res-bar-fill" style="background: var(--accent-brick);"></div></div><div class="res-sub"><span id="brick-current">0</span> / <span id="brick-max">50</span></div></div>
+        <div class="res-box locked" id="box-glass"><div class="res-header"><span>🏺 Glass</span><span id="glass-rate" class="rate-neu">+0/s</span></div><div class="res-bar-bg"><div id="glass-bar" class="res-bar-fill" style="background: var(--accent-glass);"></div></div><div class="res-sub"><span id="glass-current">0</span> / <span id="glass-max">50</span></div></div>
+        <div class="res-box locked" id="box-mana"><div class="res-header"><span>✨ Mana</span><span id="mana-rate" class="rate-neu">+0/s</span></div><div class="res-bar-bg"><div id="mana-bar" class="res-bar-fill" style="background: var(--accent-mana);"></div></div><div class="res-sub"><span id="mana-current">0</span> / <span id="mana-max">50</span></div></div>
+        <div class="res-box locked" id="box-parchment"><div class="res-header"><span>📜 Parchment</span><span id="parchment-rate" class="rate-neu">+0/s</span></div><div class="res-bar-bg"><div id="parchment-bar" class="res-bar-fill" style="background: #d4af37;"></div></div><div class="res-sub"><span id="parchment-current">0</span> / <span id="parchment-max">30</span></div></div>
+        <div class="res-box locked" id="box-ale"><div class="res-header"><span>🍺 Ale</span><span id="ale-rate" class="rate-neu">+0/s</span></div><div class="res-bar-bg"><div id="ale-bar" class="res-bar-fill" style="background: #c49a6c;"></div></div><div class="res-sub"><span id="ale-current">0</span> / <span id="ale-max">40</span></div></div>
+        <div class="res-box locked" id="box-canvas"><div class="res-header"><span>🎨 Canvas</span><span id="canvas-rate" class="rate-neu">+0/s</span></div><div class="res-bar-bg"><div id="canvas-bar" class="res-bar-fill" style="background: #f5f5dc;"></div></div><div class="res-sub"><span id="canvas-current">0</span> / <span id="canvas-max">40</span></div></div>
+        <div class="res-box locked" id="box-art"><div class="res-header"><span>🖼️ Art</span><span id="art-rate" class="rate-neu">+0/s</span></div><div class="res-bar-bg"><div id="art-bar" class="res-bar-fill" style="background: #9c27b0;"></div></div><div class="res-sub"><span id="art-current">0</span> / <span id="art-max">20</span></div></div>
+
+        <div id="cat-materials" class="sb-category locked">Materials</div>
+        <div class="res-box locked" id="box-stone"><div class="res-header"><span>🪨 Stone</span><span id="stone-rate" class="rate-neu">+0/s</span></div><div class="res-bar-bg"><div id="stone-bar" class="res-bar-fill" style="background: var(--accent-stone);"></div></div><div class="res-sub"><span id="stone-current">0</span> / <span id="stone-max">20</span></div></div>
+        <div class="res-box locked" id="box-clay"><div class="res-header"><span>🍘 Clay</span><span id="clay-rate" class="rate-neu">+0/s</span></div><div class="res-bar-bg"><div id="clay-bar" class="res-bar-fill" style="background: var(--accent-clay);"></div></div><div class="res-sub"><span id="clay-current">0</span> / <span id="clay-max">20</span></div></div>
+        <div class="res-box locked" id="box-skins"><div class="res-header"><span>🧥 Skins</span><span id="skins-rate" class="rate-neu">+0/s</span></div><div class="res-bar-bg"><div id="skins-bar" class="res-bar-fill" style="background: var(--accent-skins);"></div></div><div class="res-sub"><span id="skins-current">0</span> / <span id="skins-max">20</span></div></div>
+        <div class="res-box locked" id="box-copper"><div class="res-header"><span>⛏️ Copper</span><span id="copper-rate" class="rate-neu">+0/s</span></div><div class="res-bar-bg"><div id="copper-bar" class="res-bar-fill" style="background: var(--accent-copper);"></div></div><div class="res-sub"><span id="copper-current">0</span> / <span id="copper-max">10</span></div></div>
+        <div class="res-box locked" id="box-coal"><div class="res-header"><span>⚫ Coal</span><span id="coal-rate" class="rate-neu">+0/s</span></div><div class="res-bar-bg"><div id="coal-bar" class="res-bar-fill" style="background: var(--accent-coal);"></div></div><div class="res-sub"><span id="coal-current">0</span> / <span id="coal-max">20</span></div></div>
+        <div class="res-box locked" id="box-weapons"><div class="res-header"><span>⚔️ Weapons</span><span id="weapons-rate" class="rate-neu">+0/s</span></div><div class="res-bar-bg"><div id="weapons-bar" class="res-bar-fill" style="background: #b71c1c;"></div></div><div class="res-sub"><span id="weapons-current">0</span> / <span id="weapons-max">20</span></div></div>
+        <div class="res-box locked" id="box-armor"><div class="res-header"><span>🛡️ Armor</span><span id="armor-rate" class="rate-neu">+0/s</span></div><div class="res-bar-bg"><div id="armor-bar" class="res-bar-fill" style="background: #757575;"></div></div><div class="res-sub"><span id="armor-current">0</span> / <span id="armor-max">20</span></div></div>
+        <div class="res-box locked" id="box-rubber"><div class="res-header"><span>⚪ Rubber</span><span id="rubber-rate" class="rate-neu">+0/s</span></div><div class="res-bar-bg"><div id="rubber-bar" class="res-bar-fill" style="background: #424242;"></div></div><div class="res-sub"><span id="rubber-current">0</span> / <span id="rubber-max">40</span></div></div>
+        <div class="res-box locked" id="box-brass"><div class="res-header"><span>🔔 Brass</span><span id="brass-rate" class="rate-neu">+0/s</span></div><div class="res-bar-bg"><div id="brass-bar" class="res-bar-fill" style="background: #b5a642;"></div></div><div class="res-sub"><span id="brass-current">0</span> / <span id="brass-max">30</span></div></div>
+
+        <div id="cat-industry" class="sb-category locked">Industry</div>
+        <div class="res-box locked" id="box-iron"><div class="res-header"><span>🛡️ Iron</span><span id="iron-rate" class="rate-neu">+0/s</span></div><div class="res-bar-bg"><div id="iron-bar" class="res-bar-fill" style="background: var(--accent-iron);"></div></div><div class="res-sub"><span id="iron-current">0</span> / <span id="iron-max">10</span></div></div>
+        <div class="res-box locked" id="box-tools"><div class="res-header"><span>🛠️ Tools</span><span id="tools-rate" class="rate-neu">+0/s</span></div><div class="res-bar-bg"><div id="tools-bar" class="res-bar-fill" style="background: var(--accent-tools);"></div></div><div class="res-sub"><span id="tools-current">0</span> / <span id="tools-max">10</span></div></div>
+        <div class="res-box locked" id="box-steel"><div class="res-header"><span>⚙️ Steel</span><span id="steel-rate" class="rate-neu">+0/s</span></div><div class="res-bar-bg"><div id="steel-bar" class="res-bar-fill" style="background: var(--accent-steel);"></div></div><div class="res-sub"><span id="steel-current">0</span> / <span id="steel-max">10</span></div></div>
+        <div class="res-box locked" id="box-faith"><div class="res-header"><span>🙏 Faith</span><span id="faith-rate" class="rate-neu">+0/s</span></div><div class="res-bar-bg"><div id="faith-bar" class="res-bar-fill" style="background: var(--accent-faith);"></div></div><div class="res-sub"><span id="faith-current">0</span> / <span id="faith-max">50</span></div></div>
+        <div class="res-box locked" id="box-gold"><div class="res-header"><span>💰 Gold</span><span id="gold-rate" class="rate-neu">+0/s</span></div><div class="res-bar-bg"><div id="gold-bar" class="res-bar-fill" style="background: var(--accent-gold);"></div></div><div class="res-sub"><span id="gold-current">0</span> / <span id="gold-max">5</span></div></div>
+        <div class="res-box locked" id="box-chivalry"><div class="res-header"><span>⚜️ Chivalry</span><span id="chivalry-rate" class="rate-neu">+0/s</span></div><div class="res-bar-bg"><div id="chivalry-bar" class="res-bar-fill" style="background: #4169e1;"></div></div><div class="res-sub"><span id="chivalry-current">0</span> / <span id="chivalry-max">10</span></div></div>
+        <div class="res-box locked" id="box-gunpowder"><div class="res-header"><span>💥 Gunpowder</span><span id="gunpowder-rate" class="rate-neu">+0/s</span></div><div class="res-bar-bg"><div id="gunpowder-bar" class="res-bar-fill" style="background: #8b4513;"></div></div><div class="res-sub"><span id="gunpowder-current">0</span> / <span id="gunpowder-max">30</span></div></div>
+        <div class="res-box locked" id="box-spices"><div class="res-header"><span>🌶️ Spices</span><span id="spices-rate" class="rate-neu">+0/s</span></div><div class="res-bar-bg"><div id="spices-bar" class="res-bar-fill" style="background: #ff6347;"></div></div><div class="res-sub"><span id="spices-current">0</span> / <span id="spices-max">30</span></div></div>
+        <div class="res-box locked" id="box-influence"><div class="res-header"><span>👑 Influence</span><span id="influence-rate" class="rate-neu">+0/s</span></div><div class="res-bar-bg"><div id="influence-bar" class="res-bar-fill" style="background: #ffd700;"></div></div><div class="res-sub"><span id="influence-current">0</span> / <span id="influence-max">10</span></div></div>
+
+        <div id="cat-modern" class="sb-category locked">Modern</div>
+        <div class="res-box locked" id="box-oil"><div class="res-header"><span>🛢️ Oil</span><span id="oil-rate" class="rate-neu">+0/s</span></div><div class="res-bar-bg"><div id="oil-bar" class="res-bar-fill" style="background: #1a1a1a;"></div></div><div class="res-sub"><span id="oil-current">0</span> / <span id="oil-max">50</span></div></div>
+        <div class="res-box locked" id="box-concrete"><div class="res-header"><span>🏗️ Concrete</span><span id="concrete-rate" class="rate-neu">+0/s</span></div><div class="res-bar-bg"><div id="concrete-bar" class="res-bar-fill" style="background: #808080;"></div></div><div class="res-sub"><span id="concrete-current">0</span> / <span id="concrete-max">50</span></div></div>
+        <div class="res-box locked" id="box-power"><div class="res-header"><span>⚡ Power</span><span id="power-rate" class="rate-neu">+0/s</span></div><div class="res-bar-bg"><div id="power-bar" class="res-bar-fill" style="background: #ffeb3b;"></div></div><div class="res-sub"><span id="power-current">0</span> / <span id="power-max">100</span></div></div>
+        <div class="res-box locked" id="box-engines"><div class="res-header"><span>⚙️ Engines</span><span id="engines-rate" class="rate-neu">+0/s</span></div><div class="res-bar-bg"><div id="engines-bar" class="res-bar-fill" style="background: #607d8b;"></div></div><div class="res-sub"><span id="engines-current">0</span> / <span id="engines-max">20</span></div></div>
+
+        <div id="cat-space" class="sb-category locked">Space Age</div>
+        <div class="res-box locked" id="box-uranium"><div class="res-header"><span>☢️ Uranium</span><span id="uranium-rate" class="rate-neu">+0/s</span></div><div class="res-bar-bg"><div id="uranium-bar" class="res-bar-fill" style="background: #76ff03;"></div></div><div class="res-sub"><span id="uranium-current">0</span> / <span id="uranium-max">10</span></div></div>
+        <div class="res-box locked" id="box-rocketfuel"><div class="res-header"><span>🚀 Rocket Fuel</span><span id="rocketfuel-rate" class="rate-neu">+0/s</span></div><div class="res-bar-bg"><div id="rocketfuel-bar" class="res-bar-fill" style="background: #ff5722;"></div></div><div class="res-sub"><span id="rocketfuel-current">0</span> / <span id="rocketfuel-max">30</span></div></div>
+        <div class="res-box locked" id="box-superalloy"><div class="res-header"><span>🔩 Superalloy</span><span id="superalloy-rate" class="rate-neu">+0/s</span></div><div class="res-bar-bg"><div id="superalloy-bar" class="res-bar-fill" style="background: #9e9e9e;"></div></div><div class="res-sub"><span id="superalloy-current">0</span> / <span id="superalloy-max">20</span></div></div>
+        <div class="res-box locked" id="box-nanobots"><div class="res-header"><span>🤖 Nanobots</span><span id="nanobots-rate" class="rate-neu">+0/s</span></div><div class="res-bar-bg"><div id="nanobots-bar" class="res-bar-fill" style="background: #00bcd4;"></div></div><div class="res-sub"><span id="nanobots-current">0</span> / <span id="nanobots-max">10</span></div></div>
+        <div class="res-box locked" id="box-antimatter"><div class="res-header"><span>⚛️ Antimatter</span><span id="antimatter-rate" class="rate-neu">+0/s</span></div><div class="res-bar-bg"><div id="antimatter-bar" class="res-bar-fill" style="background: #e91e63;"></div></div><div class="res-sub"><span id="antimatter-current">0</span> / <span id="antimatter-max">5</span></div></div>
+    </aside>
+
+    <main>
+        <header>
+            <div style="display: flex; gap: 15px;">
+                <button class="tab-btn active" onclick="switchTab('village', event)">🏘️ Village</button>
+                <button class="tab-btn" onclick="switchTab('jobs', event)">👷 Jobs</button>
+                <button class="tab-btn" onclick="switchTab('buildings', event)">🏛️ Buildings</button>
+                <button class="tab-btn" onclick="switchTab('tech', event)">🔬 Technology</button>
+                <button class="tab-btn" onclick="switchTab('achievements', event)">🏆 Achievements</button>
+                <button class="tab-btn" onclick="switchTab('stats', event)">📊 Statistics</button>
+            </div>
+            <div style="display: flex; gap: 10px; align-items: center;">
+                <span style="font-size: 0.9rem; color: var(--text-dim);">Era <span id="current-era">0</span></span>
+                <span id="prestige-level" style="font-size: 0.9rem; color: var(--accent-gold); display:none;">⭐ Prestige <span id="prestige-count">0</span></span>
+                <button onclick="confirmPrestige()" class="btn-prestige" id="btn-prestige" style="display: none;">🌟 Prestige</button>
+                <button onclick="confirmReset()" class="btn-reset">🔄 Reset</button>
+            </div>
+        </header>
+
+        <div id="tab-village" class="content-area active">
+            <div class="pop-dashboard">
+                <div class="pop-stats">
+                    <div class="stat-group">
+                        <div class="stat-label">Population</div>
+                        <div class="stat-value"><span id="pop-total">0</span> / <span id="pop-max">5</span></div>
+                    </div>
+                    <div class="stat-group">
+                        <div class="stat-label">Idle Workers</div>
+                        <div class="stat-value highlight-idle" id="pop-idle">0</div>
+                    </div>
+                </div>
+                <button id="btn-recruit" class="btn-recruit" onclick="recruitVillager()">
+                    Recruit Villager
+                    <span class="recruit-cost">10 Food</span>
+                </button>
+            </div>
+
+            <div class="action-deck">
+                <button class="btn-manual" onclick="manualGather()">
+                    <span class="manual-icon">👋</span>
+                    <div>
+                        <div style="font-weight: 700; font-size: 1.1rem;">Gather Resources</div>
+                        <div style="font-size: 0.85rem; color: var(--text-dim); margin-top: 2px;">+1 Food, +1 Wood, +1 Science</div>
+                    </div>
+                </button>
+            </div>
+
+            <div class="section-title">Era Progress</div>
+            <div id="era-advance-container"></div>
+        </div>
+
+        <div id="tab-jobs" class="content-area">
+            <div class="section-title">Available Jobs</div>
+            <div class="card-grid" id="jobs-container"></div>
+        </div>
+
+        <div id="tab-buildings" class="content-area">
+            <div class="section-title">Available Buildings</div>
+            <div class="card-grid" id="buildings-container"></div>
+        </div>
+
+        <div id="tab-tech" class="content-area">
+            <div class="section-title">Research Technologies</div>
+            <div class="card-grid" id="tech-container"></div>
+        </div>
+
+        <div id="tab-achievements" class="content-area">
+            <div class="section-title">Achievements <span id="achievement-progress">(0/0)</span></div>
+            <div id="achievements-container"></div>
+        </div>
+
+        <div id="tab-stats" class="content-area">
+            <div class="section-title">Your Statistics</div>
+            <div class="stat-grid" id="stats-container"></div>
+        </div>
+
+        <div id="log-overlay"></div>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+</html>
