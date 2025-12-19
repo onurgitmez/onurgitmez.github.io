@@ -546,8 +546,6 @@ function killMultiple(amount) {
 // ===== ACTIONS =====
 function manualGather() {
     addRes('food', 1);
-    addRes('wood', 1);
-    addRes('science', 1);
     G.stats.manualClicks++;
     updateUI();
     
