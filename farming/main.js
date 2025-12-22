@@ -5,6 +5,7 @@ const Game = {
         gold: 100, 
         level: 1,
         xp: 0,
+        nextLevelXp: 100,
         lastSave: Date.now(),
         inventory: {},
         plots: [null, null, null], 
@@ -16,18 +17,18 @@ const Game = {
 
     init() {
         this.loadGame();
-        this.render(); 
-        
+        this.render();
         setInterval(() => this.saveGame(), 5000); 
         setInterval(() => this.uiLoop(), 50);
-        setInterval(() => this.logicLoop(), 500); 
+        setInterval(() => this.logicLoop(), 500);
     },
 
-    // --- LOGIC ---
+    // --- GAME LOGIC ---
+
     logicLoop() {
         const now = Date.now();
 
-        // 1. PLOTS
+        // 1. PROCESS PLOTS
         this.data.plots.forEach((slot) => {
             if (!slot) return;
             const isTree = GAME_DATA.trees[slot.type];
@@ -36,9 +37,8 @@ const Game = {
 
             if (slot.state === 'idle') {
                 let canStart = false;
-                if (isTree) {
-                    canStart = true;
-                } else {
+                if (isTree) canStart = true;
+                else {
                     if (this.data.gold >= config.seedCost) {
                         this.data.gold -= config.seedCost;
                         canStart = true;
@@ -59,27 +59,31 @@ const Game = {
             }
         });
 
-        // 2. ANIMALS
+        // 2. PROCESS ANIMALS
         this.data.animals.forEach(slot => {
             if (!slot) return;
             const config = GAME_DATA.animals[slot.type];
+            if (!config) return;
+
             if (now - slot.startTime >= config.time) {
                 this.addItem(config.output, 1);
                 this.addXp(config.xp);
-                slot.startTime = now; 
+                slot.startTime = now;
             }
         });
 
-        // 3. MACHINES
+        // 3. PROCESS MACHINES
         this.data.machines.forEach(slot => {
             if (!slot) return;
             const config = GAME_DATA.machines[slot.type];
+            if (!config) return;
+
             if (slot.state === 'idle') {
                 if (this.data.inventory[config.input] > 0) {
                     this.removeItem(config.input, 1);
                     slot.state = 'working';
                     slot.startTime = now;
-                    this.renderInventory(); 
+                    this.renderInventory();
                 }
             } 
             else if (slot.state === 'working') {
@@ -92,10 +96,9 @@ const Game = {
         });
     },
 
-    // --- UI LOOP (UPDATED COLORS) ---
+    // --- UI LOOP ---
     uiLoop() {
         const now = Date.now();
-
         const updateBar = (id, percent, color) => {
             const el = document.getElementById(id);
             if (el) {
@@ -104,51 +107,39 @@ const Game = {
             }
         };
 
-        // COZY COLORS
-        const C_GREEN = '#66bb6a';  // Pastel Green
-        const C_RED = '#ef5350';    // Soft Red
-        const C_YELLOW = '#ffa726'; // Warm Orange
-        const C_BLUE = '#42a5f5';   // Soft Blue
-
-        // Plots
         this.data.plots.forEach((slot, i) => {
             if (!slot) return;
             const config = GAME_DATA.trees[slot.type] || GAME_DATA.crops[slot.type];
-            
             if (slot.state === 'idle') {
                 if (!GAME_DATA.trees[slot.type] && this.data.gold < config.seedCost) {
-                    updateBar(`plot-bar-${i}`, 100, C_RED); // No Money
+                    updateBar(`plot-bar-${i}`, 100, '#e74c3c');
                 } else {
-                    updateBar(`plot-bar-${i}`, 0, C_GREEN);
+                    updateBar(`plot-bar-${i}`, 0, '#2ecc71');
                 }
             } else {
-                const pct = ((now - slot.startTime) / config.time) * 100;
-                updateBar(`plot-bar-${i}`, pct, C_GREEN);
+                updateBar(`plot-bar-${i}`, ((now - slot.startTime) / config.time) * 100, '#2ecc71');
             }
         });
 
-        // Animals
         this.data.animals.forEach((slot, i) => {
             if (!slot) return;
             const config = GAME_DATA.animals[slot.type];
-            const pct = ((now - slot.startTime) / config.time) * 100;
-            updateBar(`anim-bar-${i}`, pct, C_YELLOW);
+            updateBar(`anim-bar-${i}`, ((now - slot.startTime) / config.time) * 100, '#f1c40f');
         });
 
-        // Machines
         this.data.machines.forEach((slot, i) => {
             if (!slot) return;
             const config = GAME_DATA.machines[slot.type];
             if (slot.state === 'working') {
-                const pct = ((now - slot.startTime) / config.time) * 100;
-                updateBar(`mach-bar-${i}`, pct, C_BLUE);
+                updateBar(`mach-bar-${i}`, ((now - slot.startTime) / config.time) * 100, '#3498db');
             } else {
-                updateBar(`mach-bar-${i}`, 0, C_BLUE);
+                updateBar(`mach-bar-${i}`, 0, '#3498db');
             }
         });
     },
 
     // --- ACTIONS ---
+
     assignSlot(category, index, typeKey) {
         let sources = {...GAME_DATA.crops, ...GAME_DATA.trees, ...GAME_DATA.animals, ...GAME_DATA.machines};
         let config = sources[typeKey];
@@ -158,11 +149,7 @@ const Game = {
 
         if (this.data.gold >= setupCost) {
             this.data.gold -= setupCost;
-            this.data[category][index] = {
-                type: typeKey,
-                state: 'idle',
-                startTime: Date.now()
-            };
+            this.data[category][index] = { type: typeKey, state: 'idle', startTime: Date.now() };
             this.render();
             this.saveGame();
         } else {
@@ -171,7 +158,7 @@ const Game = {
     },
 
     clearSlot(category, index) {
-        if(confirm("Clear this slot?")) {
+        if(confirm("Remove this?")) {
             this.data[category][index] = null;
             this.render();
         }
@@ -188,14 +175,22 @@ const Game = {
         }
     },
 
+    // --- ECONOMY (FIXED) ---
+
+    // Helper to find the price of ANY item
+    getPrice(key) {
+        if (GAME_DATA.crops[key]) return GAME_DATA.crops[key].sell;
+        if (GAME_DATA.trees[key]) return GAME_DATA.trees[key].sell;
+        if (GAME_DATA.products[key]) return GAME_DATA.products[key].sell; // <--- THIS WAS MISSING
+        return 0;
+    },
+
     sellItem(key, all) {
         const qty = all ? this.data.inventory[key] : 1;
         if (!qty) return;
 
-        let price = 0;
-        const find = (list) => { if(list[key]) price = list[key].sell; };
-        find(GAME_DATA.crops); find(GAME_DATA.trees); find(GAME_DATA.animals); find(GAME_DATA.machines);
-
+        const price = this.getPrice(key);
+        
         if (price > 0) {
             this.data.gold += price * qty;
             this.removeItem(key, qty);
@@ -209,7 +204,8 @@ const Game = {
         }
     },
 
-    // --- DATA ---
+    // --- DATA HELPERS ---
+
     addItem(key, qty) { 
         this.data.inventory[key] = (this.data.inventory[key] || 0) + qty;
         this.renderInventory();
@@ -250,14 +246,12 @@ const Game = {
     loadGame() {
         const save = localStorage.getItem('farm_tycoon_v3');
         if (save) {
-            try {
-                const parsed = JSON.parse(save);
-                this.data = { ...this.data, ...parsed };
-            } catch(e) { console.error("Save corrupted"); }
+            try { this.data = { ...this.data, ...JSON.parse(save) }; } catch(e) {}
         }
     },
+    
+    // --- RENDERING ---
 
-    // --- RENDER ---
     render() {
         this.renderHeader();
         this.renderList('plots', 'plot-list');
@@ -270,11 +264,7 @@ const Game = {
         const needed = this.data.level * 100;
         document.getElementById('gold').innerText = Math.floor(this.data.gold);
         document.getElementById('level').innerText = this.data.level;
-        
-        // Update new XP bar format
-        const pct = (this.data.xp / needed) * 100;
-        document.getElementById('xp-fill').style.width = pct + '%';
-        document.getElementById('xp-text').innerText = `${Math.floor(this.data.xp)} / ${needed} XP`;
+        document.getElementById('xp').innerText = `${Math.floor(this.data.xp)} / ${needed}`;
     },
 
     renderList(category, domId) {
@@ -286,19 +276,19 @@ const Game = {
             div.className = 'slot';
 
             if (!slot) {
-                div.innerHTML = `<div style="text-align:center;width:100%;color:#aaa;cursor:pointer;font-weight:bold;">➕ New Slot</div>`;
+                div.innerHTML = `<div style="text-align:center;width:100%;color:#888;cursor:pointer">➕ Empty Slot</div>`;
                 div.onclick = () => this.openShop(category, index);
             } else {
                 let sources = {...GAME_DATA.crops, ...GAME_DATA.trees, ...GAME_DATA.animals, ...GAME_DATA.machines};
                 const config = sources[slot.type];
                 
                 let sub = '';
-                let statusColor = '#8d6e63'; // Wood color
+                let statusColor = '#aaa';
                 
                 if (category === 'plots' && !GAME_DATA.trees[slot.type]) {
                     if (this.data.gold < config.seedCost && slot.state === 'idle') {
-                        sub = "NEED FUNDS";
-                        statusColor = '#ef5350';
+                        sub = "WAITING FOR FUNDS";
+                        statusColor = '#e74c3c';
                     } else {
                         sub = `Cost: ${config.seedCost}g`;
                     }
@@ -312,12 +302,12 @@ const Game = {
                     <div class="slot-icon">${config.emoji}</div>
                     <div class="slot-info">
                         <div class="slot-name">${config.name}</div>
-                        <div class="slot-sub" style="color:${statusColor}">${sub}</div>
+                        <div style="font-size:0.7em; color:${statusColor}">${sub}</div>
                         <div class="progress-bg">
                             <div id="${category === 'plots' ? 'plot' : category === 'animals' ? 'anim' : 'mach'}-bar-${index}" class="progress-fill"></div>
                         </div>
                     </div>
-                    <button class="btn-sell-small" onclick="Game.clearSlot('${category}', ${index})">❌</button>
+                    <button class="btn-sell" onclick="Game.clearSlot('${category}', ${index})">❌</button>
                 `;
             }
             container.appendChild(div);
@@ -325,10 +315,9 @@ const Game = {
 
         const cost = this.expansionCosts[category] * this.data[category].length;
         const btn = document.createElement('button');
-        btn.className = 'btn-main';
+        btn.className = 'btn-buy';
+        btn.style.width = '100%';
         btn.style.marginTop = '10px';
-        btn.style.background = '#8d6e63'; // Wood button for expand
-        btn.style.boxShadow = '0 4px 0 #5d4037';
         btn.innerText = `Expand Space (${cost}g)`;
         btn.onclick = () => this.expand(category);
         container.appendChild(btn);
@@ -339,10 +328,9 @@ const Game = {
         container.innerHTML = '';
 
         const shopBox = document.createElement('div');
-        shopBox.style.background = '#fff';
-        shopBox.style.padding = '15px';
-        shopBox.style.borderRadius = '12px';
-        shopBox.style.border = '2px solid #eee';
+        shopBox.style.background = '#2c3e50';
+        shopBox.style.padding = '10px';
+        shopBox.style.borderRadius = '8px';
 
         let sources = {};
         if (category === 'plots') sources = {...GAME_DATA.crops, ...GAME_DATA.trees};
@@ -355,18 +343,18 @@ const Game = {
 
             const row = document.createElement('div');
             row.className = 'item-row';
-            row.style.opacity = locked ? '0.6' : '1';
+            row.style.opacity = locked ? '0.5' : '1';
             
             let costTxt = '';
-            if (item.type === 'crop') costTxt = `Pay ${item.seedCost}g/run`;
-            else costTxt = `Build: ${item.seedCost}g`;
+            if (item.type === 'crop') costTxt = `Free Setup (Pay ${item.seedCost}g/run)`;
+            else costTxt = `Build Cost: ${item.seedCost}g`;
 
             row.innerHTML = `
-                <div style="display:flex; align-items:center; gap:12px">
-                    <span style="font-size:1.8em">${item.emoji}</span>
+                <div style="display:flex; align-items:center; gap:10px">
+                    <span style="font-size:1.5em">${item.emoji}</span>
                     <div>
-                        <div style="font-weight:800; color:#5d4037">${item.name}</div>
-                        <div style="font-size:0.8em; color:#888">${locked ? `🔒 Lvl ${item.reqLevel}` : costTxt}</div>
+                        <strong>${item.name}</strong> ${locked ? `🔒 (Lvl ${item.reqLevel})` : ''}
+                        <div style="font-size:0.8em; color:#f1c40f">${costTxt}</div>
                     </div>
                 </div>
             `;
@@ -380,9 +368,8 @@ const Game = {
 
         const cancel = document.createElement('button');
         cancel.innerText = "Cancel";
-        cancel.className = 'btn-main';
-        cancel.style.background = '#ef5350';
-        cancel.style.boxShadow = '0 4px 0 #c62828';
+        cancel.className = 'btn-sell';
+        cancel.style.width = '100%';
         cancel.style.marginTop = '10px';
         cancel.onclick = () => this.render();
         shopBox.appendChild(cancel);
@@ -396,21 +383,19 @@ const Game = {
         const keys = Object.keys(this.data.inventory);
         
         if (keys.length === 0) {
-            container.innerHTML = '<div style="color:#aaa; text-align:center; padding:20px;">Inventory Empty</div>';
+            container.innerHTML = '<div style="color:#666; text-align:center">Empty</div>';
             return;
         }
 
         keys.forEach(key => {
             const qty = this.data.inventory[key];
-            let price = 0;
-            const find = (list) => { if(list[key]) price = list[key].sell; };
-            find(GAME_DATA.crops); find(GAME_DATA.trees); find(GAME_DATA.animals); find(GAME_DATA.machines);
+            const price = this.getPrice(key); // Use the new helper!
 
             const div = document.createElement('div');
             div.className = 'item-row';
             div.innerHTML = `
-                <span style="font-weight:bold; color:#4e342e; text-transform:capitalize">${key} x${qty}</span>
-                <button class="btn-sell-small" style="background:#ffa726; box-shadow:0 2px 0 #ef6c00" onclick="Game.sellItem('${key}')">Sell ${price}g</button>
+                <span>${key} x${qty}</span>
+                <button class="btn-sell" onclick="Game.sellItem('${key}')">Sell (${price}g)</button>
             `;
             container.appendChild(div);
         });
