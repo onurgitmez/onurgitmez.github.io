@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cozy Harvest Manager</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="top-bar">
+        <button onclick="Game.resetGame()" class="btn-reset">⚠️ Reset</button>
+    </div>
+
+    <header>
+        <div class="stats-box">
+            <span class="icon">💰</span> <span id="gold">0</span>
+        </div>
+        
+        <div class="title-box">
+            <h1>Harvest Valley</h1>
+            <div class="xp-bar-container">
+                <div id="xp-fill" class="xp-fill"></div>
+                <span id="xp-text">0/100</span>
+            </div>
+        </div>
+
+        <div class="stats-box">
+            <span class="icon">⭐</span> Lvl <span id="level">1</span>
+        </div>
+    </header>
+
+    <main>
+        <div class="panel">
+            <div class="panel-header">
+                <h2>🌱 Fields</h2>
+            </div>
+            <div id="plot-list" class="scroll-area"></div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-header">
+                <h2>🐔 Barns</h2>
+            </div>
+            <div id="animal-list" class="scroll-area" style="height:40%"></div>
+            
+            <div class="panel-header" style="margin-top:15px">
+                <h2>🏭 Workshop</h2>
+            </div>
+            <div id="machine-list" class="scroll-area" style="height:40%"></div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-header">
+                <h2>📦 Market</h2>
+            </div>
+            <div style="padding: 0 10px 10px 10px;">
+                <button class="btn-main" onclick="Game.sellAllEverything()">Sell Everything</button>
+            </div>
+            <div id="inventory-list" class="scroll-area"></div>
+        </div>
+    </main>
+
+    <script src="data.js"></script>
+    <script src="main.js"></script>
+</body>
+</html>
