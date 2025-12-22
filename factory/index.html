@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Factory Simulator</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <nav class="sidebar">
+        <div class="brand">
+            <div class="brand-icon">⚛️</div>
+            <span>Factory<br>Simulator <span style="font-size:0.5em; color:var(--accent)">v4.2</span></span>
+        </div>
+
+        <div class="stage-display">
+            STAGE: <span id="current-stage">0</span>
+        </div>
+
+        <div class="manual-panel">
+            <h3>Survival Ops</h3>
+            <button class="manual-btn" onclick="scavenge()">
+                🖐️ Scavenge Area
+            </button>
+            <div class="manual-info" id="manual-status">
+                Biomass: 0 | Stone: 0
+            </div>
+        </div>
+
+        <ul class="nav-links" id="nav-list"></ul>
+
+        <div class="market-panel">
+            <h3>Galactic Trade</h3>
+            <div class="market-controls" id="market-buttons"></div>
+        </div>
+
+        <div style="margin-top:auto; display:flex; gap:5px; flex-direction:column;">
+            <div id="save-status" style="font-size:0.7rem; color:#64748b; text-align:center; height:1rem;"></div>
+            <button class="reset-btn" onclick="hardReset()">⚠️ ERASE SAVE DATA</button>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <header class="top-bar">
+            <div class="wallet-display">
+                <span style="font-size:0.8em; color:#64748b">MC:</span>
+                <span id="credit-display">0</span>
+            </div>
+
+            <div class="power-display">
+                <div class="power-text">
+                    <span>⚡ GRID</span>
+                    <span id="power-val">0 / 0 MW</span>
+                </div>
+                <div class="power-track">
+                    <div class="power-fill" id="power-bar"></div>
+                </div>
+            </div>
+
+            <div class="milestone-tracker" id="milestone-tracker">
+                <div class="ms-title">OBJECTIVE</div>
+                <div class="ms-desc" id="ms-desc">Loading...</div>
+                <div class="ms-req" id="ms-req">...</div>
+            </div>
+        </header>
+
+        <div class="ticker-container">
+            <div class="storage-ticker" id="storage-ticker"></div>
+        </div>
+
+        <div id="tab-container"></div>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+</html>
