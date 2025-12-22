@@ -5,7 +5,6 @@ const Game = {
         gold: 100, 
         level: 1,
         xp: 0,
-        nextLevelXp: 100,
         lastSave: Date.now(),
         inventory: {},
         plots: [null, null, null], 
@@ -18,38 +17,48 @@ const Game = {
     init() {
         this.loadGame();
         this.render();
+        
+        // 1. SAVE Loop (Every 5 seconds)
         setInterval(() => this.saveGame(), 5000); 
+        // 2. VISUAL Loop (Every 50ms for smooth bars)
         setInterval(() => this.uiLoop(), 50);
+        // 3. LOGIC Loop (Every 500ms for resource calculation)
         setInterval(() => this.logicLoop(), 500);
     },
 
-    // --- GAME LOGIC ---
-
+    // --- LOGIC LOOP ---
     logicLoop() {
         const now = Date.now();
 
-        // 1. PROCESS PLOTS
+        // 1. Plots (Crops & Trees)
         this.data.plots.forEach((slot) => {
             if (!slot) return;
             const isTree = GAME_DATA.trees[slot.type];
             const config = isTree ? GAME_DATA.trees[slot.type] : GAME_DATA.crops[slot.type];
             if (!config) return;
 
+            // State: IDLE -> GROWING
             if (slot.state === 'idle') {
                 let canStart = false;
-                if (isTree) canStart = true;
-                else {
+                
+                if (isTree) {
+                    // Trees grow for free once planted
+                    canStart = true;
+                } else {
+                    // Crops need money deducted every time
                     if (this.data.gold >= config.seedCost) {
                         this.data.gold -= config.seedCost;
                         canStart = true;
-                        this.renderHeader();
+                        this.renderHeader(); // Show money change
                     }
                 }
+
                 if (canStart) {
                     slot.state = 'growing';
                     slot.startTime = now;
                 }
             }
+            // State: GROWING -> IDLE (Harvest)
             else if (slot.state === 'growing') {
                 if (now - slot.startTime >= config.time) {
                     this.addItem(slot.type, 1);
@@ -59,12 +68,10 @@ const Game = {
             }
         });
 
-        // 2. PROCESS ANIMALS
+        // 2. Animals
         this.data.animals.forEach(slot => {
             if (!slot) return;
             const config = GAME_DATA.animals[slot.type];
-            if (!config) return;
-
             if (now - slot.startTime >= config.time) {
                 this.addItem(config.output, 1);
                 this.addXp(config.xp);
@@ -72,13 +79,13 @@ const Game = {
             }
         });
 
-        // 3. PROCESS MACHINES
+        // 3. Machines
         this.data.machines.forEach(slot => {
             if (!slot) return;
             const config = GAME_DATA.machines[slot.type];
-            if (!config) return;
 
             if (slot.state === 'idle') {
+                // Check if we have input ingredient
                 if (this.data.inventory[config.input] > 0) {
                     this.removeItem(config.input, 1);
                     slot.state = 'working';
@@ -96,7 +103,7 @@ const Game = {
         });
     },
 
-    // --- UI LOOP ---
+    // --- UI LOOP (Visuals) ---
     uiLoop() {
         const now = Date.now();
         const updateBar = (id, percent, color) => {
@@ -107,10 +114,12 @@ const Game = {
             }
         };
 
+        // Plots
         this.data.plots.forEach((slot, i) => {
             if (!slot) return;
             const config = GAME_DATA.trees[slot.type] || GAME_DATA.crops[slot.type];
             if (slot.state === 'idle') {
+                // If it's a crop waiting for funds, show red
                 if (!GAME_DATA.trees[slot.type] && this.data.gold < config.seedCost) {
                     updateBar(`plot-bar-${i}`, 100, '#e74c3c');
                 } else {
@@ -121,12 +130,14 @@ const Game = {
             }
         });
 
+        // Animals
         this.data.animals.forEach((slot, i) => {
             if (!slot) return;
             const config = GAME_DATA.animals[slot.type];
             updateBar(`anim-bar-${i}`, ((now - slot.startTime) / config.time) * 100, '#f1c40f');
         });
 
+        // Machines
         this.data.machines.forEach((slot, i) => {
             if (!slot) return;
             const config = GAME_DATA.machines[slot.type];
@@ -139,13 +150,12 @@ const Game = {
     },
 
     // --- ACTIONS ---
-
     assignSlot(category, index, typeKey) {
         let sources = {...GAME_DATA.crops, ...GAME_DATA.trees, ...GAME_DATA.animals, ...GAME_DATA.machines};
         let config = sources[typeKey];
         
-        let setupCost = 0;
-        if (config.type !== 'crop') setupCost = config.seedCost;
+        // Setup Cost (Crops = 0, others = seedCost)
+        let setupCost = (config.type === 'crop') ? 0 : config.seedCost;
 
         if (this.data.gold >= setupCost) {
             this.data.gold -= setupCost;
@@ -158,7 +168,7 @@ const Game = {
     },
 
     clearSlot(category, index) {
-        if(confirm("Remove this?")) {
+        if(confirm("Remove this item? You won't get the gold back.")) {
             this.data[category][index] = null;
             this.render();
         }
@@ -175,13 +185,11 @@ const Game = {
         }
     },
 
-    // --- ECONOMY (FIXED) ---
-
-    // Helper to find the price of ANY item
+    // --- ECONOMY ---
     getPrice(key) {
         if (GAME_DATA.crops[key]) return GAME_DATA.crops[key].sell;
         if (GAME_DATA.trees[key]) return GAME_DATA.trees[key].sell;
-        if (GAME_DATA.products[key]) return GAME_DATA.products[key].sell; // <--- THIS WAS MISSING
+        if (GAME_DATA.products[key]) return GAME_DATA.products[key].sell; 
         return 0;
     },
 
@@ -190,7 +198,6 @@ const Game = {
         if (!qty) return;
 
         const price = this.getPrice(key);
-        
         if (price > 0) {
             this.data.gold += price * qty;
             this.removeItem(key, qty);
@@ -205,7 +212,6 @@ const Game = {
     },
 
     // --- DATA HELPERS ---
-
     addItem(key, qty) { 
         this.data.inventory[key] = (this.data.inventory[key] || 0) + qty;
         this.renderInventory();
@@ -249,9 +255,8 @@ const Game = {
             try { this.data = { ...this.data, ...JSON.parse(save) }; } catch(e) {}
         }
     },
-    
-    // --- RENDERING ---
 
+    // --- RENDERING ---
     render() {
         this.renderHeader();
         this.renderList('plots', 'plot-list');
@@ -389,7 +394,7 @@ const Game = {
 
         keys.forEach(key => {
             const qty = this.data.inventory[key];
-            const price = this.getPrice(key); // Use the new helper!
+            const price = this.getPrice(key);
 
             const div = document.createElement('div');
             div.className = 'item-row';
