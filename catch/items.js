@@ -28,4 +28,5 @@ export const ITEMS = [
   {id:"golden_razz",name:"Golden Razz",catchBonus:2.5,price:500,emoji:"🍋",desc:"2.5× catch boost"},
   {id:"lure",name:"Lure Module",catchBonus:0,price:400,emoji:"🧲",desc:"Rarer spawns ×3"},
   {id:"repel_flee",name:"Smoke Ball",catchBonus:0,price:350,emoji:"💨",desc:"No flee ×3"},
+  {id:"shiny_lure",name:"Shiny Charm",catchBonus:0,price:1000,emoji:"✨",desc:"Higher shiny odds ×3"},
 ];

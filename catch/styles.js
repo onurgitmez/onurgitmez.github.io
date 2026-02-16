@@ -1,13 +1,15 @@
 import { RC } from './constants.js';
 
-// Common styles object
 export const CS = {
   app: { minHeight: "100vh", color: "#f8fafc", display: "flex", flexDirection: "column", alignItems: "center", paddingBottom: 60, background: "radial-gradient(circle at 50% -20%, #1e293b, #0f172a)" },
   hdr: { width: "100%", background: "rgba(15, 23, 42, 0.8)", backdropFilter: "blur(16px)", borderBottom: "1px solid rgba(255,255,255,0.08)", padding: "12px 20px", display: "flex", alignItems: "center", justifyContent: "space-between", position: "sticky", top: 0, zIndex: 100, flexWrap: "wrap", gap: 8 },
   logo: { fontSize: 22, fontWeight: 900, cursor: "pointer", background: "linear-gradient(90deg, #f87171, #facc15)", WebkitBackgroundClip: "text", color: "transparent" },
   nav: { display: "flex", gap: 6, flexWrap: "wrap" },
   nb: (a) => ({ padding: "8px 14px", borderRadius: 20, border: "1px solid rgba(255,255,255,0.1)", background: a ? "rgba(255,255,255,0.15)" : "transparent", color: a ? "#fff" : "#cbd5e1", fontWeight: 700, fontSize: 13, cursor: "pointer" }),
-  ct: { width: "100%", maxWidth: 640, padding: "20px 16px" },
+  
+  // Expanded max width to 1200px for full-screen desktop use
+  ct: { width: "100%", maxWidth: 1200, padding: "20px 16px" },
+  
   cd: { background: "rgba(255,255,255,0.03)", backdropFilter: "blur(12px)", borderRadius: 16, border: "1px solid rgba(255,255,255,0.08)", padding: 20, marginBottom: 16, boxShadow: "0 4px 20px rgba(0,0,0,0.1)" },
   tt: { fontSize: 20, fontWeight: 800, marginBottom: 16, color: "#f8fafc" },
   bt: (bg="#dc2626") => ({ padding: "10px 24px", borderRadius: 12, border: "none", background: bg, color: "#fff", fontWeight: 700, fontSize: 14, cursor: "pointer" }),
