@@ -413,18 +413,18 @@ const Game = {
 
     resetGame() {
         if(confirm("Reset all progress?")) {
-            localStorage.removeItem('farm_tycoon_v5');
+            localStorage.removeItem('farm_tycoon_v6');
             location.reload();
         }
     },
 
     saveGame() {
         this.data.lastSave = Date.now();
-        localStorage.setItem('farm_tycoon_v5', JSON.stringify(this.data));
+        localStorage.setItem('farm_tycoon_v6', JSON.stringify(this.data));
     },
 
     loadGame() {
-        const save = localStorage.getItem('farm_tycoon_v5');
+        const save = localStorage.getItem('farm_tycoon_v6');
         if (save) {
             try { 
                 this.data = { ...this.data, ...JSON.parse(save) }; 
@@ -520,8 +520,8 @@ const Game = {
         container.appendChild(btn);
     },
 
-    renderShop(category, index) {
-        const container = document.getElementById('animal-list'); 
+    renderShop(category, index, currentFilter = 'all') {
+        const container = document.getElementById('animal-list'); // Hijack middle panel for shop
         if (category === 'upgrades') {
              container.innerHTML = `<h3 style="margin-top:0">Upgrades & Managers</h3>`;
         } else {
@@ -533,24 +533,56 @@ const Game = {
         shopBox.style.padding = '10px';
         shopBox.style.borderRadius = '8px';
 
-        let sources = {};
-        if (category === 'plots') sources = {...GAME_DATA.crops, ...GAME_DATA.trees};
-        else if (category === 'animals') sources = GAME_DATA.animals;
-        else if (category === 'machines') sources = GAME_DATA.machines;
-        else sources = {...GAME_DATA.upgrades, ...GAME_DATA.managers}; 
+        // --- 1. GENERATE TABS ---
+        let tabs = [];
+        if (category === 'plots') {
+            tabs = [{ id: 'all', name: 'All' }, { id: 'crops', name: 'Seeds' }, { id: 'trees', name: 'Saplings' }];
+        } else if (category === 'upgrades') {
+            tabs = [{ id: 'all', name: 'All' }, { id: 'upgrades', name: 'Upgrades' }, { id: 'managers', name: 'Automation' }];
+        }
 
+        if (tabs.length > 0) {
+            const tabContainer = document.createElement('div');
+            tabContainer.className = 'tab-container';
+
+            tabs.forEach(tab => {
+                const btn = document.createElement('button');
+                btn.innerText = tab.name;
+                btn.className = currentFilter === tab.id ? 'btn-tab active' : 'btn-tab';
+                btn.onclick = () => this.renderShop(category, index, tab.id);
+                tabContainer.appendChild(btn);
+            });
+            shopBox.appendChild(tabContainer);
+        }
+
+        // --- 2. FILTER DATA ---
+        let sources = {};
+        if (category === 'plots') {
+            if (currentFilter === 'all' || currentFilter === 'crops') Object.assign(sources, GAME_DATA.crops);
+            if (currentFilter === 'all' || currentFilter === 'trees') Object.assign(sources, GAME_DATA.trees);
+        } else if (category === 'animals') {
+            sources = GAME_DATA.animals;
+        } else if (category === 'machines') {
+            sources = GAME_DATA.machines;
+        } else if (category === 'upgrades') {
+            if (currentFilter === 'all' || currentFilter === 'upgrades') Object.assign(sources, GAME_DATA.upgrades);
+            if (currentFilter === 'all' || currentFilter === 'managers') Object.assign(sources, GAME_DATA.managers);
+        }
+
+        // --- 3. RENDER ITEMS ---
         for (let key in sources) {
             const item = sources[key];
             const locked = this.data.level < item.reqLevel;
             const isUpgrade = category === 'upgrades';
             
+            // Check if already bought
             let bought = false;
             if (isUpgrade) {
                 if (GAME_DATA.upgrades[key] && this.data.upgrades[key]) bought = true;
                 if (GAME_DATA.managers[key] && this.data.managers[key]) bought = true;
             }
 
-            if (bought) continue; 
+            if (bought) continue; // Don't show bought upgrades
 
             const row = document.createElement('div');
             row.className = 'item-row';
