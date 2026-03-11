@@ -58,6 +58,7 @@ const Game = {
     // --- LOGIC LOOP ---
     logicLoop() {
         const now = Date.now();
+        let needsRender = false; // Track if we need to update the UI this tick
 
         // Automation: Auto-Route Items to Machines (Logistics Network)
         if (this.data.managers.auto_route) {
@@ -68,6 +69,7 @@ const Game = {
                         this.removeItem(config.input, 1);
                         slot.state = 'working';
                         slot.startTime = now;
+                        needsRender = true;
                     }
                 }
             });
@@ -90,6 +92,7 @@ const Game = {
                         this.data.gold -= config.seedCost;
                         canStart = true;
                         this.renderHeader();
+                        needsRender = true;
                     }
                 }
 
@@ -108,6 +111,8 @@ const Game = {
                 if (isTree) {
                     slot.state = 'growing';
                     slot.startTime = now;
+                } else {
+                    needsRender = true; // Tell UI to show "CLICK TO PLANT"
                 }
             }
         });
@@ -135,6 +140,7 @@ const Game = {
                 this.addItem(config.output, 1);
                 this.addXp(config.xp);
                 slot.state = 'idle';
+                needsRender = true; // Tell UI machine is idle again
             }
         });
 
@@ -148,6 +154,8 @@ const Game = {
                 }
             }
         }
+
+        if (needsRender) this.render();
     },
 
     // --- UI LOOP (Visuals) ---
@@ -413,18 +421,18 @@ const Game = {
 
     resetGame() {
         if(confirm("Reset all progress?")) {
-            localStorage.removeItem('farm_tycoon_v6');
+            localStorage.removeItem('farm_tycoon_v7');
             location.reload();
         }
     },
 
     saveGame() {
         this.data.lastSave = Date.now();
-        localStorage.setItem('farm_tycoon_v6', JSON.stringify(this.data));
+        localStorage.setItem('farm_tycoon_v7', JSON.stringify(this.data));
     },
 
     loadGame() {
-        const save = localStorage.getItem('farm_tycoon_v6');
+        const save = localStorage.getItem('farm_tycoon_v7');
         if (save) {
             try { 
                 this.data = { ...this.data, ...JSON.parse(save) }; 
@@ -484,6 +492,7 @@ const Game = {
                                  this.data.gold -= config.seedCost;
                                  slot.state = 'growing';
                                  slot.startTime = Date.now();
+                                 Game.render(); // Force UI update on click
                              }
                          }
                     } else {
