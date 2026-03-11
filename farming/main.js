@@ -59,7 +59,7 @@ const Game = {
     logicLoop() {
         const now = Date.now();
 
-        // Automation: Auto-Route Items to Machines
+        // Automation: Auto-Route Items to Machines (Logistics Network)
         if (this.data.managers.auto_route) {
             this.data.machines.forEach(slot => {
                 if (slot && slot.state === 'idle') {
@@ -82,16 +82,14 @@ const Game = {
 
             // Start Growing
             if (slot.state === 'idle') {
-                let canStart = isTree;
+                let canStart = isTree; // Trees always start
                 
                 if (!isTree) {
-                    // Automation: Auto-Replant
+                    // Automation: Auto-Replant (Field Hands)
                     if (this.data.managers.auto_replant && this.data.gold >= config.seedCost) {
                         this.data.gold -= config.seedCost;
                         canStart = true;
                         this.renderHeader();
-                    } else if (!this.data.managers.auto_replant && this.data.gold >= config.seedCost) {
-                        // Manual replant requires clicking in UI, so logic loop won't auto-start unless manager exists
                     }
                 }
 
@@ -139,6 +137,17 @@ const Game = {
                 slot.state = 'idle';
             }
         });
+
+        // Automation: Auto-Sell (Wholesale Contracts)
+        if (this.data.managers.auto_sell) {
+            // Only sell end products, do not sell inputs needed for machines
+            for (let key in this.data.inventory) {
+                const isInput = Object.values(GAME_DATA.machines).some(m => m.input === key);
+                if (!isInput) {
+                    this.sellItem(key, true); // true = sell all
+                }
+            }
+        }
     },
 
     // --- UI LOOP (Visuals) ---
@@ -220,19 +229,25 @@ const Game = {
         // Show Modal
         if (Object.keys(itemsGained).length > 0) {
             let reportHtml = '';
-            for (let k in itemsGained) reportHtml += `<div>+${itemsGained[k]} ${k}</div>`;
+            for (let k in itemsGained) reportHtml += `<div>+${itemsGained[k]} ${k.replace('_', ' ')}</div>`;
             reportHtml += `<div style="color:#2ecc71; margin-top:5px;">+${xpGained} XP</div>`;
             
-            document.getElementById('offline-report').innerHTML = reportHtml;
-            document.getElementById('offline-modal').style.display = 'flex';
+            const reportEl = document.getElementById('offline-report');
+            const modalEl = document.getElementById('offline-modal');
+            if(reportEl && modalEl) {
+                reportEl.innerHTML = reportHtml;
+                modalEl.style.display = 'flex';
+            }
         }
     },
 
-    // --- MODIFIERS ---
+    // --- MODIFIERS (Upgrades) ---
     getModifiedTime(config) {
         let time = config.time;
-        if (config.type === 'crop' && this.data.upgrades.fertilizer_1) {
-            time *= 0.85; // 15% faster
+        if (config.type === 'crop') {
+            if (this.data.upgrades.tractor) time *= 0.65;
+            else if (this.data.upgrades.irrigation) time *= 0.80;
+            else if (this.data.upgrades.steel_tools) time *= 0.90;
         }
         return time;
     },
@@ -243,7 +258,18 @@ const Game = {
         else if (GAME_DATA.trees[key]) price = GAME_DATA.trees[key].sell;
         else if (GAME_DATA.products[key]) price = GAME_DATA.products[key].sell;
         
-        if (key === 'wool' && this.data.upgrades.sharp_shears) price *= 1.5;
+        // Check if it's an animal product
+        const isAnimalProduct = Object.values(GAME_DATA.animals).some(a => a.output === key);
+        if (isAnimalProduct) {
+            if (this.data.upgrades.selective_breeding) price *= 1.50;
+            else if (this.data.upgrades.premium_feed) price *= 1.25;
+        }
+
+        // Check if it's a machine product (Artisan Good)
+        const isMachineProduct = Object.values(GAME_DATA.machines).some(m => m.output === key);
+        if (isMachineProduct && this.data.upgrades.artisan_crafting) {
+            price *= 1.40;
+        }
         
         return Math.floor(price);
     },
@@ -274,6 +300,7 @@ const Game = {
         }
 
         const price = this.getModifiedPrice(key);
+        const displayName = key.replace('_', ' ');
 
         // If it exists, just update text (No flickering!)
         if (row) {
@@ -286,7 +313,7 @@ const Game = {
         row.className = 'item-row';
         row.id = `inv-row-${key}`;
         row.innerHTML = `
-            <span>${key} <strong class="inv-qty">x${qty}</strong></span>
+            <span style="text-transform: capitalize">${displayName} <strong class="inv-qty">x${qty}</strong></span>
             <button class="btn-sell" onclick="Game.sellItem('${key}')">Sell (${price}g)</button>
         `;
         container.appendChild(row);
@@ -317,9 +344,9 @@ const Game = {
 
         if (this.data.gold >= config.cost) {
             this.data.gold -= config.cost;
-            this.data[type][key] = true; // Save to player data
+            this.data[type][key] = true; 
             this.renderHeader();
-            this.renderShop('upgrades'); // re-render to show as unlocked
+            this.renderShop('upgrades'); // re-render to remove it from shop
             this.saveGame();
         } else {
             alert(`Not enough gold! Need ${config.cost}g`);
@@ -335,9 +362,9 @@ const Game = {
         if (this.data.gold >= setupCost) {
             this.data.gold -= setupCost;
             this.data[category][index] = { type: typeKey, state: 'idle', startTime: Date.now() };
-            // Auto-start crops if replanting is on or manual start
+            
+            // Auto-start logic
             if (config.type === 'crop' && (!this.data.managers.auto_replant)) {
-                 // Crop requires 1 manual click to start first time if no automation
                  if (this.data.gold >= config.seedCost) {
                      this.data.gold -= config.seedCost;
                      this.data[category][index].state = 'growing';
@@ -386,26 +413,23 @@ const Game = {
 
     resetGame() {
         if(confirm("Reset all progress?")) {
-            localStorage.removeItem('farm_tycoon_v4');
+            localStorage.removeItem('farm_tycoon_v5');
             location.reload();
         }
     },
 
     saveGame() {
         this.data.lastSave = Date.now();
-        localStorage.setItem('farm_tycoon_v4', JSON.stringify(this.data));
+        localStorage.setItem('farm_tycoon_v5', JSON.stringify(this.data));
     },
 
     loadGame() {
-        const save = localStorage.getItem('farm_tycoon_v4');
+        const save = localStorage.getItem('farm_tycoon_v5');
         if (save) {
             try { 
                 this.data = { ...this.data, ...JSON.parse(save) }; 
-                
-                // Process Offline time
                 const elapsedMs = Date.now() - this.data.lastSave;
                 this.processOfflineProgress(elapsedMs);
-
             } catch(e) {}
         }
     },
@@ -417,7 +441,6 @@ const Game = {
         this.renderList('animals', 'animal-list');
         this.renderList('machines', 'machine-list');
         
-        // Re-render inventory by wiping and rebuilding via the new dynamic function
         document.getElementById('inventory-list').innerHTML = '';
         for (let key in this.data.inventory) {
             this.updateInventoryDOM(key);
@@ -454,7 +477,6 @@ const Game = {
                         sub = "WAITING FOR FUNDS";
                         statusColor = '#e74c3c';
                     } else if (slot.state === 'idle') {
-                         // Click to replant manually
                          sub = "CLICK TO PLANT";
                          div.style.cursor = 'pointer';
                          div.onclick = () => {
@@ -468,7 +490,7 @@ const Game = {
                         sub = `Cost: ${config.seedCost}g`;
                     }
                 } else if (category === 'machines') {
-                    sub = slot.state === 'working' ? 'Processing...' : `Needs ${config.input}`;
+                    sub = slot.state === 'working' ? 'Processing...' : `Needs ${config.input.replace('_', ' ')}`;
                 } else {
                     sub = 'Producing...';
                 }
@@ -499,7 +521,7 @@ const Game = {
     },
 
     renderShop(category, index) {
-        const container = document.getElementById('animal-list'); // Hijack middle panel for shop
+        const container = document.getElementById('animal-list'); 
         if (category === 'upgrades') {
              container.innerHTML = `<h3 style="margin-top:0">Upgrades & Managers</h3>`;
         } else {
@@ -515,21 +537,20 @@ const Game = {
         if (category === 'plots') sources = {...GAME_DATA.crops, ...GAME_DATA.trees};
         else if (category === 'animals') sources = GAME_DATA.animals;
         else if (category === 'machines') sources = GAME_DATA.machines;
-        else sources = {...GAME_DATA.upgrades, ...GAME_DATA.managers}; // Mixed Upgrades
+        else sources = {...GAME_DATA.upgrades, ...GAME_DATA.managers}; 
 
         for (let key in sources) {
             const item = sources[key];
             const locked = this.data.level < item.reqLevel;
             const isUpgrade = category === 'upgrades';
             
-            // Check if already bought
             let bought = false;
             if (isUpgrade) {
                 if (GAME_DATA.upgrades[key] && this.data.upgrades[key]) bought = true;
                 if (GAME_DATA.managers[key] && this.data.managers[key]) bought = true;
             }
 
-            if (bought) continue; // Don't show bought upgrades
+            if (bought) continue; 
 
             const row = document.createElement('div');
             row.className = 'item-row';
