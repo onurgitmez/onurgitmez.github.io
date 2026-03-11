@@ -19,11 +19,6 @@ const Game = {
     getConfig(key) {
         return GAME_DATA.crops[key] || GAME_DATA.trees[key] || GAME_DATA.animals[key] || GAME_DATA.machines[key];
     },
-    getCategory(key) {
-        if (GAME_DATA.crops[key] || GAME_DATA.trees[key]) return 'plots';
-        if (GAME_DATA.animals[key]) return 'animals';
-        return 'machines';
-    },
 
     // --- GAME LOOP ARCHITECTURE ---
     gameLoop(timestamp) {
@@ -41,10 +36,9 @@ const Game = {
         requestAnimationFrame((ts) => this.gameLoop(ts));
     },
 
-    // --- LOGIC LOOP (Condensed!) ---
+    // --- LOGIC LOOP (No UI rendering here!) ---
     logicLoop() {
         const now = Date.now();
-        let needsRender = false;
 
         // Auto-Route (Machines)
         if (this.data.managers.auto_route) {
@@ -53,7 +47,7 @@ const Game = {
                     const config = this.getConfig(slot.type);
                     if (this.data.inventory[config.input] > 0) {
                         this.removeItem(config.input, 1);
-                        slot.state = 'working'; slot.startTime = now; needsRender = true;
+                        slot.state = 'working'; slot.startTime = now;
                     }
                 }
             });
@@ -72,7 +66,7 @@ const Game = {
                     // Start crops if auto-replant is on
                     if (isCrop && this.data.managers.auto_replant && this.data.gold >= config.seedCost) {
                         this.data.gold -= config.seedCost;
-                        slot.state = 'growing'; slot.startTime = now; needsRender = true;
+                        slot.state = 'growing'; slot.startTime = now;
                         this.updateHeaderDOM();
                     }
                 } 
@@ -84,8 +78,6 @@ const Game = {
                     // Auto-restart trees and animals. Machines and crops stay idle.
                     if (!isCrop && !isMachine) {
                         slot.state = 'growing'; slot.startTime = now;
-                    } else {
-                        needsRender = true;
                     }
                 }
             });
@@ -97,11 +89,9 @@ const Game = {
                 if (!Object.values(GAME_DATA.machines).some(m => m.input === key)) this.sellItem(key, true); 
             }
         }
-
-        if (needsRender) this.renderAll();
     },
 
-    // --- UI LOOP (Condensed!) ---
+    // --- UI LOOP (Real-time updates, zero flickering) ---
     uiLoop() {
         const now = Date.now();
         
@@ -132,13 +122,30 @@ const Game = {
                             statusEl.innerText = `CLICK TO PLANT (${config.seedCost}g)`; statusEl.style.color = '#2ecc71';
                             slotEl.style.cursor = 'pointer';
                             slotEl.onclick = () => {
-                                this.data.gold -= config.seedCost;
-                                slot.state = 'growing'; slot.startTime = Date.now();
-                                this.updateHeaderDOM();
+                                if (this.data.gold >= config.seedCost) {
+                                    this.data.gold -= config.seedCost;
+                                    slot.state = 'growing'; slot.startTime = Date.now();
+                                    this.updateHeaderDOM();
+                                }
                             };
                         }
                     } else if (category === 'machines') {
-                        statusEl.innerText = `Needs ${config.input.replace('_', ' ')}`; statusEl.style.color = '#e67e22';
+                        // FIX: Allow manual loading of machines if inventory exists
+                        if (this.data.inventory[config.input] > 0) {
+                            statusEl.innerText = `CLICK TO LOAD (${config.input.replace('_', ' ')})`; 
+                            statusEl.style.color = '#2ecc71';
+                            slotEl.style.cursor = 'pointer';
+                            slotEl.onclick = () => {
+                                this.removeItem(config.input, 1);
+                                slot.state = 'working'; 
+                                slot.startTime = Date.now();
+                            };
+                        } else {
+                            statusEl.innerText = `Needs ${config.input.replace('_', ' ')}`; 
+                            statusEl.style.color = '#e67e22';
+                            slotEl.style.cursor = 'default'; 
+                            slotEl.onclick = null;
+                        }
                     }
                 }
             });
@@ -205,7 +212,7 @@ const Game = {
         if (this.data.gold >= cost) {
             this.data.gold -= cost;
             this.data[category][index] = { type: key, state: (config.input ? 'idle' : 'growing'), startTime: Date.now() };
-            if (config.type === 'crop' && !this.data.managers.auto_replant) this.data[category][index].state = 'idle'; // Wait for manual click
+            if (config.type === 'crop' && !this.data.managers.auto_replant) this.data[category][index].state = 'idle'; 
             document.getElementById('shop-modal').style.display = 'none';
             this.renderAll(); this.saveGame();
         } else alert(`Need ${cost}g`);
@@ -271,8 +278,10 @@ const Game = {
         document.getElementById('inventory-list').appendChild(row);
     },
     renderList(cat) {
-        const container = document.getElementById(`${cat.replace('s', '')}-list` === 'plot-list' ? 'plot-list' : cat === 'animals' ? 'animal-list' : 'machine-list');
+        const targetId = cat === 'plots' ? 'plot-list' : cat === 'animals' ? 'animal-list' : 'machine-list';
+        const container = document.getElementById(targetId);
         container.innerHTML = '';
+        
         this.data[cat].forEach((slot, i) => {
             const div = document.createElement('div'); div.className = 'slot'; div.id = `${cat}-slot-${i}`;
             if (!slot) {
@@ -290,6 +299,7 @@ const Game = {
             }
             container.appendChild(div);
         });
+        
         const btn = document.createElement('button'); btn.className = 'btn-buy'; btn.style = 'width:100%; margin-top:10px;';
         btn.innerText = `Expand Space (${this.expansionCosts[cat] * this.data[cat].length}g)`;
         btn.onclick = () => this.expand(cat); container.appendChild(btn);
