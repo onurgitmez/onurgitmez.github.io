@@ -9,10 +9,19 @@ function fmt(n) {
     ];
     
     const i = Math.floor(Math.log10(n) / 3);
-    if (i >= s.length) return n.toExponential(2).replace('+', '');
-    
     let v = parseFloat((n / Math.pow(1000, i)).toFixed(2));
-    return v + s[i];
+    
+    // If within standard suffixes
+    if (i < s.length) {
+        return v + s[i];
+    }
+    
+    // Fallback to AA, AB, AC scaling for massive numbers
+    const extendedIndex = i - s.length;
+    const firstLetter = String.fromCharCode(65 + Math.floor(extendedIndex / 26));
+    const secondLetter = String.fromCharCode(65 + (extendedIndex % 26));
+    
+    return v + firstLetter + secondLetter;
 }
 
 function getResearchDiscount() {
@@ -37,48 +46,38 @@ function totalCost(base, count, amt, prestigeLevel, buyModeSetting) {
     
     const total = firstCost * (Math.pow(scaling, amt) - 1) / (scaling - 1);
     
-    // LOGIC FIX: Check against the actual requested amount, not just the setting
     const useDiscount = prestigeLevel >= 5 && amt >= 10;
     const prestigeDiscount = useDiscount ? 0.95 : 1;
     
     return total * prestigeDiscount;
 }
 
-// FIX: Added prestigeLevel to params to calculate discount correctly
 function maxBuy(base, count, money, prestigeLevel) {
     const scaling = 1.15;
     const researchDiscount = getResearchDiscount();
     
-    // Effective base price after research
     const effectiveBase = base * researchDiscount;
     const currentCost = effectiveBase * Math.pow(scaling, count);
     
     if ((money + 0.000001) < currentCost) return 0;
     
-    // Helper to calculate max N given a specific base price
     const calcN = (p_base) => {
-    const p_curr = p_base * Math.pow(scaling, count);
-    if (!isFinite(p_curr) || p_curr <= 0) return 0;
-    const result = Math.floor(
-        Math.log(1 + (money * (scaling - 1)) / p_curr) / Math.log(scaling)
-    );
-    return isFinite(result) && result > 0 ? result : 0;
-};
+        const p_curr = p_base * Math.pow(scaling, count);
+        if (!isFinite(p_curr) || p_curr <= 0) return 0;
+        const result = Math.floor(
+            Math.log(1 + (money * (scaling - 1)) / p_curr) / Math.log(scaling)
+        );
+        return isFinite(result) && result > 0 ? result : 0;
+    };
 
-    // 1. Calculate Max at standard price
     let n = calcN(effectiveBase);
 
-    // 2. Logic Check: Bulk Discount (Prestige Lvl 5+)
     if (prestigeLevel >= 5) {
-        // If we can already afford 10+, recalculate using the 5% off price
         if (n >= 10) {
             n = calcN(effectiveBase * 0.95);
-        } 
-        // Edge Case: If we can afford 9 at full price, can we afford 10 at discount?
-        else {
+        } else {
             const costOf10 = totalCost(base, count, 10, prestigeLevel, 10);
             if (money >= costOf10) {
-                // If we can afford 10, we might be able to afford even more
                 n = calcN(effectiveBase * 0.95);
             }
         }

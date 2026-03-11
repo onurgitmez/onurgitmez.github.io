@@ -1,37 +1,46 @@
+let multiplierCache = []; // Global cache for multipliers
+
+function recalculateAllMultipliers() {
+    if (multiplierCache.length !== businesses.length) {
+        multiplierCache = new Array(businesses.length).fill(1);
+    }
+    
+    businesses.forEach((b, i) => {
+        let m = 1;
+        
+        upgrades.forEach(u => {
+            if (u.level > 0) {
+                if (u.biz !== -1) {
+                    if (u.biz === i) m *= Math.pow(u.mult, u.level);
+                } else {
+                    if (u.tier === -1 || u.tier === b.tier || (u.tier === 7 && b.tier === 8)) {
+                        m *= Math.pow(u.mult, u.level);
+                    }
+                }
+            }
+        });
+        
+        const milestoneBonus = 1.25; 
+        const milestones = [25, 50, 75, 100, 150, 200, 250, 300, 400, 500, 600, 700, 800, 900, 1000];
+        milestones.forEach(ms => { if (b.count >= ms) m *= milestoneBonus; });
+        
+        const resLvl = getResearchLevel('res_global');
+        if (resLvl > 0) {
+            const rData = researchData.find(r => r.id === 'res_global');
+            m *= (1 + (resLvl * rData.val));
+        }
+        
+        multiplierCache[i] = isFinite(m) ? m : 1e300; 
+    });
+}
+
 function getResearchLevel(id) {
     return game.researchLevels[id] || 0;
 }
 
+// Drastically simplified!
 function getMultiplier(i) {
-    let m = 1;
-    const b = businesses[i];
-    
-    upgrades.forEach(u => {
-        if (u.level > 0) {
-            if (u.biz !== -1) {
-                if (u.biz === i) m *= Math.pow(u.mult, u.level);
-            } else {
-                if (u.tier === -1 || u.tier === b.tier || (u.tier === 7 && b.tier === 8)) {
-                    m *= Math.pow(u.mult, u.level);
-                }
-            }
-        }
-    });
-    
-    const milestoneBonus = 1.25; 
-    const milestones = [25, 50, 75, 100, 150, 200, 250, 300, 400, 500, 600, 700, 800, 900, 1000];
-    milestones.forEach(ms => { if (b.count >= ms) m *= milestoneBonus; });
-    
-    const resLvl = getResearchLevel('res_global');
-    if (resLvl > 0) {
-        const rData = researchData.find(r => r.id === 'res_global');
-        m *= (1 + (resLvl * rData.val));
-    }
-    
-    // FIX: Increased hard cap significantly to prevent endgame stalling
-    if (!isFinite(m)) m = 1e300; 
-    
-    return m;
+    return multiplierCache[i] || 1;
 }
 
 function getMultiplierBreakdown(i) {
@@ -95,6 +104,7 @@ function buyBiz(i, e) {
         }
         game.lastPurchase = now;
 
+        recalculateAllMultipliers(); // UPDATE CACHE
         updateIncome();
         checkAchievements();
         updateUIDisplay(getMultiplier, getMultiplierBreakdown);
@@ -104,7 +114,6 @@ function buyBiz(i, e) {
 
 function buyMax(i, e) {
     const b = businesses[i];
-    // FIX: Pass prestigeLevel to maxBuy to check for discounts
     const amt = maxBuy(b.cost, b.count, game.money, game.prestigeLevel);
     
     if (amt > 0) {
@@ -115,6 +124,8 @@ function buyMax(i, e) {
             if (game.money < 0) game.money = 0; 
             game.totalSpent += c;
             b.count += amt;
+            
+            recalculateAllMultipliers(); // UPDATE CACHE
             updateIncome();
             updateUIDisplay(getMultiplier, getMultiplierBreakdown);
         }
@@ -129,6 +140,8 @@ function buyUpgrade(id) {
         game.money -= c;
         game.totalSpent += c;
         u.level++;
+        
+        recalculateAllMultipliers(); // UPDATE CACHE
         updateIncome();
         renderUpgrades();
         updateUIDisplay(getMultiplier, getMultiplierBreakdown);
@@ -149,6 +162,7 @@ function buyAllUpgrades() {
         }
     });
     if (count > 0) {
+        recalculateAllMultipliers(); // UPDATE CACHE
         updateIncome();
         renderUpgrades();
         updateUIDisplay(getMultiplier, getMultiplierBreakdown);
@@ -168,6 +182,7 @@ function buyResearch(id) {
         game.knowledgePoints -= cost;
         game.researchLevels[id] = currentLevel + 1;
         
+        recalculateAllMultipliers(); // UPDATE CACHE
         renderResearch(); 
         updateIncome();   
         showToast(`🧪 Upgraded: ${r.name} (Lvl ${currentLevel + 1})`);
@@ -215,6 +230,7 @@ function doPrestige() {
     upgrades.forEach(u => { u.level = 0; });
     
     checkAchievements();
+    recalculateAllMultipliers(); // UPDATE CACHE
     updateIncome();
     createUI();
     closeModal('prestige');
@@ -274,7 +290,10 @@ function resetGame() {
     resetGameData();
 }
 
+// THROTLED LOOP VARIABLES
 let lastUpdate = Date.now();
+let lastUIUpdate = Date.now();
+const UI_UPDATE_RATE = 100; // Only update DOM every 100ms (10 FPS)
 let loopFrame = 0; 
 
 function gameLoop() {
@@ -282,6 +301,7 @@ function gameLoop() {
     const delta = (now - lastUpdate) / 1000;
     lastUpdate = now;
     
+    // 1. Logic Layer (Unthrottled)
     if (game.totalIncome > 0) {
         const earn = game.totalIncome * delta;
         game.money += earn;
@@ -299,6 +319,7 @@ function gameLoop() {
     if (game.comboCount > 0 && (now - game.lastPurchase) > 3000) {
         game.comboCount = 0;
         game.comboMult = 1;
+        updateIncome();
     }
 
     loopFrame++;
@@ -306,7 +327,12 @@ function gameLoop() {
         checkAchievements();
     }
 
-    updateUIDisplay(getMultiplier, getMultiplierBreakdown);
+    // 2. Render Layer (Throttled for Performance)
+    if (now - lastUIUpdate >= UI_UPDATE_RATE) {
+        updateUIDisplay(getMultiplier, getMultiplierBreakdown);
+        lastUIUpdate = now;
+    }
+    
     requestAnimationFrame(gameLoop);
 }
 
@@ -327,6 +353,9 @@ if (lastSaveTime > 0) {
         }
     }
 }
+
+// INITIALIZE CACHE ON BOOT
+recalculateAllMultipliers();
 
 createUI();
 updateIncome();
@@ -352,7 +381,6 @@ setInterval(() => {
     if (evtLvl > 0) {
         chance += (evtLvl * 0.1); 
     }
-    
     chance = Math.min(chance, 1.0);
 
     if (!game.currentEvent && Math.random() < chance && game.totalIncome > 0) {

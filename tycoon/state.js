@@ -18,13 +18,13 @@ let game = {
     eventsWitnessed: 0, 
     currentEvent: null, 
     eventEndTime: 0, 
-    unlockedAchievements: []
+    unlockedAchievements: [],
+    unlockedManagers: [] // NEW STATE
 };
 
 let settings = { soundEnabled: true, viewMode: 'all', buyMode: 1 };
 
 function saveGame() {
-    // FIX: Save upgrades as an Object map { "id": level }, not an Array
     const upgradeMap = {};
     upgrades.forEach(u => {
         if (u.level > 0) upgradeMap[u.id] = u.level;
@@ -44,9 +44,10 @@ function saveGame() {
         researchLevels: game.researchLevels,
         eventsWitnessed: game.eventsWitnessed, 
         unlockedAchievements: game.unlockedAchievements,
+        unlockedManagers: game.unlockedManagers, // NEW SAVE DATA
         businesses: businesses.map((b, i) => ({ id: i, count: b.count, level: b.level })),
         
-        upgrades: upgradeMap, // NEW FORMAT
+        upgrades: upgradeMap, 
         settings
     };
     localStorage.setItem('tycoonV5', JSON.stringify(data));
@@ -67,6 +68,7 @@ function loadGame() {
                 delete game.researchUnlocked;
             }
             if (!game.researchLevels) game.researchLevels = {};
+            if (!game.unlockedManagers) game.unlockedManagers = []; // SAFETY CHECK
 
             if (game.lifetimeEarned === undefined) {
                 game.lifetimeEarned = game.totalEarned || 0;
@@ -81,15 +83,12 @@ function loadGame() {
                 });
             }
             
-            // FIX: Handle both Legacy (Array) and New (Object) upgrade saves
             if (data.upgrades) {
                 if (Array.isArray(data.upgrades)) {
-                    // Legacy: Load by Index
                     upgrades.forEach((u, i) => {
                         if (data.upgrades[i] !== undefined) u.level = data.upgrades[i];
                     });
                 } else {
-                    // New: Load by ID
                     for (const [id, lvl] of Object.entries(data.upgrades)) {
                         const u = upgrades.find(x => x.id === id);
                         if (u) u.level = lvl;
