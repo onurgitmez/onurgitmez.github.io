@@ -173,3 +173,32 @@ main {
     margin-top: 0;
     color: var(--highlight);
 }
+/* SHOP TABS */
+.tab-container {
+    display: flex;
+    gap: 5px;
+    margin-bottom: 15px;
+}
+
+.btn-tab {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 6px;
+    border-radius: 4px;
+    cursor: pointer;
+    flex: 1;
+    font-size: 0.8rem;
+    font-weight: bold;
+    transition: all 0.2s;
+}
+
+.btn-tab:hover {
+    background: #3a414d;
+}
+
+.btn-tab.active {
+    background: var(--accent);
+    color: white;
+    border-color: var(--accent);
+}
