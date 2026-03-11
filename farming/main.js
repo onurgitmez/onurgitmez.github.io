@@ -10,13 +10,12 @@ const Game = {
         plots: [null, null, null], 
         animals: [null, null],     
         machines: [null, null],
-        upgrades: {}, // Tracks bought upgrades
-        managers: {}  // Tracks active automation
+        upgrades: {}, 
+        managers: {}  
     },
 
     expansionCosts: { plots: 500, animals: 1000, machines: 2000 },
     
-    // Animation Frame timing
     lastFrameTime: 0,
     logicAccumulator: 0,
     saveAccumulator: 0,
@@ -24,7 +23,6 @@ const Game = {
     init() {
         this.loadGame();
         this.render();
-        // Start the native browser render loop
         requestAnimationFrame((timestamp) => this.gameLoop(timestamp));
     },
 
@@ -37,30 +35,24 @@ const Game = {
         this.logicAccumulator += dt;
         this.saveAccumulator += dt;
 
-        // Logic Loop (runs every 500ms regardless of frame drops)
         if (this.logicAccumulator >= 500) {
             this.logicLoop();
             this.logicAccumulator = 0;
         }
 
-        // Save Loop (runs every 5000ms)
         if (this.saveAccumulator >= 5000) {
             this.saveGame();
             this.saveAccumulator = 0;
         }
 
-        // UI Loop runs as fast as the monitor allows for smooth bars
         this.uiLoop();
-
         requestAnimationFrame((ts) => this.gameLoop(ts));
     },
 
-    // --- LOGIC LOOP ---
+    // --- LOGIC LOOP (No UI rendering here anymore!) ---
     logicLoop() {
         const now = Date.now();
-        let needsRender = false; // Track if we need to update the UI this tick
 
-        // Automation: Auto-Route Items to Machines (Logistics Network)
         if (this.data.managers.auto_route) {
             this.data.machines.forEach(slot => {
                 if (slot && slot.state === 'idle') {
@@ -69,55 +61,41 @@ const Game = {
                         this.removeItem(config.input, 1);
                         slot.state = 'working';
                         slot.startTime = now;
-                        needsRender = true;
                     }
                 }
             });
         }
 
-        // 1. Plots (Crops & Trees)
         this.data.plots.forEach((slot) => {
             if (!slot) return;
             const isTree = GAME_DATA.trees[slot.type];
             const config = isTree ? GAME_DATA.trees[slot.type] : GAME_DATA.crops[slot.type];
             const modifiedTime = this.getModifiedTime(config);
 
-            // Start Growing
             if (slot.state === 'idle') {
-                let canStart = isTree; // Trees always start
-                
-                if (!isTree) {
-                    // Automation: Auto-Replant (Field Hands)
-                    if (this.data.managers.auto_replant && this.data.gold >= config.seedCost) {
-                        this.data.gold -= config.seedCost;
-                        canStart = true;
-                        this.renderHeader();
-                        needsRender = true;
-                    }
+                let canStart = isTree; 
+                if (!isTree && this.data.managers.auto_replant && this.data.gold >= config.seedCost) {
+                    this.data.gold -= config.seedCost;
+                    canStart = true;
+                    this.renderHeader();
                 }
-
                 if (canStart) {
                     slot.state = 'growing';
                     slot.startTime = now;
                 }
             }
-            // Finish Growing
             else if (slot.state === 'growing' && now - slot.startTime >= modifiedTime) {
                 this.addItem(slot.type, 1);
                 this.addXp(config.xp);
                 slot.state = 'idle';
                 
-                // If it's a tree, it restarts immediately. If crop, it waits for auto_replant or manual click
                 if (isTree) {
                     slot.state = 'growing';
                     slot.startTime = now;
-                } else {
-                    needsRender = true; // Tell UI to show "CLICK TO PLANT"
                 }
             }
         });
 
-        // 2. Animals
         this.data.animals.forEach(slot => {
             if (!slot) return;
             const config = GAME_DATA.animals[slot.type];
@@ -126,11 +104,10 @@ const Game = {
             if (now - slot.startTime >= modifiedTime) {
                 this.addItem(config.output, 1);
                 this.addXp(config.xp);
-                slot.startTime = now; // Restart loop
+                slot.startTime = now; 
             }
         });
 
-        // 3. Machines
         this.data.machines.forEach(slot => {
             if (!slot) return;
             const config = GAME_DATA.machines[slot.type];
@@ -140,25 +117,18 @@ const Game = {
                 this.addItem(config.output, 1);
                 this.addXp(config.xp);
                 slot.state = 'idle';
-                needsRender = true; // Tell UI machine is idle again
             }
         });
 
-        // Automation: Auto-Sell (Wholesale Contracts)
         if (this.data.managers.auto_sell) {
-            // Only sell end products, do not sell inputs needed for machines
             for (let key in this.data.inventory) {
                 const isInput = Object.values(GAME_DATA.machines).some(m => m.input === key);
-                if (!isInput) {
-                    this.sellItem(key, true); // true = sell all
-                }
+                if (!isInput) this.sellItem(key, true); 
             }
         }
-
-        if (needsRender) this.render();
     },
 
-    // --- UI LOOP (Visuals) ---
+    // --- UI LOOP (Real-time updates, zero flickering) ---
     uiLoop() {
         const now = Date.now();
         const updateBar = (id, percent, color) => {
@@ -172,10 +142,38 @@ const Game = {
         this.data.plots.forEach((slot, i) => {
             if (!slot) return;
             const config = GAME_DATA.trees[slot.type] || GAME_DATA.crops[slot.type];
+            const isTree = GAME_DATA.trees[slot.type];
+            const statusEl = document.getElementById(`plots-status-${i}`);
+            const slotEl = document.getElementById(`plots-slot-${i}`);
+            
             if (slot.state === 'growing') {
                 updateBar(`plot-bar-${i}`, ((now - slot.startTime) / this.getModifiedTime(config)) * 100, '#2ecc71');
+                if (statusEl) { statusEl.innerText = 'Producing...'; statusEl.style.color = '#aaa'; }
+                if (slotEl) { slotEl.style.cursor = 'default'; slotEl.onclick = null; }
             } else {
-                updateBar(`plot-bar-${i}`, 0, GAME_DATA.trees[slot.type] ? '#2ecc71' : '#e74c3c');
+                updateBar(`plot-bar-${i}`, 0, isTree ? '#2ecc71' : '#e74c3c');
+                if (statusEl && !isTree) {
+                    if (this.data.gold < config.seedCost) {
+                        statusEl.innerText = `WAITING FOR FUNDS (${config.seedCost}g)`;
+                        statusEl.style.color = '#e74c3c';
+                        if (slotEl) { slotEl.style.cursor = 'default'; slotEl.onclick = null; }
+                    } else {
+                        statusEl.innerText = `CLICK TO PLANT (${config.seedCost}g)`;
+                        statusEl.style.color = '#2ecc71';
+                        if (slotEl) {
+                            slotEl.style.cursor = 'pointer';
+                            // Manual planting logic directly attached here!
+                            slotEl.onclick = () => {
+                                if(this.data.gold >= config.seedCost) {
+                                    this.data.gold -= config.seedCost;
+                                    slot.state = 'growing';
+                                    slot.startTime = Date.now();
+                                    this.renderHeader();
+                                }
+                            };
+                        }
+                    }
+                }
             }
         });
 
@@ -183,43 +181,41 @@ const Game = {
             if (!slot) return;
             const config = GAME_DATA.animals[slot.type];
             updateBar(`anim-bar-${i}`, ((now - slot.startTime) / this.getModifiedTime(config)) * 100, '#f1c40f');
+            const statusEl = document.getElementById(`animals-status-${i}`);
+            if (statusEl) { statusEl.innerText = 'Producing...'; statusEl.style.color = '#aaa'; }
         });
 
         this.data.machines.forEach((slot, i) => {
             if (!slot) return;
             const config = GAME_DATA.machines[slot.type];
+            const statusEl = document.getElementById(`machines-status-${i}`);
             if (slot.state === 'working') {
                 updateBar(`mach-bar-${i}`, ((now - slot.startTime) / this.getModifiedTime(config)) * 100, '#3498db');
+                if (statusEl) { statusEl.innerText = 'Processing...'; statusEl.style.color = '#aaa'; }
             } else {
                 updateBar(`mach-bar-${i}`, 0, '#3498db');
+                if (statusEl) { statusEl.innerText = `Needs ${config.input.replace('_', ' ')}`; statusEl.style.color = '#e67e22'; }
             }
         });
     },
 
-    // --- OFFLINE PROGRESS ---
     processOfflineProgress(elapsedMs) {
-        if (elapsedMs < 60000) return; // Only trigger if gone for > 1 minute
-
+        if (elapsedMs < 60000) return; 
         let itemsGained = {};
         let xpGained = 0;
         const now = Date.now();
 
-        // Simulate Trees & Animals (Infinite loops)
         const simulateInfinite = (slots, configDB) => {
             slots.forEach(slot => {
                 if (!slot) return;
                 const config = configDB[slot.type];
                 const timeReq = this.getModifiedTime(config);
-                
-                // Add remaining time from last save to elapsed
                 const totalTimeAvailable = elapsedMs + (this.data.lastSave - slot.startTime);
                 const cycles = Math.floor(totalTimeAvailable / timeReq);
-                
                 if (cycles > 0) {
-                    const outputStr = config.output || slot.type; // output for animal, type for tree
+                    const outputStr = config.output || slot.type; 
                     itemsGained[outputStr] = (itemsGained[outputStr] || 0) + cycles;
                     xpGained += (config.xp * cycles);
-                    // Reset start time perfectly to account for remainder
                     slot.startTime = now - (totalTimeAvailable % timeReq);
                 }
             });
@@ -228,18 +224,13 @@ const Game = {
         simulateInfinite(this.data.trees ? this.data.plots.filter(p => p && GAME_DATA.trees[p.type]) : [], GAME_DATA.trees);
         simulateInfinite(this.data.animals, GAME_DATA.animals);
 
-        // Apply offline gains
-        for (let key in itemsGained) {
-            this.addItem(key, itemsGained[key]);
-        }
+        for (let key in itemsGained) this.addItem(key, itemsGained[key]);
         if (xpGained > 0) this.addXp(xpGained);
 
-        // Show Modal
         if (Object.keys(itemsGained).length > 0) {
             let reportHtml = '';
             for (let k in itemsGained) reportHtml += `<div>+${itemsGained[k]} ${k.replace('_', ' ')}</div>`;
             reportHtml += `<div style="color:#2ecc71; margin-top:5px;">+${xpGained} XP</div>`;
-            
             const reportEl = document.getElementById('offline-report');
             const modalEl = document.getElementById('offline-modal');
             if(reportEl && modalEl) {
@@ -249,7 +240,6 @@ const Game = {
         }
     },
 
-    // --- MODIFIERS (Upgrades) ---
     getModifiedTime(config) {
         let time = config.time;
         if (config.type === 'crop') {
@@ -266,23 +256,18 @@ const Game = {
         else if (GAME_DATA.trees[key]) price = GAME_DATA.trees[key].sell;
         else if (GAME_DATA.products[key]) price = GAME_DATA.products[key].sell;
         
-        // Check if it's an animal product
         const isAnimalProduct = Object.values(GAME_DATA.animals).some(a => a.output === key);
         if (isAnimalProduct) {
             if (this.data.upgrades.selective_breeding) price *= 1.50;
             else if (this.data.upgrades.premium_feed) price *= 1.25;
         }
 
-        // Check if it's a machine product (Artisan Good)
         const isMachineProduct = Object.values(GAME_DATA.machines).some(m => m.output === key);
-        if (isMachineProduct && this.data.upgrades.artisan_crafting) {
-            price *= 1.40;
-        }
+        if (isMachineProduct && this.data.upgrades.artisan_crafting) price *= 1.40;
         
         return Math.floor(price);
     },
 
-    // --- DYNAMIC INVENTORY ---
     addItem(key, qty) { 
         this.data.inventory[key] = (this.data.inventory[key] || 0) + qty;
         this.updateInventoryDOM(key);
@@ -301,7 +286,6 @@ const Game = {
         const qty = this.data.inventory[key] || 0;
         let row = document.getElementById(`inv-row-${key}`);
 
-        // If depleted, remove node
         if (qty <= 0) {
             if (row) row.remove();
             return;
@@ -310,13 +294,11 @@ const Game = {
         const price = this.getModifiedPrice(key);
         const displayName = key.replace('_', ' ');
 
-        // If it exists, just update text (No flickering!)
         if (row) {
             row.querySelector('.inv-qty').innerText = `x${qty}`;
             return;
         }
 
-        // If it doesn't exist, create it
         row = document.createElement('div');
         row.className = 'item-row';
         row.id = `inv-row-${key}`;
@@ -327,7 +309,6 @@ const Game = {
         container.appendChild(row);
     },
 
-    // --- ECONOMY ---
     sellItem(key, all) {
         const qty = all ? this.data.inventory[key] : 1;
         if (!qty) return;
@@ -354,14 +335,13 @@ const Game = {
             this.data.gold -= config.cost;
             this.data[type][key] = true; 
             this.renderHeader();
-            this.renderShop('upgrades'); // re-render to remove it from shop
+            this.renderShop('upgrades'); 
             this.saveGame();
         } else {
             alert(`Not enough gold! Need ${config.cost}g`);
         }
     },
 
-    // --- ACTIONS & DATA HELPERS ---
     assignSlot(category, index, typeKey) {
         let sources = {...GAME_DATA.crops, ...GAME_DATA.trees, ...GAME_DATA.animals, ...GAME_DATA.machines};
         let config = sources[typeKey];
@@ -371,17 +351,19 @@ const Game = {
             this.data.gold -= setupCost;
             this.data[category][index] = { type: typeKey, state: 'idle', startTime: Date.now() };
             
-            // Auto-start logic
             if (config.type === 'crop' && (!this.data.managers.auto_replant)) {
                  if (this.data.gold >= config.seedCost) {
                      this.data.gold -= config.seedCost;
                      this.data[category][index].state = 'growing';
                  }
             } else if (config.type !== 'crop') {
-                 // Trees, machines, animals auto start their idle loop
                  this.data[category][index].state = GAME_DATA.machines[typeKey] ? 'idle' : 'growing';
             }
             
+            // Close the shop modal after buying!
+            const modal = document.getElementById('shop-modal');
+            if (modal) modal.style.display = 'none';
+
             this.render();
             this.saveGame();
         } else {
@@ -442,7 +424,7 @@ const Game = {
         }
     },
 
-    // --- RENDERING ---
+    // --- RENDERING DOM ELEMENTS ONCE ---
     render() {
         this.renderHeader();
         this.renderList('plots', 'plot-list');
@@ -469,6 +451,7 @@ const Game = {
         this.data[category].forEach((slot, index) => {
             const div = document.createElement('div');
             div.className = 'slot';
+            div.id = `${category}-slot-${index}`; // ID for uiLoop to target
 
             if (!slot) {
                 div.innerHTML = `<div style="text-align:center;width:100%;color:#888;cursor:pointer">➕ Empty Slot</div>`;
@@ -477,38 +460,12 @@ const Game = {
                 let sources = {...GAME_DATA.crops, ...GAME_DATA.trees, ...GAME_DATA.animals, ...GAME_DATA.machines};
                 const config = sources[slot.type];
                 
-                let sub = '';
-                let statusColor = '#aaa';
-                
-                if (category === 'plots' && !GAME_DATA.trees[slot.type]) {
-                    if (this.data.gold < config.seedCost && slot.state === 'idle') {
-                        sub = "WAITING FOR FUNDS";
-                        statusColor = '#e74c3c';
-                    } else if (slot.state === 'idle') {
-                         sub = "CLICK TO PLANT";
-                         div.style.cursor = 'pointer';
-                         div.onclick = () => {
-                             if(this.data.gold >= config.seedCost) {
-                                 this.data.gold -= config.seedCost;
-                                 slot.state = 'growing';
-                                 slot.startTime = Date.now();
-                                 Game.render(); // Force UI update on click
-                             }
-                         }
-                    } else {
-                        sub = `Cost: ${config.seedCost}g`;
-                    }
-                } else if (category === 'machines') {
-                    sub = slot.state === 'working' ? 'Processing...' : `Needs ${config.input.replace('_', ' ')}`;
-                } else {
-                    sub = 'Producing...';
-                }
-
+                // We render empty placeholders, uiLoop populates them instantly
                 div.innerHTML += `
                     <div class="slot-icon">${config.emoji}</div>
                     <div class="slot-info">
                         <div class="slot-name">${config.name}</div>
-                        <div style="font-size:0.7em; color:${statusColor}">${sub}</div>
+                        <div id="${category}-status-${index}" style="font-size:0.7em; font-weight:bold;"></div>
                         <div class="progress-bg">
                             <div id="${category === 'plots' ? 'plot' : category === 'animals' ? 'anim' : 'mach'}-bar-${index}" class="progress-fill"></div>
                         </div>
@@ -529,12 +486,25 @@ const Game = {
         container.appendChild(btn);
     },
 
+    // --- NEW DYNAMIC SHOP MODAL ---
     renderShop(category, index, currentFilter = 'all') {
-        const container = document.getElementById('animal-list'); // Hijack middle panel for shop
+        // Create the modal dynamically if it doesn't exist
+        let modal = document.getElementById('shop-modal');
+        if (!modal) {
+            modal = document.createElement('div');
+            modal.id = 'shop-modal';
+            modal.className = 'modal-overlay';
+            modal.innerHTML = `<div id="shop-content" class="modal-content" style="max-height: 80vh; overflow-y: auto; width: 400px; color: var(--text);"></div>`;
+            document.body.appendChild(modal);
+        }
+        modal.style.display = 'flex';
+        
+        const container = document.getElementById('shop-content');
+        
         if (category === 'upgrades') {
-             container.innerHTML = `<h3 style="margin-top:0">Upgrades & Managers</h3>`;
+             container.innerHTML = `<h2 style="margin-top:0; color: var(--highlight)">Upgrades & Managers</h2>`;
         } else {
-             container.innerHTML = `<h3 style="margin-top:0">Build</h3>`;
+             container.innerHTML = `<h2 style="margin-top:0; color: var(--highlight)">Build Menu</h2>`;
         }
 
         const shopBox = document.createElement('div');
@@ -542,7 +512,6 @@ const Game = {
         shopBox.style.padding = '10px';
         shopBox.style.borderRadius = '8px';
 
-        // --- 1. GENERATE TABS ---
         let tabs = [];
         if (category === 'plots') {
             tabs = [{ id: 'all', name: 'All' }, { id: 'crops', name: 'Seeds' }, { id: 'trees', name: 'Saplings' }];
@@ -564,7 +533,6 @@ const Game = {
             shopBox.appendChild(tabContainer);
         }
 
-        // --- 2. FILTER DATA ---
         let sources = {};
         if (category === 'plots') {
             if (currentFilter === 'all' || currentFilter === 'crops') Object.assign(sources, GAME_DATA.crops);
@@ -578,20 +546,18 @@ const Game = {
             if (currentFilter === 'all' || currentFilter === 'managers') Object.assign(sources, GAME_DATA.managers);
         }
 
-        // --- 3. RENDER ITEMS ---
         for (let key in sources) {
             const item = sources[key];
             const locked = this.data.level < item.reqLevel;
             const isUpgrade = category === 'upgrades';
             
-            // Check if already bought
             let bought = false;
             if (isUpgrade) {
                 if (GAME_DATA.upgrades[key] && this.data.upgrades[key]) bought = true;
                 if (GAME_DATA.managers[key] && this.data.managers[key]) bought = true;
             }
 
-            if (bought) continue; // Don't show bought upgrades
+            if (bought) continue; 
 
             const row = document.createElement('div');
             row.className = 'item-row';
@@ -603,7 +569,7 @@ const Game = {
             row.innerHTML = `
                 <div style="display:flex; align-items:center; gap:10px; width:100%">
                     ${isUpgrade ? '' : `<span style="font-size:1.5em">${item.emoji}</span>`}
-                    <div style="flex:1">
+                    <div style="flex:1; text-align: left;">
                         <strong>${item.name}</strong> ${locked ? `🔒 (Lvl ${item.reqLevel})` : ''}
                         ${isUpgrade ? `<div style="font-size:0.7em; color:#ccc">${item.desc}</div>` : ''}
                         <div style="font-size:0.8em; color:#f1c40f">${costTxt}</div>
@@ -627,12 +593,20 @@ const Game = {
 
         const cancel = document.createElement('button');
         cancel.innerText = "Close Shop";
-        cancel.className = 'btn-sell';
+        cancel.className = 'btn-danger'; // Using a red button for clarity
         cancel.style.width = '100%';
         cancel.style.marginTop = '10px';
-        cancel.onclick = () => this.render();
+        cancel.style.padding = '10px';
+        cancel.style.background = '#e74c3c';
+        cancel.style.color = 'white';
+        cancel.style.border = 'none';
+        cancel.style.borderRadius = '5px';
+        cancel.style.cursor = 'pointer';
+        
+        // Modal Hide Logic
+        cancel.onclick = () => { modal.style.display = 'none'; };
+        
         shopBox.appendChild(cancel);
-
         container.appendChild(shopBox);
     }
 };
