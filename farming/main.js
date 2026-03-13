@@ -19,6 +19,16 @@ const Game = {
     getConfig(key) {
         return GAME_DATA.crops[key] || GAME_DATA.trees[key] || GAME_DATA.animals[key] || GAME_DATA.machines[key];
     },
+    
+    // XP requirement now scales quadratically instead of linearly
+    getXpRequirement(level) {
+        return Math.floor(Math.pow(level, 2) * 50); 
+    },
+    
+    // Expansion costs scale exponentially (1.5x per slot)
+    getExpansionCost(cat) {
+        return Math.floor(this.expansionCosts[cat] * Math.pow(1.5, this.data[cat].length - 1));
+    },
 
     // --- GAME LOOP ARCHITECTURE ---
     gameLoop(timestamp) {
@@ -36,11 +46,42 @@ const Game = {
         requestAnimationFrame((ts) => this.gameLoop(ts));
     },
 
-    // --- LOGIC LOOP (No UI rendering here!) ---
+    // --- LOGIC LOOP (Strict execution order to fix automation) ---
     logicLoop() {
         const now = Date.now();
 
-        // Auto-Route (Machines)
+        // 1. HARVEST & PROCESS FINISHED ITEMS
+        ['plots', 'animals', 'machines'].forEach(category => {
+            this.data[category].forEach(slot => {
+                if (!slot) return;
+                const config = this.getConfig(slot.type);
+                if ((slot.state === 'growing' || slot.state === 'working') && now - slot.startTime >= this.getModifiedTime(config)) {
+                    this.addItem(config.output || slot.type, 1);
+                    this.addXp(config.xp);
+                    
+                    const isCrop = config.type === 'crop';
+                    const isMachine = !!config.input;
+                    
+                    if (!isCrop && !isMachine) {
+                        slot.startTime = now; // Auto-restart trees/animals
+                    } else {
+                        slot.state = 'idle'; // Crops and machines wait for replant/reload
+                    }
+                }
+            });
+        });
+
+        // 2. AUTO-SELL (Turns fresh harvests into gold immediately)
+        if (this.data.managers.auto_sell) {
+            const activeInputs = new Set(
+                this.data.machines.filter(s => s !== null).map(s => this.getConfig(s.type).input)
+            );
+            for (let key in this.data.inventory) {
+                if (!activeInputs.has(key)) this.sellItem(key, true); 
+            }
+        }
+
+        // 3. AUTO-ROUTE (Load machines with remaining inventory)
         if (this.data.managers.auto_route) {
             this.data.machines.forEach(slot => {
                 if (slot && slot.state === 'idle') {
@@ -53,45 +94,22 @@ const Game = {
             });
         }
 
-        // Process ALL categories dynamically
-        ['plots', 'animals', 'machines'].forEach(category => {
-            this.data[category].forEach(slot => {
-                if (!slot) return;
-                const config = this.getConfig(slot.type);
-                const modTime = this.getModifiedTime(config);
-                const isCrop = config.type === 'crop';
-                const isMachine = !!config.input;
-
-                if (slot.state === 'idle') {
-                    // Start crops if auto-replant is on
-                    if (isCrop && this.data.managers.auto_replant && this.data.gold >= config.seedCost) {
+        // 4. AUTO-PLANT (Spends the gold you just earned on new seeds)
+        if (this.data.managers.auto_replant) {
+            this.data.plots.forEach(slot => {
+                if (slot && slot.state === 'idle') {
+                    const config = this.getConfig(slot.type);
+                    if (config.type === 'crop' && this.data.gold >= config.seedCost) {
                         this.data.gold -= config.seedCost;
-                        slot.state = 'growing'; slot.startTime = now;
-                        this.updateHeaderDOM();
-                    }
-                } 
-                else if ((slot.state === 'growing' || slot.state === 'working') && now - slot.startTime >= modTime) {
-                    this.addItem(config.output || slot.type, 1);
-                    this.addXp(config.xp);
-                    slot.state = 'idle';
-                    
-                    // Auto-restart trees and animals. Machines and crops stay idle.
-                    if (!isCrop && !isMachine) {
                         slot.state = 'growing'; slot.startTime = now;
                     }
                 }
             });
-        });
-
-        // Auto-Sell
-        if (this.data.managers.auto_sell) {
-            for (let key in this.data.inventory) {
-                if (!Object.values(GAME_DATA.machines).some(m => m.input === key)) this.sellItem(key, true); 
-            }
+            this.updateHeaderDOM(); // Update gold display once after all planting
         }
     },
 
-    // --- UI LOOP (Real-time updates, zero flickering) ---
+    // --- UI LOOP ---
     uiLoop() {
         const now = Date.now();
         
@@ -130,7 +148,6 @@ const Game = {
                             };
                         }
                     } else if (category === 'machines') {
-                        // FIX: Allow manual loading of machines if inventory exists
                         if (this.data.inventory[config.input] > 0) {
                             statusEl.innerText = `CLICK TO LOAD (${config.input.replace('_', ' ')})`; 
                             statusEl.style.color = '#2ecc71';
@@ -190,8 +207,16 @@ const Game = {
     sellAllEverything() { for(let k in this.data.inventory) this.sellItem(k, true); },
     addXp(amount) {
         this.data.xp += amount;
-        if (this.data.xp >= this.data.level * 100) {
-            this.data.xp -= this.data.level * 100; this.data.level++;
+        let leveledUp = false;
+        
+        // Loop allows jumping multiple levels if XP gain is massive, but scaling makes this rare
+        while (this.data.xp >= this.getXpRequirement(this.data.level)) {
+            this.data.xp -= this.getXpRequirement(this.data.level); 
+            this.data.level++;
+            leveledUp = true;
+        }
+        
+        if (leveledUp) {
             alert(`🎉 Level Up! You are now Level ${this.data.level}`);
             this.renderAll(); 
         }
@@ -208,18 +233,23 @@ const Game = {
     },
     assignSlot(category, index, key) {
         const config = this.getConfig(key);
-        const cost = config.type === 'crop' ? 0 : config.seedCost;
+        const willAutoPlant = config.type === 'crop' && this.data.managers.auto_replant;
+        const cost = config.type === 'crop' && !willAutoPlant ? 0 : config.seedCost;
+        
         if (this.data.gold >= cost) {
             this.data.gold -= cost;
-            this.data[category][index] = { type: key, state: (config.input ? 'idle' : 'growing'), startTime: Date.now() };
-            if (config.type === 'crop' && !this.data.managers.auto_replant) this.data[category][index].state = 'idle'; 
+            this.data[category][index] = { 
+                type: key, 
+                state: (config.input || (config.type === 'crop' && !willAutoPlant) ? 'idle' : 'growing'), 
+                startTime: Date.now() 
+            };
             document.getElementById('shop-modal').style.display = 'none';
             this.renderAll(); this.saveGame();
         } else alert(`Need ${cost}g`);
     },
     clearSlot(cat, i) { if(confirm("Remove item?")) { this.data[cat][i] = null; this.renderAll(); } },
     expand(cat) {
-        const cost = this.expansionCosts[cat] * this.data[cat].length;
+        const cost = this.getExpansionCost(cat);
         if (this.data.gold >= cost) { this.data.gold -= cost; this.data[cat].push(null); this.renderAll(); } 
         else alert(`Need ${cost}g`);
     },
@@ -264,7 +294,7 @@ const Game = {
     updateHeaderDOM() {
         document.getElementById('gold').innerText = Math.floor(this.data.gold);
         document.getElementById('level').innerText = this.data.level;
-        document.getElementById('xp').innerText = `${Math.floor(this.data.xp)} / ${this.data.level * 100}`;
+        document.getElementById('xp').innerText = `${Math.floor(this.data.xp)} / ${this.getXpRequirement(this.data.level)}`;
     },
     updateInventoryDOM(key) {
         const qty = this.data.inventory[key] || 0;
@@ -301,7 +331,7 @@ const Game = {
         });
         
         const btn = document.createElement('button'); btn.className = 'btn-buy'; btn.style = 'width:100%; margin-top:10px;';
-        btn.innerText = `Expand Space (${this.expansionCosts[cat] * this.data[cat].length}g)`;
+        btn.innerText = `Expand Space (${this.getExpansionCost(cat)}g)`;
         btn.onclick = () => this.expand(cat); container.appendChild(btn);
     },
     renderShop(category, index, filter = 'all') {
