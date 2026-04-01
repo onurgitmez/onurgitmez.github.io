@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vergi Levhası Okuyucu</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #0a0a0f;
+  --surface: #111118;
+  --surface2: #16161f;
+  --surface3: #1c1c28;
+  --border: rgba(255,255,255,0.06);
+  --border-hover: rgba(255,255,255,0.1);
+  --text: #f0f0f5;
+  --text-secondary: #8888a0;
+  --text-dim: #55556a;
+  --accent: #6366f1;
+  --accent-soft: rgba(99,102,241,0.1);
+  --accent-mid: rgba(99,102,241,0.2);
+  --success: #10b981;
+  --success-soft: rgba(16,185,129,0.1);
+  --error: #f43f5e;
+  --error-soft: rgba(244,63,94,0.08);
+  --radius: 14px;
+  --radius-sm: 10px;
+  --radius-xs: 7px;
+}
+
+html { font-size: 16px; }
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Background ambient glow */
+body::before {
+  content: '';
+  position: fixed;
+  top: -200px; left: 50%;
+  transform: translateX(-50%);
+  width: 800px; height: 600px;
+  background: radial-gradient(ellipse, rgba(99,102,241,0.04) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.app {
+  position: relative; z-index: 1;
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 40px 24px 100px;
+}
+
+/* ── Header ── */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 48px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.brand-icon {
+  width: 36px; height: 36px;
+  border-radius: var(--radius-sm);
+  background: linear-gradient(135deg, var(--accent-soft), var(--accent-mid));
+  border: 1px solid var(--accent-mid);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.brand-icon svg {
+  width: 18px; height: 18px;
+  stroke: var(--accent);
+  fill: none;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.brand-text {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+  letter-spacing: -0.02em;
+}
+
+.model-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 100px;
+  padding: 6px 14px 6px 10px;
+  font-size: 12px;
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--text-secondary);
+  font-weight: 400;
+}
+
+.model-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--success);
+  box-shadow: 0 0 10px rgba(16,185,129,0.5);
+  animation: pulse-dot 2.5s ease-in-out infinite;
+}
+
+@keyframes pulse-dot {
+  0%, 100% { box-shadow: 0 0 6px rgba(16,185,129,0.4); }
+  50% { box-shadow: 0 0 12px rgba(16,185,129,0.7); }
+}
+
+/* ── Sections ── */
+.section {
+  margin-bottom: 24px;
+}
+
+.section-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 10px;
+}
+
+/* ── API Key ── */
+.key-row {
+  display: flex;
+  gap: 8px;
+}
+
+.key-input {
+  flex: 1;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 13px 16px;
+  font-size: 13px;
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--text);
+  outline: none;
+  transition: border-color 0.25s, box-shadow 0.25s;
+}
+.key-input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+.key-input::placeholder { color: var(--text-dim); }
+
+.key-btn {
+  padding: 0 22px;
+  background: var(--accent);
+  border: none;
+  border-radius: var(--radius-sm);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: 'DM Sans', sans-serif;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+.key-btn:hover { filter: brightness(1.15); transform: translateY(-1px); }
+.key-btn:active { transform: translateY(0) scale(0.98); }
+.key-btn.saved {
+  background: var(--success-soft);
+  color: var(--success);
+  border: 1px solid rgba(16,185,129,0.2);
+}
+
+.key-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+  font-size: 12px;
+  color: var(--text-dim);
+  line-height: 1.5;
+}
+.key-meta.active { color: var(--success); }
+.key-meta-dot {
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: currentColor;
+  flex-shrink: 0;
+}
+.key-change {
+  margin-left: auto;
+  font-size: 11px;
+  color: var(--text-dim);
+  cursor: pointer;
+  transition: color 0.15s;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.key-change:hover { color: var(--text-secondary); }
+
+/* ── Upload Zone ── */
+.upload-zone {
+  border: 1.5px dashed var(--border-hover);
+  border-radius: 20px;
+  padding: 56px 40px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  background: var(--surface);
+}
+.upload-zone.ready:hover, .upload-zone.dragging {
+  border-color: var(--accent);
+  background: linear-gradient(180deg, rgba(99,102,241,0.04) 0%, var(--surface) 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 40px rgba(99,102,241,0.06);
+}
+.upload-zone.disabled {
+  opacity: 0.35;
+  pointer-events: none;
+  filter: grayscale(0.3);
+}
+
+.upload-icon-wrap {
+  width: 56px; height: 56px;
+  margin: 0 auto 20px;
+  border-radius: 16px;
+  background: var(--surface2);
+  border: 1px solid var(--border-hover);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s;
+  position: relative;
+  z-index: 1;
+}
+.upload-zone.ready:hover .upload-icon-wrap {
+  background: var(--accent-soft);
+  border-color: var(--accent-mid);
+  transform: translateY(-2px);
+}
+
+.upload-icon-wrap svg {
+  width: 22px; height: 22px;
+  stroke: var(--text-secondary);
+  fill: none;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: stroke 0.3s;
+}
+.upload-zone.ready:hover .upload-icon-wrap svg { stroke: var(--accent); }
+
+.upload-zone h2 {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 6px;
+  position: relative;
+  z-index: 1;
+  letter-spacing: -0.02em;
+}
+.upload-zone p {
+  font-size: 13px;
+  color: var(--text-secondary);
+  position: relative;
+  z-index: 1;
+}
+
+.format-tags {
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+  margin-top: 20px;
+  position: relative;
+  z-index: 1;
+}
+.format-tag {
+  font-size: 10px;
+  font-weight: 600;
+  font-family: 'JetBrains Mono', monospace;
+  padding: 4px 10px;
+  border-radius: var(--radius-xs);
+  background: var(--surface2);
+  color: var(--text-dim);
+  border: 1px solid var(--border);
+  letter-spacing: 0.04em;
+}
+
+/* ── Loading ── */
+#loading { display: none; margin-top: 20px; }
+.loader-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 22px 24px;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  animation: fadeSlideIn 0.3s ease;
+}
+
+.loader-spinner {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  border: 2.5px solid var(--surface3);
+  border-top-color: var(--accent);
+  animation: spin 0.8s linear infinite;
+  flex-shrink: 0;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.loader-text {
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+.loader-text strong {
+  color: var(--text);
+  font-weight: 600;
+}
+
+/* ── Error ── */
+#error-box {
+  display: none;
+  margin-top: 16px;
+  background: var(--error-soft);
+  border: 1px solid rgba(244,63,94,0.15);
+  border-radius: var(--radius-sm);
+  padding: 14px 18px;
+  font-size: 13px;
+  color: var(--error);
+  line-height: 1.6;
+  font-family: 'JetBrains Mono', monospace;
+  animation: fadeSlideIn 0.3s ease;
+}
+
+/* ── Results ── */
+#results { display: none; margin-top: 32px; animation: fadeSlideIn 0.4s ease; }
+
+@keyframes fadeSlideIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.results-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+.results-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.btn-new {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 500;
+  padding: 7px 14px;
+  border-radius: var(--radius-xs);
+  transition: all 0.15s;
+}
+.btn-new:hover {
+  color: var(--text);
+  border-color: var(--border-hover);
+  background: var(--surface2);
+}
+.btn-new svg {
+  width: 13px; height: 13px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* Grid */
+.data-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  background: var(--border);
+  border-radius: 18px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+
+.field {
+  background: var(--surface);
+  padding: 18px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  position: relative;
+  transition: background 0.15s;
+}
+.field:hover { background: var(--surface2); }
+.field.span2 { grid-column: span 2; }
+.field.span3 { grid-column: span 3; }
+
+.field-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #a8a8be;
+  letter-spacing: 0.01em;
+}
+
+.field-value {
+  font-size: 14px;
+  color: var(--text);
+  font-weight: 400;
+  line-height: 1.55;
+  word-break: break-word;
+  letter-spacing: -0.01em;
+  padding-right: 32px;
+}
+.field-value.empty {
+  color: var(--text-dim);
+  font-style: italic;
+  font-size: 13px;
+  font-weight: 300;
+}
+
+.copy-btn {
+  position: absolute;
+  top: 14px; right: 14px;
+  width: 28px; height: 28px;
+  border-radius: var(--radius-xs);
+  background: transparent;
+  border: 1px solid transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s;
+  color: var(--text-dim);
+  opacity: 0;
+}
+.field:hover .copy-btn { opacity: 1; border-color: var(--border-hover); }
+.copy-btn:hover { background: var(--surface3); color: var(--text); border-color: var(--border-hover); }
+.copy-btn.ok { opacity: 1; color: var(--success); border-color: rgba(16,185,129,0.3); background: var(--success-soft); }
+.copy-btn svg {
+  width: 13px; height: 13px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  pointer-events: none;
+}
+
+/* ── Table ── */
+.takvim-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 12px;
+}
+.takvim-table th {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 0 0 10px;
+  text-align: left;
+  border-bottom: 1px solid var(--border-hover);
+}
+.takvim-table td {
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 13px;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+.takvim-table tr:last-child td { border-bottom: none; }
+.takvim-table td:not(:first-child) {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+/* ── Responsive ── */
+@media (max-width: 640px) {
+  .app { padding: 28px 16px 80px; }
+  .header { flex-direction: column; align-items: flex-start; gap: 14px; margin-bottom: 36px; }
+  .upload-zone { padding: 44px 24px; }
+  .data-grid { grid-template-columns: 1fr; }
+  .field.span2, .field.span3 { grid-column: span 1; }
+  .copy-btn { opacity: 1; }
+}
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--surface3); border-radius: 3px; }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="brand">
+      <div class="brand-icon">
+        <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/><path d="M16 13H8"/><path d="M16 17H8"/><path d="M10 9H8"/></svg>
+      </div>
+      <span class="brand-text">Vergi Levhası Okuyucu</span>
+    </div>
+    <div class="model-badge">
+      <div class="model-dot"></div>
+      gemini-2.5-flash
+    </div>
+  </div>
+
+  <!-- API Key -->
+  <div class="section">
+    <div class="section-label">API Key</div>
+    <div class="key-row">
+      <input type="password" class="key-input" id="key-input" placeholder="AIza...">
+      <button class="key-btn" id="key-btn" onclick="saveKey()">Kaydet</button>
+    </div>
+    <div class="key-meta" id="key-meta">
+      <span class="key-meta-dot"></span>
+      <span id="key-meta-text">aistudio.google.com/app/apikey adresinden alabilirsiniz</span>
+      <span class="key-change" id="key-change" style="display:none" onclick="resetKey()">Değiştir</span>
+    </div>
+  </div>
+
+  <!-- Upload -->
+  <div class="upload-zone disabled" id="drop" onclick="document.getElementById('file-in').click()">
+    <input type="file" id="file-in" accept="image/*,.pdf" style="display:none">
+    <div class="upload-icon-wrap">
+      <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+    </div>
+    <h2>Vergi levhası yükleyin</h2>
+    <p id="drop-hint">Önce API key kaydedin</p>
+    <div class="format-tags">
+      <span class="format-tag">JPG</span>
+      <span class="format-tag">PNG</span>
+      <span class="format-tag">PDF</span>
+      <span class="format-tag">WEBP</span>
+    </div>
+  </div>
+
+  <!-- Error -->
+  <div id="error-box"></div>
+
+  <!-- Loading -->
+  <div id="loading">
+    <div class="loader-card">
+      <div class="loader-spinner"></div>
+      <div class="loader-text">Belge <strong>okunuyor</strong></div>
+    </div>
+  </div>
+
+  <!-- Results -->
+  <div id="results">
+    <div class="results-header">
+      <span class="results-title">Çıkarılan Bilgiler</span>
+      <button class="btn-new" onclick="reset()">
+        <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+        Yeni belge
+      </button>
+    </div>
+    <div class="data-grid" id="grid"></div>
+  </div>
+
+</div>
+
+<script>
+const COPY_ICON = `<svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>`;
+const CHECK_ICON = `<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>`;
+
+let key = localStorage.getItem('vl_key') || '';
+if (key) activateKey();
+
+function saveKey() {
+  const v = document.getElementById('key-input').value.trim();
+  if (!v || v.includes('•')) return;
+  key = v;
+  localStorage.setItem('vl_key', v);
+  activateKey();
+}
+
+function activateKey() {
+  const meta = document.getElementById('key-meta');
+  const metaText = document.getElementById('key-meta-text');
+  const btn = document.getElementById('key-btn');
+  const drop = document.getElementById('drop');
+
+  meta.classList.add('active');
+  metaText.textContent = 'Key kaydedildi';
+  btn.textContent = '✓';
+  btn.classList.add('saved');
+  document.getElementById('key-change').style.display = 'block';
+  document.getElementById('key-input').value = key.slice(0, 6) + '••••••••••••';
+  drop.classList.remove('disabled');
+  drop.classList.add('ready');
+  document.getElementById('drop-hint').textContent = 'Sürükleyip bırakın ya da tıklayın';
+}
+
+function resetKey() {
+  document.getElementById('key-input').value = '';
+  document.getElementById('key-btn').textContent = 'Kaydet';
+  document.getElementById('key-btn').classList.remove('saved');
+  document.getElementById('key-meta').classList.remove('active');
+  document.getElementById('key-meta-text').textContent = 'aistudio.google.com/app/apikey adresinden alabilirsiniz';
+  document.getElementById('key-change').style.display = 'none';
+  document.getElementById('key-input').focus();
+}
+
+const drop = document.getElementById('drop');
+const fileIn = document.getElementById('file-in');
+drop.addEventListener('dragover', e => { e.preventDefault(); drop.classList.add('dragging'); });
+drop.addEventListener('dragleave', () => drop.classList.remove('dragging'));
+drop.addEventListener('drop', e => { e.preventDefault(); drop.classList.remove('dragging'); if (e.dataTransfer.files[0]) go(e.dataTransfer.files[0]); });
+fileIn.addEventListener('change', () => { if (fileIn.files[0]) go(fileIn.files[0]); });
+
+async function go(file) {
+  if (!key) return;
+  document.getElementById('error-box').style.display = 'none';
+  document.getElementById('results').style.display = 'none';
+  document.getElementById('loading').style.display = 'block';
+
+  try {
+    const b64 = await toB64(file);
+    const res = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${key}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [
+            { inline_data: { mime_type: file.type || 'image/jpeg', data: b64 } },
+            { text: `Bu Türk Vergi Levhası'ndan şu alanları çıkar, SADECE JSON döndür:\n{"adi_soyadi":"","ticaret_unvani":"","is_yeri_adresi":"","vergi_turu":"","ana_faaliyet_kodu_ve_adi":"","vergi_dairesi":"","vergi_kimlik_no":"","tc_kimlik_no":"","ise_baslama_tarihi":"","takvim_yillari":[{"yil":"","beyan_olunan_matrah":"","tahakkuk_eden_vergi":""}]}` }
+          ]}],
+          generationConfig: { temperature: 0 }
+        })
+      }
+    );
+    const data = await res.json();
+    document.getElementById('loading').style.display = 'none';
+    if (data.error) { showErr(data.error.message); return; }
+    const raw = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    const parsed = JSON.parse(raw.replace(/```json|```/g, '').trim());
+    render(parsed);
+  } catch(e) {
+    document.getElementById('loading').style.display = 'none';
+    showErr(e.message);
+  }
+}
+
+function render(d) {
+  const g = document.getElementById('grid');
+  g.innerHTML = '';
+
+  const fields = [
+    { label: 'Ticaret Ünvanı', val: d.ticaret_unvani, span: 3 },
+    { label: 'İş Yeri Adresi', val: d.is_yeri_adresi, span: 3 },
+    { label: 'Vergi Dairesi', val: d.vergi_dairesi, span: 1 },
+    { label: 'Vergi Kimlik No', val: d.vergi_kimlik_no, span: 1 },
+    { label: 'TC Kimlik No', val: d.tc_kimlik_no, span: 1 },
+    { label: 'Vergi Türü', val: d.vergi_turu, span: 1 },
+    { label: 'İşe Başlama Tarihi', val: d.ise_baslama_tarihi, span: 1 },
+    { label: 'Adı Soyadı', val: d.adi_soyadi, span: 1 },
+    { label: 'Ana Faaliyet Kodu', val: d.ana_faaliyet_kodu_ve_adi, span: 3 },
+  ];
+
+  for (const f of fields) {
+    const el = document.createElement('div');
+    const cls = f.span === 3 ? 'span3' : f.span === 2 ? 'span2' : '';
+    el.className = 'field' + (cls ? ' ' + cls : '');
+    const isEmpty = !f.val || !f.val.trim();
+    const safe = (f.val || '').replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+    el.innerHTML = `
+      <span class="field-label">${f.label}</span>
+      <span class="field-value${isEmpty ? ' empty' : ''}">${isEmpty ? 'Bulunamadı' : f.val}</span>
+      ${!isEmpty ? `<button class="copy-btn" onclick="cp(this,'${safe}')">${COPY_ICON}</button>` : ''}
+    `;
+    g.appendChild(el);
+  }
+
+  const tv = d.takvim_yillari?.filter(r => r.yil);
+  if (tv?.length) {
+    const el = document.createElement('div');
+    el.className = 'field span3';
+    el.innerHTML = `
+      <span class="field-label">Takvim Yılları</span>
+      <table class="takvim-table">
+        <thead><tr><th>Yıl</th><th>Beyan Olunan Matrah</th><th>Tahakkuk Eden Vergi</th></tr></thead>
+        <tbody>${tv.map(r=>`<tr><td>${r.yil}</td><td>${r.beyan_olunan_matrah||'—'}</td><td>${r.tahakkuk_eden_vergi||'—'}</td></tr>`).join('')}</tbody>
+      </table>`;
+    g.appendChild(el);
+  }
+
+  document.getElementById('results').style.display = 'block';
+}
+
+function cp(btn, val) {
+  navigator.clipboard.writeText(val);
+  btn.innerHTML = CHECK_ICON;
+  btn.classList.add('ok');
+  setTimeout(() => { btn.innerHTML = COPY_ICON; btn.classList.remove('ok'); }, 2000);
+}
+
+function showErr(msg) {
+  const el = document.getElementById('error-box');
+  el.style.display = 'block';
+  el.textContent = 'Hata: ' + msg;
+}
+
+function reset() {
+  document.getElementById('results').style.display = 'none';
+  document.getElementById('error-box').style.display = 'none';
+  fileIn.value = '';
+}
+
+function toB64(file) {
+  return new Promise((res, rej) => {
+    const r = new FileReader();
+    r.onload = () => res(r.result.split(',')[1]);
+    r.onerror = rej;
+    r.readAsDataURL(file);
+  });
+}
+</script>
+</body>
+</html>
